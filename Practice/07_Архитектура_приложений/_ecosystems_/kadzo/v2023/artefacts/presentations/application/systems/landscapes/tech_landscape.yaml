@@ -1,0 +1,37 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      tech_landscape:
+        title: Технические характеристики
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        widgets:
+          summary_performance:
+            title: Параметры производительности и надежности
+            entity: kadzo.v2023.systems
+            presentation: summary_performance
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          tech_params:
+            title: Параметры ТА
+            entity: kadzo.v2023.tech_params
+            presentation: tech_params_by_systems
+            order: 20
+            style:
+              margin: 4px
+              border: true
+        type: mkr-grid
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+            $lookup( $lookup($, "__widgets__.kadzo.v2023.systems.tech_landscape"), $params.system_id);
+          )

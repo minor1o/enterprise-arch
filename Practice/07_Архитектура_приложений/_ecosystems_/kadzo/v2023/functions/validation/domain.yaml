@@ -1,0 +1,28 @@
+kadzo:
+  domain.validation:
+    foreign: >
+      (  
+          $all := $.dataset;
+          $domain := $.domain;
+          $regex_ent := /^kadzo\.v2023\..*$/;
+          $regex_domain := $eval('/^(sber|ecosystem|' & $domain & ')\\..*$/');
+          $entities := $all.$spread()[$regex_ent($keys()[0])].*.$keys();
+          $foreign := $entities.(
+              $id := $;
+              $not($exists($regex_domain($id).match)) ? (
+                  $obj := $all.$spread().*.$spread()[$keys()[0] = $id];
+                  $entity := $all.$spread()[*.$spread()[$keys()[0] = $id]];
+                  {
+                      'uid': "domain-v1-" & $id & "-invaliddomain",
+                      'id': $id,
+                      'name': $obj.*.title,
+                      'error_type': 'Домен не принадлежащий организации',
+                      'error_group_code': 'foreign',
+                      'attr_id': 'Идентификатор объекта',
+                      'attr_name': 'pattern',
+                      'error_text': 'Объекты организации не могут содержать в идентификаторе другой домен (отличный от ' & $domain &')',
+                      'link': '/entities/' & $entity.$keys()[0] & '/card?id=' & $id
+                  }
+              )
+          );
+      )

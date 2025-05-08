@@ -1,0 +1,30 @@
+entities:
+  kadzo.v2023.cross_validation:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/cross_validation.md
+        origin:
+          system : kadzo.v2023.validators.systems
+          bo: kadzo.v2023.validators.business_objects
+          client: kadzo.v2023.validators.clients
+        source: >
+          (         
+              $systems:= system;
+              $bo := bo;
+              $clients := client;
+              $domain := $params.domain;
+              $domain_errors := $systems[domain=$params.domain and validator_type="systems"];
+              $errors := $domain_errors {$.error_group_code : 1};
+              $total_sys := {"functionalities" : $errors."functionalities"};
+              $domain_errors := $bo[domain=$params.domain and validator_type="business_objects"];
+              $errors := $domain_errors {$.error_group_code : 1};
+              $total_bo := {"data_objects" : $errors."less_data_object"};
+              $domain_errors := $clients[domain=$params.domain and validator_type="clients"];
+              $errors := $domain_errors {$.error_group_code : 1};
+              $total_clients:= {"client_channel" : $errors."less_channel"};
+              $result := $append($append($total_sys, $total_bo), $total_clients);
+              $check := $exists(total_sys."functionalities") or $exists($total_bo."data_objects") or $exists($total_clients."client_channel") ? false : true;
+              $merge($result) ~> |$|{'domain':$domain, "check" : $check}|; 
+          )
+          

@@ -1,0 +1,14 @@
+entities:
+  kadzo.enterprise.menu.data_map:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                [{
+                    "location": "ДЗО/" & $title & "/Схемы/Общие/Карта данных",
+                    "link": "/entities/kadzo.v2023.data_map/data_map_select?domain=" & $domain
+                 }]
+            );
+      )

@@ -1,0 +1,151 @@
+kadzo:
+  business_objects.validation:
+    base_attributes: >
+      (
+          $objects := $.business_objects."kadzo.v2023.business_objects";
+          $obj_full := $.schema;
+          $check_list := ['title', 'status'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $each($objects, function($business_object, $bo_id){(
+                  $value := $lookup($business_object, $attr_id);
+                  $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                  $uidpref := "business_objects-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                  $exist = false ? (
+                          {
+                                'uid': $uidpref & $bo_id & "-notexist",
+                                'id': $bo_id,
+                                'name': $business_object.title,
+                                'error_type': 'Базовые атрибуты',
+                                'error_group_code': 'general',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                                'link': '/entities/kadzo.v2023.business_objects/card?id=' & $bo_id
+                          }
+                      ) : (
+                    $attr.enum ? (
+                        $not($value in $attr.enum) ? (
+                            {
+                                  'uid': $uidpref & $bo_id & "-notinlist",
+                                  'id': $bo_id,
+                                  'name': $business_object.title,
+                                  'error_type': 'Базовые атрибуты',
+                                  'error_group_code': 'general',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                                  'link': '/entities/kadzo.v2023.business_objects/card?id=' & $bo_id
+                            }
+                        )
+                    )
+                  );
+                )});
+          )
+      )
+
+    process_attributes: >
+      (
+          $objects := $.business_objects."kadzo.v2023.business_objects";
+          $cprocesses := $.processes."kadzo.v2023.processes";
+          $obj_full := $.schema;
+          $check_list := ['processes'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $each($objects, function($business_object, $bo_id){(
+                $value := $lookup($business_object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $uidpref := "business_objects-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                $exist = false ? (
+                        {
+                              'uid': $uidpref & $bo_id & "-notexist",
+                              'id': $bo_id,
+                              'name': $business_object.title,
+                              'error_type': 'Атрибут "Используется в бизнес-процессах"',
+                              'error_group_code': 'processes',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.business_objects/card?id=' & $bo_id
+                        }
+                    );
+                /*$linkcheck := $attr.**.'$ref' ? (
+                      $exist = true ? $value.(
+                          $id := $;
+                          $not($exists($lookup($cprocesses, $))) ? (
+                              {
+                                  'uid': $uidpref & $bo_id & "-notinlist",
+                                  'id': $bo_id,
+                                  'name': $business_object.title,
+                                  'error_type': 'Атрибут "Используется в бизнес-процессах"',
+                                  'error_group_code': 'processes',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $id &'" не найдено среди идентификаторов бизнес-процессов "kadzo.v2023.processes"',
+                                  'link': '/entities/kadzo.v2023.business_objects/card?id=' & $bo_id
+                              }
+                          )
+                    )
+                );*/
+                /*$append($nullcheck, $linkcheck)*/
+            )});
+          );
+      )
+
+    process_links: >
+      (
+          $objects := $.business_objects."kadzo.v2023.business_objects";
+
+          $tmp := $objects.$spread().(
+              $k := $.$keys();
+              $.*.processes.( { $ : $k} )
+          ) {$.$keys() : [$.*]};
+
+          $processes := $.processes."kadzo.v2023.processes".$keys();
+
+          $errors := $tmp ~> | $ | {}, $processes |;
+
+          $uidpref := "business_objects-processes-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+          $each($errors, function($v, $k){(
+              $v.(
+                $pid := $;
+                {
+                    'uid': $uidpref & $pid & "-" & $k & "-notinlist",
+                    'id': $pid,
+                    /*'name': $object.title,*/
+                    'error_type': 'Атрибут "Используется в бизнес-процессах"',
+                    'error_group_code': 'processes',
+                    'attr_id': 'processes',
+                    'attr_name': ' Связь с процессами',
+                    'error_text': 'Значение "' & $k &'" не найдено среди идентификаторов бизнес-процессов "kadzo.v2023.processes"',
+                    'link': '/entities/kadzo.v2023.business_objects/card?id=' & $pid
+                }
+              )
+          )});
+      )
+
+    data_objects: >
+      (
+          $bo := $.business_objects."kadzo.v2023.business_objects";
+          $data_objects := $.data_objects."kadzo.v2023.data_objects";
+          $func := function($v) {$type($v) = "string" ? $v};
+          $do := $map( $data_objects.*.business_object ~> $distinct(), $func);
+
+          $objects := $bo ~> | $ | {}, $do |;
+
+          $each($objects, function($v, $k){({
+                  'uid': "business_objects-data_objects-v1-" & $k,
+                  'id': $k,
+                  'name' : $v.title,
+                  'error_type': 'Бизнес-объекты без объектов данных',
+                  'error_group_code': 'less_data_object',
+                  'error_text': 'Ни один объект данных не ссылается на бизнес объект',
+                  'link': '/entities/kadzo.v2023.business_objects/card?id=' & $k
+              })}
+          );
+      )

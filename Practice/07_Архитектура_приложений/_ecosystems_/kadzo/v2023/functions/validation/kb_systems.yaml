@@ -1,0 +1,49 @@
+kadzo:
+  kb_systems.validation:
+    base_attributes: >
+      (
+          $objects := $.kb_systems."kadzo.v2023.kb_systems";
+          $obj_full := $.schema;
+          $check_list := ['title', 'description', 'class', 'location', 'status'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+            
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "kb_systems-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.kb_systems/card?id=' & $id
+                      }
+                  );
+              $enumcheck := $attr.enum ? (
+                  $not($value in $attr.enum) and $exist = true ? (
+                      {
+                            'uid': $uidpref & $id & "-notinlist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                            'link': '/entities/kadzo.v2023.kb_systems/card?id=' & $id
+                      }
+                  )
+              );
+              $append($nullcheck, $enumcheck)
+            )})
+          );
+      )

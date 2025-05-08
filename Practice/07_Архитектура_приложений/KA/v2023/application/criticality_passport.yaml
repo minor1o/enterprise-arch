@@ -1,0 +1,8 @@
+kadzo.v2023.criticality_passport:
+  ecogroup.bike_rent.criticality_passport.telegram:
+    evaluated_object: ecogroup.bike_rent.external_systems.telegram
+    object_workload: 30
+    object_consumers_type: Сотрудники компаний Группы (Внутренние клиенты)
+    object_outage_impact: Не оказана услуга в заявленный SLA срок (Внутренние и Внешние клиенты)
+    object_sla: 1440
+    object_criticality_estimation: Office productivity

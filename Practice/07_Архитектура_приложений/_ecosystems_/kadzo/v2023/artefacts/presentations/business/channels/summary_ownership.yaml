@@ -1,0 +1,28 @@
+entities:
+  kadzo.v2023.channels:
+    presentations:
+      summary_ownership:
+        title: Модель владения
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор канала
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $channel_id := $params.id;
+            $ctx:= base;
+            $props_to_summary($channel_id,
+                          $ctx."kadzo.v2023.channels",
+                          schema."kadzo.v2023.channels".schema."$defs"."kadzo.v2023.channels.ownership".properties,
+                          $ctx, refs)
+          )

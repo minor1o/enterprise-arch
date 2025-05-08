@@ -1,0 +1,17 @@
+kadzo:
+  strategy.validation:
+    absence: >
+      (
+          $domain := $.domain;
+          $matcher := $eval('/^' & $.domain & '\\./i');
+          $objects := $sift($.dataset."kadzo.v2023.strategy", function($v, $k){ $k ~> $matcher });
+          $not($exists($objects)) ?
+            {
+                    'uid': "strategy-notexists-" & $domain,
+                    'name': "",
+                    'error_type': 'Бизнес стратегия',
+                    'error_group_code': 'general',
+                    'error_text': 'Отсутствуют задачи бизнес стратегии',
+                    'link': '/entities/kadzo.v2023.strategy/registry?domain=' & $domain
+            };
+      )

@@ -1,0 +1,44 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      contexts:
+        title: Контекст системы
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        type: mkr-select
+        source: >
+          (
+              $system := $params.id;
+              [
+                  {
+                      "title": "Текущий контекст системы",
+                      "src": "@entity/kadzo.v2023.system_context/system_context_asis?system=" & $system
+                  },
+                  {
+                      "title": "Текущий контекст системы (без ФП)",
+                      "src": "@entity/kadzo.v2023.system_context/system_context_asis_exclude_details?system=" & $system
+                  },
+                  {
+                      "title": "Текущий контекст системы (view данные)",
+                      "src": "@entity/kadzo.v2023.system_context/system_context_data_view_asis?system=" & $system
+                  },
+                  {
+                      "title": "Целевой контекст системы",
+                      "src": "@entity/kadzo.v2023.system_context/system_context?system=" & $system
+                  },
+                  {
+                      "title": "Целевой контекст системы (без ФП)",
+                      "src": "@entity/kadzo.v2023.system_context/system_context_exclude_details?system=" & $system
+                  },
+                  {
+                      "title": "Целевой контекст системы (view данные)",
+                      "src": "@entity/kadzo.v2023.system_context/system_context_data_view_tobe?system=" & $system
+                  }
+              ]   
+          )

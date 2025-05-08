@@ -1,0 +1,364 @@
+kadzo:
+  processes.validation:
+    base_attributes: >
+      (
+          $objects := $.processes."kadzo.v2023.processes";
+          $obj_full := $.schema;
+          $check_list := ['title', 'description'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "processes-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              
+              $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                      }
+                  ) : (
+                  $attr.enum ? (
+                    $not($value in $attr.enum) ? (
+                        {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                              'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                        }
+                    )
+                  )
+              );
+            )})
+          );
+      )
+
+    products_attributes: >
+      (
+          $objects := $.processes."kadzo.v2023.processes";
+          $cproducts := $.products."kadzo.v2023.products";
+          $obj_full := $.schema;
+          $check_list := ['products'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $uidpref := "processes-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+              $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Атрибут "Связь с продуктами"',
+                            'error_group_code': 'products',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                      }
+                  );
+              /*
+              $linkcheck := $attr.**.'$ref' ? (
+                    $exist = true ? $value.(
+                      $rid := $;
+                      $type($rid) = 'string' ? ( $not($exists($lookup($cproducts, $rid))) ? (
+                            {
+                                'uid': $uidpref & $id & "-notinlist",
+                                'id': $id,
+                                'name': $object.title,
+                                'error_type': 'Атрибут "Связь с продуктами"',
+                                'error_group_code': 'products',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов продуктов и услуг "kadzo.v2023.products"',
+                                'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                            }
+                        )
+                      )
+                  )
+              );*/
+              /*$append($nullcheck, $linkcheck)*/
+            )})
+          );
+      )
+
+    products_links: >
+      (
+          $objects := $.processes."kadzo.v2023.processes";
+
+          $tmp := $objects.$spread().(
+              $k := $.$keys();
+              $.*.products.( { $ : $k} )
+          ) {$.$keys() : [$.*]};
+
+          $products := $.products."kadzo.v2023.products".$keys();
+
+          $errors := $tmp ~> | $ | {}, $products |;
+
+          $uidpref := "processes-products-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+          $each($errors, function($v, $k){(
+              $v.(
+                $pid := $;
+                {
+                    'uid': $uidpref & $pid & "-" & $k & "-notinlist",
+                    'id': $pid,
+                    /*'name': $object.title,*/
+                    'error_type': 'Атрибут "Связь с продуктами"',
+                    'error_group_code': 'products',
+                    'attr_id': 'products',
+                    'attr_name': ' Связь с продуктами',
+                    'error_text': 'Значение "' & $k  &'" не найдено среди идентификаторов продуктов и услуг "kadzo.v2023.products"',
+                    'link': '/entities/kadzo.v2023.processes/card?id=' & $pid
+                }
+              )
+          )});
+      )
+
+    systems_attributes: >
+      (
+          $objects := $.processes."kadzo.v2023.processes";
+          $csystems := $.systems."kadzo.v2023.systems";
+          $obj_full := $.schema;
+          $check_list := ['systems'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "processes-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $exist = false ? (
+                  {
+                     'id': $id,
+                     'uid': $uidpref & $id & "-notexist",
+                     'name': $object.title,
+                     'error_type': 'Атрибут "Системы, обеспечивающие бизнес-процесс"',
+                     'error_group_code': 'systems',
+                     'attr_id': $attr_id,
+                     'attr_name': $attr.title,
+                     'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                     'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                  }
+              );
+              /*
+              $linkcheck := $attr.**.'$ref' ? (
+                    $exist = true ? $value.(
+                        $rid := $;
+                        $type($rid) = 'string' ? ( $not($exists($lookup($csystems, $rid))) ? (
+                              {
+                                  'id': $id,
+                                  'uid': $uidpref & $id & "-" & $rid & "-notinlist",
+                                  'name': $object.title,
+                                  'error_type': 'Атрибут "Системы, обеспечивающие бизнес-процесс"',
+                                  'error_group_code': 'systems',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов систем "kadzo.v2023.systems"',
+                                  'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                              }
+                          )
+                        )
+                  )
+              );*/
+              /*$append($nullcheck, $linkcheck)*/
+            )})
+          );
+      )
+
+    systems_links: >
+      (
+          $objects := $.processes."kadzo.v2023.processes";
+
+          $tmp := $objects.$spread().(
+              $k := $.$keys();
+              $.*.systems.( { $ : $k} )
+          ) {$.$keys() : [$.*]};
+
+          $systems := $.systems."kadzo.v2023.systems".$keys();
+
+          $errors := $tmp ~> | $ | {}, $systems |;
+
+          $uidpref := "processes-systems-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+          $each($errors, function($v, $k){(
+              $v.(
+                $pid := $;
+                {
+                    'uid': $uidpref & $pid & "-" & $k & "-notinlist",
+                    'id': $pid,
+                    /*'name': $object.title,*/
+                    'error_type': 'Атрибут "Связь с системами"',
+                    'error_group_code': 'systems',
+                    'attr_id': 'systems',
+                    'attr_name': ' Связь с системами',
+                    'error_text': 'Значение "' & $k &'" не найдено среди идентификаторов систем "kadzo.v2023.systems"',
+                    'link': '/entities/kadzo.v2023.processes/card?id=' & $pid
+                }
+              )
+          )});
+      )
+
+    integrations_attributes: >
+      (
+          $objects := $.processes."kadzo.v2023.processes";
+          $integrations := $.integrations."kadzo.v2023.integrations";
+          $obj_full := $.schema;
+          $check_list := ['integrations'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "processes-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $exist = false ? (
+                  {
+                     'id': $id,
+                     'uid': $uidpref & $id & "-notexist",
+                     'name': $object.title,
+                     'error_type': 'Атрибут "Интеграционные потоки, обеспечивающие бизнес-процесс"',
+                     'error_group_code': 'integrations',
+                     'attr_id': $attr_id,
+                     'attr_name': $attr.title,
+                     'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                     'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                  }
+              );
+              /*
+              $linkcheck := $attr.**.'$ref' ? (
+                    $exist = true ? $value.(
+                        $rid := $;
+                        $type($rid) = 'string' ? ( $not($exists($lookup($integrations, $rid))) ? (
+                              {
+                                  'id': $id,
+                                  'uid': $uidpref & $id & "-" & $rid & "-notinlist",
+                                  'name': $object.title,
+                                  'error_type': 'Атрибут "Связь с интеграционными потоками"',
+                                  'error_group_code': 'integrations',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $id &'" не найдено среди идентификаторов интеграций "kadzo.v2023.integrations"',
+                                  'link': '/entities/kadzo.v2023.processes/card?id=' & $id
+                              }
+                          )
+                        )
+                  )
+              );*/
+              /*$append($nullcheck, $linkcheck)*/
+            )})
+          );
+      )
+
+    integrations_links: >
+      (
+          $objects := $.processes."kadzo.v2023.processes";
+
+          $tmp := $objects.$spread().(
+              $k := $.$keys();
+              $.*.integrations.( { $ : $k} )
+          ) {$.$keys() : [$.*]};
+
+          $integrations := $.integrations."kadzo.v2023.integrations".$keys();
+
+          $errors := $tmp ~> | $ | {}, $integrations |;
+
+          $uidpref := "processes-integrations-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+          $each($errors, function($v, $k){(
+              $v.(
+                $pid := $;
+                {
+                    'uid': $uidpref & $pid & "-" & $k & "-notinlist",
+                    'id': $pid,
+                    /*'name': $object.title,*/
+                    'error_type': 'Атрибут "Связь с интеграционными потоками"',
+                    'error_group_code': 'integrations',
+                    'attr_id': 'integrations',
+                    'attr_name': ' Связь с системами',
+                    'error_text': 'Значение "' & $k &'" не найдено среди идентификаторов интеграций "kadzo.v2023.integrations"',
+                    'link': '/entities/kadzo.v2023.processes/card?id=' & $pid
+                }
+              )
+          )});
+      )
+
+#    systems_and_integrations: >
+#      (
+#          $ctx := $.obj.$keys()[0];
+#          $process := $.obj;
+#          $integrations := $.dataset."kadzo.v2023.integrations";
+#          $systems := $.dataset."kadzo.v2023.systems";
+#          $process_intg := $process.*.integrations;
+#          $process_systems := $process.*.systems;
+#          $intg_exist := $process_intg = null or $exists($process_intg) != true or $count($process_intg) = 0 ? false : true;
+#          $systems_exist := $process_systems = null or $exists($process_systems) != true or $count($process_systems) = 0 ? false : true;
+#
+#          $intg_errors := $process_intg.(
+#            $intg_id := $;
+#            $src_i := $integrations.$spread()[$keys() = $intg_id].*.source;
+#            $consumer_i := $integrations.$spread()[$keys() = $intg_id].*.consumer;
+#            $sys_intg := $distinct($append($src_i, $consumer_i));
+#            $switch := true;
+#            $tmp := $sys_intg.($log($, 'sys'); $not($ in $process_systems ) and $switch ? true : false );
+#            $not(false in $tmp) ? $intg_id;
+#          ) ~> $distinct();
+#
+#          $system_errors := $process_systems.(
+#            $sys_id := $;
+#            $src_s := $integrations.$spread()[$keys() in $process_intg].*.source;
+#            $consumer_s := $integrations.$spread()[$keys() in $process_intg].*.consumer;
+#            $list_s := $distinct($append($src_s, $consumer_s));
+#            $not($sys_id in $list_s) ? $sys_id
+#          ) ~> $distinct();
+#
+#          $res_array := $intg_errors.(
+#              {
+#                  'id': $process.$keys()[0],
+#                  'name': $process.*.title,
+#                  'error_type': 'Атрибут "Связь с интеграционными потоками"',
+#                  'attr_id': 'integrations',
+#                  'attr_name': 'Связь с интеграционными потоками',
+#                  'error_text': 'В интеграционном потоке "' & $ &'" не найдено систем перечисленных в атрибуте systems данного Бизнес-процесса',
+#                  'link': '/entities/kadzo.v2023.processes/card?id=' & $ctx
+#              }
+#          );
+#          $res_array := $append($res_array, $system_errors.(
+#                  {
+#                      'id': $process.$keys()[0],
+#                      'name': $process.*.title,
+#                      'error_type': 'Атрибут "Системы, обеспечивающие бизнес-процесс"',
+#                      'attr_id': 'systems',
+#                      'attr_name': 'Системы, обеспечивающие бизнес-процесс',
+#                      'error_text': 'В атрибутах source и consumer интеграционных потоков (integrations) Бизнес-процесса не найдено системы ' & $,
+#                      'link': '/entities/kadzo.v2023.processes/card?id=' & $ctx
+#                  }
+#              )
+#          );
+#          $intg_exist = true and $systems_exist = true ? $res_array
+#
+#      )

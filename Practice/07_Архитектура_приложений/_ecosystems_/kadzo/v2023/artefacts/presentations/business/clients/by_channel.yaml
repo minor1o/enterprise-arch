@@ -1,0 +1,38 @@
+entities:
+  kadzo.v2023.clients:
+    presentations:
+      clients_by_channel:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Клиенты
+            align: left
+            link: link
+          - value: type
+            text: Тип клиентов
+            align: left
+          - value: count
+            text: Количество
+          - value: measure
+            text: Ед. измерения количественной оценки клиентов
+
+        origin: kadzo.v2023
+
+        source: >
+          (
+              $client_channel := [$lookup($."kadzo.v2023.channels", $params.channel).clients];
+              [$."kadzo.v2023.clients".$spread().(
+                  ($keys()[0] in $client_channel) ?
+                  {
+                      "id": $keys()[0],
+                      "link": "/entities/kadzo.v2023.clients/card?id=" & $keys()[0],
+                      "title": *.title,
+                      "type": *.type,
+                      "count": *.count,
+                      "measure": *.measure
+                  }
+              )]
+          )

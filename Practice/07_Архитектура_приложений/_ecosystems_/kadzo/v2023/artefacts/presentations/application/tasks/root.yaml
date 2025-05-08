@@ -1,0 +1,5 @@
+imports:
+  - domain_table.yaml
+  - card.yaml
+#  - card_plain.yaml
+  - summary.yaml

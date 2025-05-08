@@ -1,0 +1,19 @@
+entities:
+  kadzo.v2023.clients:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/clients.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.clients".$spread()[$keys()[0] =$params.id].{
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.clients/card?id=" & $keys()[0],
+                "title": *.title,
+                "type": *.type,
+                "count": *.count,
+                "measure": *.measure
+            };          
+          )

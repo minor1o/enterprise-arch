@@ -1,0 +1,32 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      system_in_landscapes:
+        title: Система в IT-ландшафте
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        type: mkr-select
+        source: >
+          (
+              $system := $params.id;
+              [
+                  {
+                      "title": "Прикладной ландшафт",
+                      "src": "@entity/kadzo.v2023.systems/app_landscape?system_id=" & $system
+                  },
+                  {
+                      "title": "Бизнес ландшафт",
+                      "src": "@entity/kadzo.v2023.systems/business_landscape?system_id=" & $system
+                  },
+                  {
+                      "title": "Технический ландшафт",
+                      "src": "@entity/kadzo.v2023.systems/tech_landscape?system_id=" & $system
+                  }
+              ]
+          )

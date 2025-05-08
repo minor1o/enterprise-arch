@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.goals:
+    presentations:
+      summary:
+        title: Сводка по бизнес-цели
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор цели
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $goal_id := $params.id;
+            $ctx:= base;
+            $append([
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $goal_id}]
+                }
+              ],
+              $props_to_summary($goal_id,
+                            $ctx."kadzo.v2023.goals",
+                            schema."kadzo.v2023.goals".schema.patternProperties.*.properties,
+                            $ctx, refs)
+            );
+          )

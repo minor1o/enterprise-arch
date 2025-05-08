@@ -1,0 +1,124 @@
+entities:
+  menu.kadzo.v2023.enterprise.systems_as:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Системы/Автоматизированные системы",
+                    "link": "/entities/kadzo.v2023.systems.as/domain_registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.systems.as:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Прикладная архитектура/Системы/Автоматизированные системы",
+                             "link": "/entities/kadzo.v2023.systems.as/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.systems.as:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: parent
+            text: Родительская АС
+            link: parent_link
+            align: left
+          - value: class
+            text: Класс
+            align: left
+          - value: location
+            text: Размещение
+            align: left
+          - value: group
+            text: Группа систем
+            align: left
+          - value: ownership
+            text: Степень владения
+            align: left
+          - value: live-stage
+            text: Этап жизненного цикла
+            align: left
+          - value: live-stage-target
+            text: Этап жизненного цикла на горизонт планирования
+            align: left
+          - value: status
+            text: Целевой статус (решение принято)
+            align: left
+          - value: change-type
+            text: Тип изменений
+            align: left
+          - value: criticality
+            text: Уровень критичности
+            align: left
+          - value: performance
+            text: Производительность
+          - value: rto
+            text: RTO (час)
+          - value: rpo
+            text: RPO (час)
+          - value: sla
+            text: SLA
+          - value: monitoring
+            text: Средства мониторинга
+          - value: changes
+            text: Описание изменений
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin:
+          as: kadzo.v2023.systems.as
+          systems_domains: kadzo.v2023.systems_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(as."kadzo.v2023.systems.as", function ($v, $k){({
+                  "domain": $lookup($$.systems_domains."kadzo.v2023.systems", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.systems/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.systems_domains."kadzo.v2023.systems", $k).domain).title,
+                  "title": $v.title,
+                  "description": $v.description,
+                  "parent": $v.parent,
+                  "parent_link": $exists($v.parent) ? "/entities/kadzo.v2023.systems/card?id=" & $v.parent,
+                  "class": $v.class,
+                  "location": $v.location,
+                  "group": $v.group,
+                  "ownership": $v.ownership,
+                  "live-stage": $v."live-stage",
+                  "live-stage-target": $v."live-stage-target",
+                  "status": $v."target-status",
+                  "change-type": $v."change-type",
+                  "criticality": $v.criticality,
+                  "performance": $v.performance,
+                  "rto": $v.rto,
+                  "rpo": $v.rpo,
+                  "sla": $v.sla,
+                  "monitoring": $v.monitoring,
+                  "changes": $v.changes,
+                  "comments": $v.comments
+              })})]
+          )

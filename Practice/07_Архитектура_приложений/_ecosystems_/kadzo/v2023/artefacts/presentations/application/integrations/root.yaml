@@ -1,0 +1,14 @@
+imports:
+  - domain_registry.yaml
+  - card.yaml
+#  - card_plain.yaml
+  - summary_performance.yaml
+  - summary_livestage.yaml
+  - summary_technologies.yaml
+  - summary.yaml
+#  - by_processes.yaml
+  - by_data_objects.yaml
+  - by_consumer.yaml
+  - by_source.yaml
+  - by_endpoint.yaml
+  - in_and_out_integrations.yaml

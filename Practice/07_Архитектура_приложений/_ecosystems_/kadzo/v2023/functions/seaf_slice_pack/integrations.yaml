@@ -1,0 +1,39 @@
+kadzo:
+  seaf_slice_pack:
+    integrations: >
+      (
+          $domain := sber.domain;
+          $matcher := $eval('/^' & $domain & '/i');
+
+          $propsMap := { 
+              "from" : "source",
+              "to": "consumer"
+          };
+          $propsMapper := function ($map, $x) { (
+            $var := $lookup($map, $x); 
+            $exists($var) ? $var : $x
+          )};
+
+          /* Вытаскиваем внутренние системы (на основе матчинга доменного имени с разметкой sber) */      
+          $systems := $sift($."components", function($v, $k){$k ~> $matcher and $exists($v.sber) and ($v.sber.service_type = "Система" or $v.sber.service_type = "Функциональная подсистема")});
+          $systems_components := $sift($."components", function ($v, $k) { $k ~> $matcher and $v.sber.is_component_of} );
+      
+          $integrations := $sift($."seaf.app.integrations", function($v, $k) {$k ~> $matcher and ($v.to in $systems.$keys() or $v.from in $systems.$keys()) or  ($v.to in $systems_components.$keys() or $v.from in $systems_components.$keys())});
+
+          $integrations := $integrations ~> | $.* | $.to in $systems_components.$keys() ? {"to" : $lookup($systems_components, $.to).sber.is_component_of} |;
+          $integrations := $integrations ~> | $.* | $.from in $systems_components.$keys() ? {"from" : $lookup($systems_components, $.from).sber.is_component_of} |;
+          $integrations := $integrations ~> | $.* |  {"to" : $.to ? $seaf_single_key_mapper($.to, $domain), "from" : $.from ? $seaf_single_key_mapper($.from, $domain) } |;
+      
+          /* Оставляем в интеграциях только объекты-данных, объявленные фасадами */
+          /* Подменяем ключи для соответствия доменной политики идентификаторов */
+          $data_objects := $sift($."seaf.ia.data_objects", function($v, $k) { $exists($v.sber) } );
+          $integrations := $integrations ~> | $.* | { "data-objects": $seaf_single_array_mapper( [$."data-objects"[$exists($lookup($data_objects, $))]], $domain )}  |;
+      
+          $integrations := $integrations ~> | $.* |  $merge([ $each($propsMap, function($v1, $k1) {(
+                                { $v1 : $lookup($, $k1) } 
+                                )}) ~> $merge(),
+                                $.sber])
+                           |;
+
+          { "kadzo.v2023.integrations": $merge($integrations) };
+      )

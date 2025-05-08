@@ -1,0 +1,21 @@
+entities:
+  kadzo.v2023.tech_services:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/tech_services.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.tech_services".$spread()[$keys()[0] =$params.id].{
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.tech_services/card?id=" & $keys()[0],
+                "title": *.title,
+                "description": *.description,
+                "class": *.class,
+                "location": *.location,
+                "status": *.status,
+                "comments": *.comments
+            };          
+          )

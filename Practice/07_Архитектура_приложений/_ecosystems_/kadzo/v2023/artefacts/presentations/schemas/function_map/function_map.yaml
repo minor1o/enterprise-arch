@@ -1,0 +1,77 @@
+entities:
+  kadzo.v2023.function_map:
+    data: >
+      (
+          $domain := $params.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $domain_functions := $merge($.base."kadzo.v2023.functions".$spread()[$.$keys() ~> $matcher]);
+          $domain_systems := $.base."kadzo.v2023.systems";
+      
+          $functions := $domain_functions.$spread().(
+              $fid := $keys()[0];
+              $s := [$.*.systems.(
+                $sys_id := $;
+                $lookup($domain_systems, $sys_id).{"id": $fid & $sys_id, "title": $.title, "notation": $.notation};
+              )];
+              {
+                  "id": $keys()[0],
+                  "title": *.title,
+                  "systems": $s
+              } 
+          );
+      
+          {
+              "functions": $functions
+          };
+      )
+
+    presentations:
+      function_map_select:
+        title: Схема бизнес слоя
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен
+              type: string
+          required:
+            - domain
+        type: mkr-select
+        source: >
+          (
+              $domain := $params.domain;
+              [
+                  {
+                      "title": "Функциональная карта (текущая)",
+                      "src": "@entity/kadzo.v2023.function_map/function_map_as_is?domain=" & $domain
+                  },
+                  {
+                      "title": "Функциональная карта (целевая)",
+                      "src": "@entity/kadzo.v2023.function_map/function_map_to_be?domain=" & $domain
+                  }
+              ]
+          )
+
+      function_map_as_is:
+        type: plantuml
+        template: function_map.puml
+        origin:
+          entities: kadzo.v2023.entities
+          base: kadzo.v2023.asis
+        source: >
+          (
+              $result := $eval(entities."kadzo.v2023.function_map".data);
+              $result := $merge([$result, {"title": "Функциональная карта (текущая)"}]);
+          )
+
+      function_map_to_be:
+        type: plantuml
+        template: function_map.puml
+        origin:
+          entities: kadzo.v2023.entities
+          base: kadzo.v2023.tobe
+        source: >
+          (
+              $result := $eval(entities."kadzo.v2023.function_map".data);
+              $result := $merge([$result, {"title": "Функциональная карта (целевая)"}]);
+          )

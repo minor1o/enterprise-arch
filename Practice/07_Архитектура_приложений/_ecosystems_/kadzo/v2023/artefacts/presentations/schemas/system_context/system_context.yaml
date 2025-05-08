@@ -1,0 +1,152 @@
+entities:
+  kadzo.v2023.system_context:
+    config:
+      sber_frame: false
+      elk: true
+    data: >
+      (
+        $ctx := $.base;
+        $current_id := $params.system;
+        /* Находим систему, для которой строим контекст */
+        $current := { $current_id : $lookup($ctx."kadzo.v2023.systems", $current_id) };
+        $current_title := $current.*.title;
+        $current_subsystems := $merge( $sift($ctx."kadzo.v2023.systems", function($v) { $v.parent = $current_id}));
+        $current := $merge([$current, $current_subsystems]);
+        
+        /* Находим интеграции с системой */
+        $current_integrations := $sift( $ctx."kadzo.v2023.integrations", function($v){ $v.source in $current.$keys() or $v.consumer in $current.$keys()});
+        $extend_integrations := $sift($ctx."kadzo.v2023.integrations", function($v, $k){$v.extends in $current_integrations.*.extends});
+        $current_integrations := $merge([$current_integrations, $extend_integrations]);
+        $domain_integrations := $current_integrations;
+
+        /* Получаем все системы, которые встречаются в интеграциях */
+        $bound_systems := $sift($ctx."kadzo.v2023.systems", function($v, $k) {$k in [$current_integrations.*.source, $current_integrations.*.consumer]});
+
+        $context_systems := $merge([$bound_systems, $current]);
+            
+        $toSystem := function($v){(
+          $res := $v;
+          $parent_src := $lookup($context_systems, $v.*.source).parent;
+          $res := $exists($parent_src) ? { $res.$keys() : $merge([$res.*, {"source": $parent_src}])} : $res;
+          $parent_consumer := $lookup($context_systems, $v.*.consumer).parent;
+          $res := $exists($parent_consumer) ? { $res.$keys() : $merge([$res.*, {"consumer": $parent_consumer}])} : $res;
+        )};
+
+        $domain_integrations := $scParams.exclude_fp ? $merge($domain_integrations.$spread().($toSystem($))) : $domain_integrations;
+      
+        $endpoint_ids := [$domain_integrations.*.endpoint];
+        $ts_used_ep := $endpoint_ids.(
+          $point := $lookup($ctx."kadzo.v2023.endpoints", $);
+          $point.gates.($lookup($ctx."kadzo.v2023.tech_services", $) ? $)
+        );
+
+        $domain_tech_services := $merge($ctx."kadzo.v2023.tech_services".$spread()[$.$keys()[0] in $ts_used_ep]);
+      
+        $subsystems := $sift($context_systems, function($v, $k){ $exists($v.parent)});
+        $parents_systems := $sift($ctx."kadzo.v2023.systems", function($v, $k){ $k in $subsystems.*.parent });
+        $systems := $merge([$sift($context_systems, function($v, $k){$not($exists($v.parent))}), $parents_systems]);
+      
+        $channels := $sift($ctx."kadzo.v2023.channels", function($v, $k){ ($v.systems)@$a1.($current.$keys())@$a2[$a1=$a2].$k  } );
+      
+        $context_clients := $sift($ctx."kadzo.v2023.clients", function($v, $k){ $k in $channels.*.clients });
+      
+          $r_systems := $each($systems, function($v, $k){(
+               $scParams.exclude_fp ? 
+                    ( $var := $lookup($$.schema.systems, $k); $var ~> | $ | {"has_subsystems" : 0 }, "subsystems" | )
+                    : $lookup($$.schema.systems, $k) 
+              )});
+          $r_channels := $each($channels, function($v, $k){(
+                 $lookup($$.schema.channels, $k)
+             )});
+           $mergedeep([
+              {
+                "systems": $r_systems,
+                "has_external": $count($r_systems[$.is_external = 1]) > 0 ? 1 : 0,
+                "has_sber": $count($r_systems[$.is_sber = 1]) > 0 ? 1 : 0,
+                "integrations": $each($domain_integrations, function($v, $k){(
+                              $merge([ $lookup($$.schema.integrations, $k), {"from": $v.source, "to": $v.consumer}])
+                        )}),
+                "tech_services": $each($domain_tech_services, function($v, $k){(
+                            $lookup($$.schema.tech_services, $k)
+                        )}),
+                "channels": $r_channels,
+                "channels_links": [$r_channels.$spread().(
+                                      $channel := $.id;
+                                      $lookup($channels, $.id).systems.(
+                                          $exists($lookup($systems, $)) ? {"channel": $channel, "system": $} 
+                                              : $exists($lookup($subsystems, $)) ? {"channel": $channel, "system": $}  
+                                      )
+                                  )],
+                "has_channels": $count($r_channels) > 0 ? 1 : 0,
+                "clients": $each($context_clients, function($v, $k){(
+                                 $lookup($$.schema.clients, $k)
+                             )}),
+                "clients_links": [$r_channels.$spread().(
+                                    $channel := $.id;
+                                    $lookup($channels, $.id).clients.({"client": $, "channel": $channel});
+                                  )]
+              },   
+              { "title": $scParams.title & " " & $current_title},
+              { "config": $merge([$.entities."kadzo.v2023.system_context".config, $.settings.system_context_schema])}
+           ])
+      )
+    presentations:
+      system_context_asis:
+        template: ../templates/arch_schema.puml
+        type: plantuml
+        title: Текущий контекст системы
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $scParams := {"title": "Текущий контекс системы"};
+              $eval(entities."kadzo.v2023.system_context".data);
+          )
+
+      system_context_asis_exclude_details:
+        template: ../templates/arch_schema.puml
+        type: plantuml
+        title: Текущий контекст системы (без ФП)
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $scParams := {"title": "Текущий контекс системы (без ФП)", "exclude_fp": true};
+              $eval(entities."kadzo.v2023.system_context".data);
+          )
+
+      system_context:
+        template: ../templates/arch_schema_to_be.puml
+        type: plantuml
+        title: Целевой контекст системы
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title": "Целевой контекс системы"};
+              $eval(entities."kadzo.v2023.system_context".data);
+          )
+
+      system_context_exclude_details:
+        template: ../templates/arch_schema_to_be.puml
+        type: plantuml
+        title: Целевой контекст системы (без ФП)
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title": "Целевой контекс системы (без ФП)", "exclude_fp": true};
+              $eval(entities."kadzo.v2023.system_context".data);
+          )

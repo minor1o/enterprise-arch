@@ -1,0 +1,61 @@
+entities:
+  kadzo.v2023.tech_services:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/tech_services_errors.md
+        origin: kadzo.v2023.validators.tech_services
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="tech_services"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "ext" : $errors."ext",
+                  "iserrors" : $boolean($errors)
+              }
+
+          )
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех сервиса
+            link: link
+          - value: name
+            text: Название Тех сервиса
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_services
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_services" and error_group_code="general"] ];
+          )
+
+      validation.ext_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех сервиса
+            link: link
+          - value: name
+            text: Название Тех сервиса
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_services
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_services" and error_group_code="ext"] ];
+          )

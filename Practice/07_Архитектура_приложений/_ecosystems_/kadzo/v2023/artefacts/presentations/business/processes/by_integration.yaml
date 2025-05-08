@@ -1,0 +1,38 @@
+entities:
+  kadzo.v2023.processes:
+    presentations:
+      processes_by_integration:
+        type: table
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор интеграционного потока
+              type: string
+          required:
+            - id
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link_process
+          - value: title
+            text: Название
+            link: link_process
+          - value: description
+            text: Описание
+
+        origin: kadzo.v2023.processes
+        source: >
+          (
+              $integration := $params.id;
+              [ $sift($."kadzo.v2023.processes", function ($v, $k){$integration in $v.integrations})
+                  ~> $each(?, function ($v, $k){(
+                    {
+                        "id": $k,
+                        "title": $v.title,
+                        "link_process": "/entities/kadzo.v2023.processes/card?id=" & $k,
+                        "description": $v.description
+                    }
+                  )})
+              ]
+          )

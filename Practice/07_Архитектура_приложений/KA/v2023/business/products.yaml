@@ -1,0 +1,5 @@
+kadzo.v2023.products:
+  ecogroup.bike_rent.products.uid1:
+    title: Маркетплейс аренды байков
+    description: Площадка для взаимодействия клиентов и арендаторов, предоставляющих байки
+    status: Используется

@@ -1,0 +1,23 @@
+entities:
+  kadzo.v2023.menu.system_context:
+    menu: >
+      (       
+          $not($exists(sber.kadzo.enterprise_mode)) and (sber.kadzo.menu.schemas.enabled = true or $not($exists(sber.kadzo.menu.schemas.enabled))) ? (
+              $domain := sber.domain;
+              $ctx := $evaluate_dataset($, "kadzo.v2023.systems");
+              $matcher := $eval('/^' & $domain & '\\./i');
+              $names := $ctx."kadzo.v2023.systems".$spread()[$.$keys() ~> $matcher].{"id": $keys()[0], "title": *.title, "location": *.location};
+              $menu_root := ($exists(sber.kadzo.menu.schemas.roots) and $count(sber.kadzo.menu.schemas.roots) > 0 and $not(sber.kadzo.menu.schemas.roots = null))  ? sber.kadzo.menu.schemas.roots :
+                  $exists(sber.kadzo.menu_root) ? sber.kadzo.menu_root : "Документы/Архитектура/КА ДЗО/2023";
+              [$menu_root.(
+                  $mr := $;
+                  $names.(
+                      $location := location = null or $not($exists(location)) ? 'Нет размещения' : location;
+                      {
+                        "location": $mr & "/Схемы/Контекстные/Системы/" & $location & "/" & $.title,
+                        "link": "/entities/kadzo.v2023.system_context_selector/system_context_select?system=" & $.id
+                      }
+                  )
+              )]
+          )
+      )

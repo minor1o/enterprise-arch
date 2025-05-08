@@ -1,0 +1,95 @@
+entities:
+  menu.kadzo.v2023.enterprise.endpoints:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Точки взаимодействия",
+                    "link": "/entities/kadzo.v2023.endpoints/domain_registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.endpoints:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+              {
+                  "location": "Единый свод/Прикладная архитектура/Точки взаимодействия",
+                  "link": "/entities/kadzo.v2023.endpoints/enterprise_registry"
+              }
+      )
+
+  kadzo.v2023.endpoints:
+    presentations:
+      enterprise_registry:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+          - value: uri
+            text: URI
+            align: left
+          - value: status
+            text: Статус
+          - value: owners
+            text: АС, обеспечивающие функционирование точки взаимодействия
+          - value: gates
+            text: АС / тех сервисы, обеспечивающие транспорт точки взаимодействия
+          - value: technology
+            text: Технология интеграции
+          - value: technical-use
+            text: Механизм использования
+          - value: protected
+            text: Средства защиты точки взаимодействия
+          - value: comments
+            text: Комментарии, риски, проблемы
+        origin:
+          endpoints: kadzo.v2023.endpoints
+          endpoints_domains: kadzo.v2023.endpoints_by_domains
+          systems: kadzo.v2023.systems.united
+          tech_services: kadzo.v2023.tech_services
+          settings: kadzo.__sber_settings__
+        source: >
+          (
+              [$each(endpoints."kadzo.v2023.endpoints", function ($v, $k) {(
+                  $exists($lookup($$.settings.sber.domains, $lookup($$.endpoints_domains."kadzo.v2023.endpoints", $k).domain)) ?
+                  {
+                      "dzo": $lookup($$.settings.sber.domains, $lookup($$.endpoints_domains."kadzo.v2023.endpoints", $k).domain).title,
+                      "id": $k,
+                      "link": "/entities/kadzo.v2023.endpoints/card?id=" & $k,
+                      "title": $v.title,
+                      "uri": $v.uri,
+                      "status": $v.status,
+                      "owners": $join([
+                                  $v.owners.(
+                                      $var := $lookup($$.systems."kadzo.v2023.systems", $);
+                                      $exists($var) ? $var.title : $)
+                                  ], "\n"),
+                      "gates": $join([
+                              $v.gates.(
+                                      $var := $lookup($$.systems."kadzo.v2023.systems", $);
+                                      $exists($var) ? $var.title : 
+                                          (
+                                              $tech_var := $lookup($$.tech_services."kadzo.v2023.tech_services", $);
+                                              $exists($tech_var) ? $tech_var.title : $; 
+                                          )
+                                      )
+                                  ], "\n"),
+                      "technology": $v.technology,
+                      "technical-use": $v."technical-use",
+                      "protected": $join([$v.protected], "\n"),
+                      "comments": $join([$v.comments], "\n")
+              })})];
+          )

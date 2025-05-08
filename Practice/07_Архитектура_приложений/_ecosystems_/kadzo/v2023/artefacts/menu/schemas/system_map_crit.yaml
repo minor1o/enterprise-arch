@@ -1,0 +1,16 @@
+entities:
+  kadzo.system_map.menu_crit:
+    menu: >
+      (
+          $not($exists(sber.kadzo.enterprise_mode)) and (sber.kadzo.menu.schemas.enabled = true or $not($exists(sber.kadzo.menu.schemas.enabled))) ? (
+              $domain := sber.domain;
+              $menu_root := ($exists(sber.kadzo.menu.schemas.roots) and $count(sber.kadzo.menu.schemas.roots) > 0 and $not(sber.kadzo.menu.schemas.roots = null))  ? sber.kadzo.menu.schemas.roots :
+                  $exists(sber.kadzo.menu_root) ? sber.kadzo.menu_root : "Документы/Архитектура/КА ДЗО/2023";
+              [$menu_root.(
+                  {
+                      "location": $ & "/Схемы/Общие/Карта систем по критичности",
+                      "link": "/entities/kadzo.v2023.system_map_crit/system_map_criticality?domain=" & $domain
+                  }
+              )]
+          )
+      )

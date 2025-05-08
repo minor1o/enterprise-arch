@@ -1,0 +1,39 @@
+entities:
+  kadzo.v2023.domain:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/domain_errors.md
+        origin: kadzo.v2023.validators.domain
+        source: >
+          (          
+              $domain_errors := $[domain=$params.domain and validator_type="domain"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "foreign" : $errors."foreign",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.domain:
+        type: table
+        headers:
+          - value: id
+            text: Id Сущности
+            link: link
+          - value: name
+            text: Название сущности
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.domain
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="domain" and error_group_code="foreign"] ];
+          )

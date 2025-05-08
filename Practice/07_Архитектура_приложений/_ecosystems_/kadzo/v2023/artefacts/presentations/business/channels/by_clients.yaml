@@ -1,0 +1,52 @@
+entities:
+  kadzo.v2023.channels:
+    presentations:
+      channels_by_client:
+        type: table
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор клиента
+              type: string
+          required:
+            - id
+        headers:
+          - value: title
+            text: Название
+            link: link_ch
+          - value: description
+            text: Описание
+            align: left
+          - value: type
+            text: Тип канала
+            align: left
+          - value: location
+            text: Размещение/владение
+            align: left
+          - value: status
+            text: Статус
+            align: left
+          - value: security
+            text: Способы защиты канала
+            align: left
+
+        origin: kadzo.v2023.channels
+
+        source: >
+          (
+              [$sift($."kadzo.v2023.channels", function ($v, $k){ $params.id in $v.clients })
+                 ~> $each(?, function($v, $k){(
+                  {
+                    "id": $k,
+                    "title": $v.title,
+                    "link_ch": "/entities/kadzo.v2023.channels/card?id=" & $k,
+                    "description": $v.description,
+                    "type": $v.type,
+                    "location": $v.location,
+                    "status": $v.status,
+                    "security": $v.security
+                  }
+                )})
+              ]
+          )

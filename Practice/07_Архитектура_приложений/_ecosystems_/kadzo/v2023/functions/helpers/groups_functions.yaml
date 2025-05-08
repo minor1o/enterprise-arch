@@ -1,0 +1,20 @@
+kadzo:
+  helpers.functions:
+    extract_parent_groups: >
+      (
+        $gr := var.group_id;
+        $groups := var.groups;
+        $checked = [];
+        $extractParentGroups := function($gr, $groups, $checked){(
+          $not($gr in $checked) ? (
+            $g := $lookup($groups, $gr);
+            $result := $append($checked, [$gr]);
+            $parent_result := $exists($g.parent) ?
+              $extractParentGroups($g.parent, $groups, $result)
+              : [];
+            $append($gr, [$parent_result]);
+            ): [];
+        )};
+      
+        $extractParentGroups($gr, $groups, $checked);
+      )

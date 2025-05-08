@@ -1,0 +1,19 @@
+entities:
+  kadzo.enterprise.menu.arch_schema:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                [{
+                    "location": "ДЗО/" & $title & "/Схемы/Общие/Архитектурная схема",
+                    "link": "/entities/kadzo.v2023.arch_schema/arch_schemas?domain=" & $domain
+                 },
+                {
+                    "location": "ДЗО/" & $title & "/Схемы/Общие/Архитектурная схема SmartAnts",
+                    "link": "/entities/kadzo.v2023.arch_schema/smartants_arch_schemas?domain=" & $domain
+                }
+                ]
+            );
+      )

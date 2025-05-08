@@ -1,0 +1,62 @@
+entities:
+  menu.kadzo.v2023.enterprise.tasks:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Задачи горизонта планирования",
+                    "link": "/entities/kadzo.v2023.tasks/domain_table?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.tasks:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Прикладная архитектура/Задачи горизонта планирования",
+                             "link": "/entities/kadzo.v2023.tasks/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.tasks:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: task
+            text: Задача
+            align: left
+          - value: planned
+            text: Плановый срок реализации
+          - value: status
+            text: Текущий статус
+
+        origin:
+          tasks: kadzo.v2023.tasks
+          tasks_domains: kadzo.v2023.tasks_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(tasks."kadzo.v2023.tasks", function ($v, $k){({
+                  "domain": $lookup($$.tasks_domains."kadzo.v2023.tasks", $k).domain,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.tasks_domains."kadzo.v2023.tasks", $k).domain).title,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.tasks/card?id=" & $k,
+                  "task": $v.task,
+                  "planned": $v.planned,
+                  "status": $v.status
+              })})]
+          )

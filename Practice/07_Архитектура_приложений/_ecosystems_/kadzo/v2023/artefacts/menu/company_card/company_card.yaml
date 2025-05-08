@@ -1,0 +1,16 @@
+entities:
+  companies:
+    menu: >
+      (
+        $not($exists(sber.kadzo.enterprise_mode)) and (sber.kadzo.menu.company_card.enabled = true or $not($exists(sber.kadzo.menu.company_card.enabled))) ? (
+              $domain := sber.domain;
+              $menu_root := ($exists(sber.kadzo.menu.company_card.roots) and $count(sber.kadzo.menu.company_card.roots) > 0 and $not(sber.kadzo.menu.company_card.roots = null)) ? sber.kadzo.menu.company_card.roots :
+                  $exists(sber.kadzo.menu_root) ? sber.kadzo.menu_root : "Документы/Архитектура/КА ДЗО/2023";      
+              [$menu_root.(
+                  {
+                    "location": $,
+                    "link": "/entities/companies/blank?id=" & $domain
+                  }
+              )]
+          )
+      )

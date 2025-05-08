@@ -1,0 +1,83 @@
+kadzo:
+  clients.validation:
+    base_attributes: >
+      (
+           $objects := $.clients."kadzo.v2023.clients";
+           $obj_full := $.schema;
+           $check_list := ['title', 'type', 'count'];
+           $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+
+           $check_list.(
+             $attr_id := $.$keys();
+             $attr := $.*;
+             $each($objects, function($client, $client_id){(
+                $value := $lookup($client, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $uidpref := "clients-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                $nullcheck := $exist = false ? (
+                        {
+                              'uid': $uidpref & $client_id & "-notexist",
+                              'id': $client_id,
+                              'name': $client.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.clients/card?id=' & $client_id
+                        }
+                    );
+                $enumcheck := $attr.enum ? (
+                    $not($value in $attr.enum) and $exist = true ? (
+                        {
+                              'uid': $uidpref & $client_id & "-notinlist",
+                              'id': $client_id,
+                              'name': $client.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                              'link': '/entities/kadzo.v2023.clients/card?id=' & $client_id
+                        }
+                    )
+                );
+                $typecheck := $attr_id = 'count' ? (
+                    $exist = true ? (
+                      $type($client.count) != "number" ? (
+                          {
+                              'uid': $uidpref & $client_id & "-invalidtype",
+                              'id': $client_id,
+                              'name': $client.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не является числом',
+                              'link': '/entities/kadzo.v2023.clients/card?id=' & $client_id
+                          }
+                      )
+                    )
+                );
+                $append($typecheck, $append($nullcheck, $enumcheck))
+             )});
+          )
+      )
+
+    client_channel: >
+      (
+          $clients := $.clients."kadzo.v2023.clients";
+          $channels := $.channels."kadzo.v2023.channels";
+          $func := function($v) {$type($v) = "string" ? $v};
+          $cl_in_channels := $map( $channels.*.clients, $func);
+      
+          $cl_no_channels := $clients ~> | $ | {}, $cl_in_channels|;
+          $cl_no_channels.$spread().{
+              'uid': 'clients-channels-v1-' & $.$keys(),
+              'id': $.$keys(),
+              'name' : $.*.title,
+              'error_group_code': 'less_channel',
+              'error_text': 'Клиент не укзан ни в одном канале',
+              'link': '/entities/kadzo.v2023.clietns/card?id=' & $.$keys()
+          }
+      )

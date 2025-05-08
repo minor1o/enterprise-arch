@@ -1,0 +1,34 @@
+entities:
+  sber:
+    title: Описание настроек шаблона
+    schema:
+      $defs:
+        kadzo.arch_version:
+          title: Описание версии архитектуры
+          type: object
+          properties:
+            title:
+              title: Название компании
+              type: string
+            version:
+              type: object
+              properties:
+                major:
+                  title: Мажорная версия архитектуры
+                  type: string
+                patch:
+                  title: Патч версии
+                  type: integer
+            required:
+              - title
+              - version
+      patternProperties:
+        "^domain$":
+          type: string
+        "^domains$":
+          type: object
+          patternProperties:
+            "^[a-zA-Z]*$":
+              $ref: "#/$defs/kadzo.arch_version"
+
+

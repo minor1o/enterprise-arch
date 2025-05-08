@@ -1,0 +1,34 @@
+kadzo:
+  v2022_migration_pack:
+    integrations: >
+      (
+          
+          $domain := sber.domain;
+          $key := sber.domain & "." & "v2022.";
+          $res := $eval(datasets."sber.kadzo.v2022.systems".source);
+          $subject := $res.components.$spread()[*.entity = "system"];
+          $asyncMap := {"Да" : "Истинно", "Нет" : "Ложно"};
+          $asyncConvertor := function ($x) {$lookup($asyncMap, $x)};
+          $links := $map($subject[*.links], function($v, $i){(
+                                $src := $v.$keys();
+                                $merge([$v.*.links.{
+                                  $domain & "." & $src & id & ":" & $i & ":" & sber.code: {
+                                  "source" : $domain & "." & $src,
+                                  "description" : sber.description, 
+                                  "consumer" : $domain & "." & id,
+                                  "technologies" : sber.technologies,
+                                  "technical-use" : sber."technical-use",
+                                  "async" : sber.async ~> $asyncConvertor,
+                                  "status" : sber.status,
+                                  "protected" : sber.protected,
+                                  "load" : sber.load,
+                                  "changes" : sber.change,
+                                  "agreement" : sber."exchange-base",
+                                  "comments" : sber.comments & sber.risks & sner.problems
+                               }
+                            }])
+                            )
+                          });
+          { "kadzo.v2023.integrations" : $merge($links) };
+        
+      )

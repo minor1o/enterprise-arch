@@ -1,0 +1,12 @@
+imports:
+  - goals.yaml
+  - strategy.yaml
+  - clients.yaml
+  - products.yaml
+  - processes.yaml
+  #- data_objects.yaml
+  - systems.yaml
+  - integrations.yaml
+  - groups.yaml
+  - functions.yaml
+  - tasks.yaml

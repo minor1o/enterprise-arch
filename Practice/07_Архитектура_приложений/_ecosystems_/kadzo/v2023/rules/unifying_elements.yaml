@@ -1,0 +1,25 @@
+rules:
+  validators:
+    kadzo.methodology.v2023.unifying_elements:
+      uid: enabler
+      title: Объединяющие элементы
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.unified_elements
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="unifying_elements" and error_group_code="general"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.name,
+                      "location": '/architect/contexts/sber.ecosystem.enablers',
+                      "correction": 'В интеграциях или каналах добавьте обязательные Объединяющие элементы Экосистемы',
+                      "description": $self.description,
+                      "standard": $self.reference
+                  }
+              )]
+            )
+        )

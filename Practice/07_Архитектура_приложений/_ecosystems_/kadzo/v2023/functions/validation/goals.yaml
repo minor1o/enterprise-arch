@@ -1,0 +1,17 @@
+kadzo:
+  goals.validation:
+    absence: >
+      (
+          $domain := $.domain;
+          $matcher := $eval('/^' & $.domain & '\\./i');
+          $objects := $sift($.dataset."kadzo.v2023.goals", function($v, $k){ $k ~> $matcher });
+          $not($exists($objects)) ?
+            {
+                    'uid': "goals-error-existence-" & $domain,
+                    'name': "",
+                    'error_type': 'Бизнес цели',
+                    'error_group_code': 'general',
+                    'error_text': 'Отсутствуют бизнес цели',
+                    'link': '/entities/kadzo.v2023.goals/registry?domain=' & $domain
+            };
+      )

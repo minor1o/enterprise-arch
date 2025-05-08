@@ -1,0 +1,92 @@
+kadzo:
+  integrations.completeness:
+    integrations_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $integrations := $all."kadzo.v2023.integrations".$spread()[$.$keys() ~> $matcher];
+          $systems := $all."kadzo.v2023.systems".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "integrations"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "integrations" & '.*$/');
+          $rules := $.rules;
+          $sum:=function($i, $j) {$i + $j};
+          $weight_desc := 1;
+          $weight_status := 1;
+          $weight_technologies := 1;
+          $weight_tech_use := 1;
+          $weight_async := 1;
+          $weight_protected := 1;
+          $weight_changes := 1;
+          $weight_source := 1;
+          $weight_consumer := 1;
+          $weight_data_objects := 1;
+          $weight_integrations := $weight_desc + $weight_status + $weight_technologies + $weight_tech_use + $weight_consumer;
+          $weight_integrations := $weight_integrations + $weight_async + $weight_protected + $weight_changes + $weight_source + $weight_data_objects;
+          $valid_desc := [$validators[($.attr_id="description")].id];
+          $valid_status := [$validators[($.attr_id="status")].id];
+          $test_desc:=$integrations.(($keys() in $valid_desc)? 0 : $weight_desc);
+          $test_status:=$integrations.(($keys() in $valid_status) ? 0 : $weight_status);
+          $valid_technologies := [$validators[($.attr_id="technologies")].id];
+          $valid_tech_use := [$validators[($.attr_id="technical-use")].id];
+          $valid_async := [$validators[($.attr_id="async")].id];
+          $valid_protected := [$validators[($.attr_id="protected")].id];
+          $test_technologies:=$integrations.(($keys() in $valid_technologies)? 0 : $weight_technologies);
+          $test_tech_use:=$integrations.(($keys() in $valid_tech_use) ? 0 : $weight_tech_use);
+          $test_async:=$integrations.(($keys() in $valid_async)? 0 : $weight_async);
+          $test_protected:=$integrations.(($keys() in $valid_protected) ? 0 : $weight_protected);
+          $valid_changes := [$validators[($.error_type='Атрибут "Описание изменений"')].id];
+          $valid_status := [$validators[($.error_type='Атрибут "Статус"')].id];
+          $test_changes:=$integrations.(($keys() in $valid_changes) ? 0 : $weight_changes);
+          $test_status2:=$integrations.(($keys() in $valid_status) ? 0 : 1);
+          $valid_source := [$validators[($.attr_id="source")].id];
+          $valid_consumer := [$validators[($.attr_id="consumer")].id];
+          $valid_data_objects := [$validators[($.attr_id="data-objects")].id];
+          $test_source:=$integrations.(($keys() in $valid_source) ? 0 : $weight_source);
+          $test_consumer:=$integrations.(($keys() in $valid_consumer) ? 0 : $weight_consumer);
+          $test_data_objects:=$integrations.(($keys() in $valid_data_objects) ? 0 : $weight_data_objects);
+          $valid_status := [$validators[($.attr_id="status")].id];
+          $test_status3:=$integrations.(($keys() in $valid_status) ? 0 : 1);
+          $valid_integration := [$validators[($.attr_id="kadzo.v2023.integrations")].id];
+          $test_integration:=$integrations.(($keys() in $valid_integration) ? 0 : 1);
+          $test_status := $zip($test_status, $test_status2) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_status := $zip($test_status, $test_status3) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total := $zip($test_desc, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_technologies) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_tech_use) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_async) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_protected) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_changes) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_source) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_consumer) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_data_objects) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_integration) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_integrations});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_status / $weight_integrations;
+          $matcher := $eval('/^.*' & "params" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_technologies / $weight_integrations;
+          $matcher := $eval('/^.*' & "changes" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_changes / $weight_integrations;
+          $matcher := $eval('/^.*' & "srcdst" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_source / $weight_integrations;
+          $matcher := $eval('/^.*' & "status" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_status / $weight_integrations;
+          $sum_except := $sum_except / $count($integrations);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4); 
+          $summary := ($reduce ($total, $sum) / $count($integrations));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )

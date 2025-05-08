@@ -1,0 +1,68 @@
+kadzo:
+  helpers.functions:
+    system_functions: >
+      (
+        /*$var := var;
+        $plain_list := [$var.$spread().(
+            $function := $keys()[0];
+            $.*.systems.({$: {"function": $function}})
+        )];
+  
+        $myfunc := function($t1, $t2) {(
+          $res := $lookup($t1, $t2.$keys()[0]);
+          $exists($res) 
+            ? $merge([$t1, { $t2.$keys()[0] : { "function": $append($res.function, $t2.*.function) }}])
+            : $merge([$t1, $t2])
+        )};
+        $reduce($plain_list, $myfunc);*/
+      
+        $each(var, function($v, $k){(
+            $map($v.systems, function($obj){( {$obj : $k } )})
+        )}).$map($, $append(?)) {$.$keys() : {"function": [$.*]}}
+      )
+
+#    systems_by_group: >
+#      (
+#        $ctx := ctx;
+#        $systems := var.systems;
+#        $groups := var.groups;
+#        $plain_list := [$systems.$spread().
+#            {
+#             $.*.group :
+#              {
+#                  "title": $lookup($groups, $.*.group).title,
+#                  "systems": $keys()[0] }
+#            }
+#        ];
+#
+#        $myfunc := function($t1, $t2) {(
+#          $res := $lookup($t1, $t2.$keys()[0]);
+#          $exists($res)
+#            ? $merge([$t1, { $t2.$keys()[0] : { "title": $t2.*.title, "systems": $append($res.systems, $t2.*.systems) }}])
+#            : $merge([$t1, $t2])
+#        )};
+#        $reduce($plain_list, $myfunc);
+#      )
+
+#    systems_without_group: >
+#      (
+#          $ctx := ctx;
+#          $systems := var.systems;
+#          [$systems.$spread()[$not($exists(*.group))]];
+#      )
+
+#    systems_subsystems: >
+#      (
+#          $ctx := ctx;
+#          $var := var;
+#          $plain_list := [$var.$spread().(
+#              {$.*.parent : {"subsystems": $keys()[0]}}
+#          )];
+#          $myfunc := function($t1, $t2) {(
+#            $res := $lookup($t1, $t2.$keys()[0]);
+#            $exists($res)
+#              ? $merge([$t1, { $t2.$keys()[0] : { "subsystems": $append($res.subsystems, $t2.*.subsystems) }}])
+#              : $merge([$t1, $t2])
+#          )};
+#          $reduce($plain_list, $myfunc);
+#      )

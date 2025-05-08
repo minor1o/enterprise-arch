@@ -1,0 +1,14 @@
+kadzo:
+  seaf_slice_pack:
+    business_objects: >
+      (
+          /* Собираем бизнес-объекты */
+
+          $domain := sber.domain;
+          /* $matcher := $eval('/^' & $domain & '/i'); */
+      
+          $business_objects := $sift( $."seaf.ia.business_objects", function($v, $k){$exists($v.sber)})
+                                   ~> | $.* | $.sber |;
+      
+          { "kadzo.v2023.business_objects": $merge($seaf_key_mapper([$business_objects], $domain)) };
+      )

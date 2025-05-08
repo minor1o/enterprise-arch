@@ -1,0 +1,11 @@
+imports:
+  - products.yaml
+  - clients.yaml
+  - channels.yaml
+#  - processes.yaml
+  - systems.yaml
+  - business_objects.yaml
+  - data_objects.yaml
+  - functions.yaml
+  - integrations.yaml
+  - key_mapper.yaml

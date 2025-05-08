@@ -1,0 +1,6 @@
+kadzo.v2023.groups:
+  ecogroup.bike_rent.groups.system:
+    title: Внутренние системы компании
+
+  ecogroup.bike_rent.groups.external_partners:
+    title: Внешние партнеры и сервисы

@@ -1,0 +1,54 @@
+kadzo:
+  seaf_slice_pack:
+    clients: >
+      (
+          $extractParent := function($v, $objects){(
+            $checked = [];
+            $extractParentGroups := function($v, $objects, $checked){(
+              $not($v in $checked) ? (
+                $g := $lookup($objects, $v);
+                $result := $append($checked, [$v]);
+                $parent_result := $exists($g.is_part_of) ?
+                $extractParentGroups($g.is_part_of, $objects, $result)
+                : [ ];
+                $append($v, [$parent_result]);
+              ): [ ];
+            )};
+          
+            $extractParentGroups($v, $objects, $checked);
+          )};
+          
+          $ecosystem := "sber";
+          $domain := sber.domain;
+          $prefix := $domain;
+          $matcher := $eval('/^' & $prefix & '/i');
+      
+          /* Берем клиентов, которые не относятся к домену (внешних) */
+          $clients := $sift( $."seaf.ba.parties", function($v, $k){ $not ($domain in $extractParent($k, $$."seaf.ba.parties")) and $exists($v.sber)});
+      
+          /* Находим клиентов, которые потребляют продукты домена напрямую или через внешние каналы */
+      
+          /* 1. Берем продукты компании */
+          /* TODO Заменить проверки принадлежности продукта компании (не использовать домен) */
+          $products := $sift( $."seaf.ba.products", function($v, $k) {$k ~> $matcher and $v.sber and ($v.sber.type='Продукт' or $not($exists($v.sber.type)))});
+      
+          /* 1.1 Находим клиентов, потребляющие продукты компании через внешние каналы */
+          $channels := $sift( $."seaf.ba.products", function($v, $k){$k in $clients.*.has_interest[type='Потребляет'].id and $v.sber.type='Канал'});
+          /* 1.2 Берем каналы, в которых используются продукты компании */
+          $external_channels :=  $sift($channels, function($v, $k) {$k in $products.*.used_in});
+      
+          $all_products := $merge([$products, $external_channels]);
+      
+          $productInterest := function($v, $products){(
+              $result := $v.*.has_interest[$.id in $products.$keys()][$.type = 'Потребляет'];
+              $count($result) > 0 ? true : false;
+          )};
+          
+          /* 2. Берем клиентов, потребляющих продукты напрямую или через внешние каналы */
+          $clients := $sift( $clients, function($v, $k){ $exists($v.has_interest) and $not($v.has_interest = null) and $productInterest($v, $all_products)});
+
+          $clients := $clients ~> | $.* | $.sber |;
+
+          { "kadzo.v2023.clients": $count($clients.$keys()) ? $seaf_key_mapper([$clients.$spread()], $domain) ~> $merge() : {}} ;
+      )
+      

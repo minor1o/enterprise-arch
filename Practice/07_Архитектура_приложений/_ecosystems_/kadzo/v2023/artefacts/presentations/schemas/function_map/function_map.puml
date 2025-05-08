@@ -1,0 +1,198 @@
+'!pragma ratio 0.3
+!pragma horizontalLineBetweenDifferentPackageAllowed
+'!pragma layout elk
+'Общее позиционирование
+
+skinparam {
+
+	wrapWidth 200
+
+	maxMessageSize 200
+
+	'hide stereotype
+
+	tabSize 5
+
+	defaultfontname Arial
+
+	roundCorner 10
+
+	linetype ortho
+
+	'linetype polyline
+
+	nodesep 20
+
+	ranksep 20
+
+	shadowing true
+
+	'padding 10
+
+    hyperlinkColor black
+
+    hyperlinkUnderline false
+
+}
+
+'top to bottom direction
+left to right direction
+
+hide circle
+
+hide empty members
+
+
+skinparam component{
+
+	fontsize 14
+
+	fontstyle bold
+
+	borderthickness 1
+
+	attributefontsize 11
+
+	bordercolor #4e4948
+
+	backgroundcolor #92d050
+
+}
+
+'Стили для (АС)
+
+skinparam class {
+
+    wrapWidth 250
+	fontsize 14
+
+	attributeFontSize 10
+
+	fontstyle bold
+
+	borderthickness 1
+
+	attributefontsize 11
+
+	bordercolor #4e4948
+
+	stereotypefontcolor<<Нецелевая>> darkgray
+
+	fontcolor<<Нецелевая>> white
+
+	backgroundcolor<<Нецелевая>> #006600
+
+	bordercolor<<Нецелевая>> gray
+
+	attributefontcolor<<Нецелевая>> white
+
+	backgroundcolor<<Целевая,запланировано>> orange
+
+	bordercolor<<Целевая,запланировано>> red
+
+	backgroundcolor<<Целевая,частичновнедрено>> #ffff8a
+
+	bordercolor<<Целевая,частичновнедрено>> red
+
+	backgroundcolor<<Целевая,внедренополностью>> #92d050
+
+	backgroundcolor<<Внешняя>> lightblue
+
+	bordercolor<<Внешняя>> gray
+
+	backgroundcolor<<Внешний>> lightblue
+
+	bordercolor<<Внешний>> gray
+
+	backgroundcolor<<Банк>> #e9f6dc
+
+}
+
+'Стили регионов
+
+skinparam rectangle {
+
+	borderthickness 1
+	fontstyle bold
+
+	attributefontsize 11
+
+	'sameClassWidth true
+
+	'padding 200
+
+	'ranksep 10
+	'bordercolor transparent
+	backgroundcolor #f0f0f0
+
+	bordercolor<<External-сеть>> transparent
+
+	backgroundcolor<<External-сеть>> #ddd5e4
+
+	bordercolor<<Internal-сеть>> transparent
+
+	backgroundcolor<<Internal-сеть>> #c5d7ef
+
+	borderstyle<<Группа систем>> dashed
+
+	bordercolor<< ДБ/ДЗО >> transparent
+
+	backgroundcolor<< ДБ/ДЗО >> #f0f0f0
+
+	bordercolor<<Каналы>> transparent
+
+	backgroundcolor<<Каналы>> #84b5f5
+
+	bordercolor<<Банк>> transparent
+
+	backgroundcolor<<Банк>> #e9f6dc
+
+	bordercolor<<ОЭ>> transparent
+
+	backgroundcolor<<ОЭ>> #a1f1dc
+
+	bordercolor<<Cloud>> transparent
+
+	backgroundcolor<<Cloud>> #a1f1dc
+
+	backgroundcolor<<Платформа>> #ffcc66
+
+}
+
+'Стили Person
+skinparam component<<Person>> {
+	backgroundColor Transparent
+	borderColor Transparent
+	shadowing false
+	hide stereotype
+	borderthickness 1
+	FontSize 14
+    FontStyle Bold
+}
+
+skinparam package {
+    borderthickness 1
+	fontstyle bold
+
+	attributefontsize 11
+    backgroundcolor<<Frame>> #GreenYellow/LightGoldenRodYellow
+}
+hide stereotype
+
+set namespaceSeparator none
+title {{&title}}
+
+@startuml
+hide << Внешняя >> stereotype
+
+
+{{#functions}}
+rectangle "{{&title}}" as {{id}}{
+{{#systems}}
+    class "{{&title}}" as {{id}} <<{{notation}}>>
+{{/systems}}
+}
+{{/functions}}
+
+
+@enduml

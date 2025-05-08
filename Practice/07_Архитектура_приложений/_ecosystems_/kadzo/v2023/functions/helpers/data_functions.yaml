@@ -1,0 +1,58 @@
+kadzo:
+  helpers.functions:
+    business_data_objects: >
+      (
+          $var := var;
+          $plain_list := [$var.$spread().(
+              {$.*.business_object : {"data_objects": $keys()[0]}}
+          )];
+          $myfunc := function($t1, $t2) {(
+            $res := $lookup($t1, $t2.$keys()[0]);
+            $exists($res) 
+              ? $merge([$t1, { $t2.$keys()[0] : { "data_objects": $append($res.data_objects, $t2.*.data_objects) }}])
+              : $merge([$t1, $t2])
+          )};
+          $reduce($plain_list, $myfunc);
+      )
+
+    system_data: >
+      (
+        $var := var;
+        $plain_list := [$var.$spread().(
+            $data := $keys()[0];
+            $.*.master_system.{$: {"data": $data}}
+        )];
+        $log($plain_list, "[system_data]: plain_list");
+      
+        $myfunc := function($t1, $t2) {(
+          $res := $lookup($t1, $t2.$keys()[0]);
+          $exists($res) 
+            ? $merge([$t1, { $t2.$keys()[0] : { "data": $append($res.data, $t2.*.data) }}])
+            : $merge([$t1, $t2])
+        )};
+        $reduce($plain_list, $myfunc);
+      )
+
+    system_flow_data: >
+      (
+        /* В переменную var передается список интеграций */
+        $var := var;
+        $plain_list_cns := [$var.$spread().(
+            $system := $.*.consumer;
+            $.*."data-objects".{$system: {"data": $}}
+        )];
+        $plain_list_src := [$var.$spread().(
+                    $system := $.*.source;
+                    $.*."data-objects".{$system: {"data": $}}
+                )];
+        $plain_list := $append($plain_list_cns, $plain_list_src);
+        $log($plain_list, "[system_flow_data]: plain_list");
+
+        $myfunc := function($t1, $t2) {(
+          $res := $lookup($t1, $t2.$keys()[0]);
+          $exists($res) 
+            ? $merge([$t1, { $t2.$keys()[0] : { "data": $distinct($append($res.data, $t2.*.data)) }}])
+            : $merge([$t1, $t2])
+        )};
+        $reduce($plain_list, $myfunc);
+      )

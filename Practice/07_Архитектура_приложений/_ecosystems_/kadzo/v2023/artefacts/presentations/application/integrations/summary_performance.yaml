@@ -1,0 +1,30 @@
+entities:
+  kadzo.v2023.integrations:
+    presentations:
+      summary_performance:
+        title: Нагрузочные характеристики потока
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор интеграционного потока
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $integration_id := $params.id;
+            $ctx:= $;
+          
+            $props_to_summary($integration_id, 
+                base."kadzo.v2023.integrations",
+                schema."kadzo.v2023.integrations".schema."$defs"."kadzo.v2023.integrations.performance".properties.load.properties,
+                base,
+                refs, "load");
+          )

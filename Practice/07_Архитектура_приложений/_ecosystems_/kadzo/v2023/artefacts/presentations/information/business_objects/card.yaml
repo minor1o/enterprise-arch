@@ -1,0 +1,46 @@
+entities:
+  kadzo.v2023.business_objects:
+    presentations:
+      card:
+        title: Карточка бизнес-объекта
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор бизнес-объекта
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по бизнес-объекту
+            entity: kadzo.v2023.business_objects
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          summary_livestage:
+            title: Жизненный цикл
+            entity: kadzo.v2023.business_objects
+            presentation: summary_livestage
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          contains_data_objects:
+            title: Объекты данных, из которых состоит бизнес-объект
+            entity: kadzo.v2023.data_objects
+            presentation: data_objects_by_business
+            order: 10
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+                $lookup( $lookup($, "__widgets__.kadzo.v2023.business_objects.card"), $params.id);
+          )

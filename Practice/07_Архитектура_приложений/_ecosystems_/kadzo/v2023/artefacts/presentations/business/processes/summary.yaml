@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.processes:
+    presentations:
+      summary:
+        title: Сводка по бизнес-процессу
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор бизнес-процесса
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $process_id := $params.id;
+            $ctx:= base;
+            $append([
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $process_id}]
+                }
+              ],
+              $props_to_summary($process_id,
+                            $ctx."kadzo.v2023.processes",
+                            schema."kadzo.v2023.processes".schema.patternProperties.*.properties,
+                            $ctx, refs)
+            );
+          )

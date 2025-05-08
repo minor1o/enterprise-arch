@@ -1,0 +1,6 @@
+imports:
+  - domain_registry.yaml
+  - card.yaml
+#  - card_plain.yaml
+  - group_contexts.yaml
+  - summary.yaml

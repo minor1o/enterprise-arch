@@ -1,0 +1,64 @@
+entities:
+  menu.kadzo.v2023.enterprise.clients:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Бизнес-архитектура/Клиенты",
+                    "link": "entities/kadzo.v2023.clients/registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.clients:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Бизнес-архитектура/Клиенты",
+                             "link": "/entities/kadzo.v2023.clients/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.clients:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Клиенты
+            align: left
+            link: link
+          - value: type
+            text: Тип клиентов
+            align: left
+          - value: count
+            text: Количество
+
+        origin:
+          clients: kadzo.v2023.clients
+          clients_domains: kadzo.v2023.clients_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+               [$each(clients."kadzo.v2023.clients", function ($v, $k){({
+                  "domain": $lookup($$.clients_domains."kadzo.v2023.clients", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.clients/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.clients_domains."kadzo.v2023.clients", $k).domain).title,
+                  "title": $v.title,
+                  "type": $v.type,
+                  "count": $v.count
+               })})]
+          )

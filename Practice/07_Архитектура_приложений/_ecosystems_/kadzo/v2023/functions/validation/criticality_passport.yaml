@@ -1,0 +1,69 @@
+kadzo:
+  criticality_passport.validation:
+    criticality_calculation: >
+      (
+          $ctx := $.obj.$keys()[0];
+          $passport := $.obj;
+          $obj_full := $.schema."kadzo.v2023.criticality_passport";
+          $dataset_cc := $.dataset."kadzo.v2023.criticality_calculator";
+          $schema := $obj_full.schema;
+          $check_list := ['object_criticality_estimation'];
+      
+           $nullcheck := (
+                        {
+                              'id': $passport.$keys()[0],
+                              'name': $passport.*.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.*.title,
+                              'error_text': 'Критичность ' & $ce & ' (' & $cWeight2 & ') '  & ' не соответствует расчетной ' & $cc & ' (' & $cWeight & ') ',
+                              /* 'error_text': 'Критичность ' & $ce & ' (' & $ce_weigth & ') '  & ' не соответсвует расчетной ' & $cc & ' (' & $cc_weigth & ') '  & $cWeight & $t & '-' & $tt & $cWeight2, */
+                              'link': '/entities/kadzo.v2023.criticality_passport/card?id=' & $ctx
+                        });
+        
+          $check_list.(
+                $attr_id := $;
+                $attr := $schema.patternProperties.*.properties.$spread()[$keys()[0] = $attr_id];
+                $value := $passport.*.$spread()[$keys()[0] = $attr_id];
+                /* $dataset := $.dataset."kadzo.v2023.criticality_calculator"; */
+      
+                $csystem_service_consumers_type := $passport.*.object_consumers_type;
+                $csystem_service_outage_impact := $passport.*.object_outage_impact;
+                $csystem_service_sla := $passport.*.object_sla;
+                $csystem_service_workload := $passport.*.object_workload;
+                $ce:= '';
+                $cc := '';
+      
+                $ce := $passport.*.object_criticality_estimation;
+                /*$log($dataset, 'dataset');*/
+                $cc := $criticality_By_Params($csystem_service_workload,$csystem_service_consumers_type,$csystem_service_outage_impact,$csystem_service_sla,$dataset_cc);
+                $cWeight := $dataset_cc."sber.criticality_weight".$spread()[*.criticality = $cc].*.weight;
+                $cWeight2 := $dataset_cc."sber.criticality_weight".$spread()[*.criticality = $ce].*.weight;
+      
+                /* $t := $type($cc2) != "string" ? true : false; */
+                $t := ($cWeight2 - $cWeight) >= 0.0 ? false : true;
+                $tt := $t = true ?  false : true;
+      
+                /*$ce_weigth := $criticality_weight($ce,$dataset);*/
+                /*$cc_weigth := $criticality_weight($tt,$dataset);*/
+      
+                /* $exist := $ce != $cc ? false : true; /* false; /* $value.* = null or $exists($value) != true or $count($value.*) = 0 ? false : true;*/
+                $exist := $tt; /* $ce_weigth != $cc_weigth ? false : true; */
+                
+                $nullcheck := $exist = false ? (
+                        {
+                              'uid': 'criticality_passport-v1-' & $passport.$keys()[0],
+                              'id': $passport.$keys()[0],
+                              'name': $passport.*.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.*.title,
+                              'error_text': 'Критичность ' & $ce & ' (' & $cWeight2 & ') '  & ' не соответствует расчетной ' & $cc & ' (' & $cWeight & ') ',
+                              /* 'error_text': 'Критичность ' & $ce & ' (' & $ce_weigth & ') '  & ' не соответсвует расчетной ' & $cc & ' (' & $cc_weigth & ') '  & $cWeight & $t & '-' & $tt & $cWeight2, */
+                              'link': '/entities/kadzo.v2023.criticality_passport/card?id=' & $ctx
+                        }
+              );
+          );
+      )

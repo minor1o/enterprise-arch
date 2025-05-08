@@ -1,0 +1,54 @@
+entities:
+  kadzo.v2023.products:
+    presentations:
+      card:
+        title: Карточка продукта
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор продукта
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по продукту
+            entity: kadzo.v2023.products
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          summary_livestage:
+            title: Жизненный цикл
+            entity: kadzo.v2023.products
+            presentation: summary_livestage
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          product_channels:
+            title: Каналы, через которые поставляется продукт
+            entity: kadzo.v2023.channels
+            presentation: channels_by_product
+            order: 20
+            style:
+              margin: 4px
+              border: true
+          product_processes:
+            title: Бизнес-процессы реализующие продукт
+            entity: kadzo.v2023.processes
+            presentation: processes_by_product
+            order: 30
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+                $lookup( $lookup($, "__widgets__.kadzo.v2023.products.card"), $params.id);
+          )

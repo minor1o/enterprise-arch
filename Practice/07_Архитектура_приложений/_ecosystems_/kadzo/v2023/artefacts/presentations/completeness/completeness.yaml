@@ -1,0 +1,234 @@
+entities:
+  kadzo.v2023.full:
+    presentations:
+      completeness.full_md:
+        type: markdown
+        template: templates/completeness.md
+        origin:
+          ka: kadzo.v2023
+          vl: kadzo.v2023.validators
+          exceptions: kadzo.rules.exception
+          impl: kadzo.completeness.impl
+        source: >
+          (
+              $domain := $params.domain;
+              $rules := exceptions.$keys();
+              $ka := ka.$;
+              $vl := vl.$;
+              $fn := impl.kadzo."client.completeness"."clients_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_clients := {"clients": $valid."summary", "clients_except": $valid."sum_except", "cl_errors" : $valid."errors"};
+          
+              $fn := impl.kadzo."systems.completeness"."systems_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_systems := {"systems": $valid."summary", "systems_except": $valid."sum_except", "systems_errors": $valid."errors"};
+              $result:= $append($result_clients, $result_systems);
+          
+              $fn := impl.kadzo."integrations.completeness"."integrations_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_integrations := {"integrations": $valid."summary", "integrations_except" : $valid."sum_except"};    
+              $result:= $append($result, $result_integrations);
+          
+              $fn := impl.kadzo."processes.completeness"."processes_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_processes := {"processes": $valid."summary", "processes_except": $valid."sum_except"};    
+              $result:= $append($result, $result_processes);
+          
+              $fn := impl.kadzo."channels.completeness"."channels_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_channels := {"channels": $valid."summary", "channels_except": $valid."sum_except"};    
+              $result:= $append($result, $result_channels);
+          
+              $fn := impl.kadzo."products.completeness"."products_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_products := {"products": $valid."summary", "products_except": $valid."sum_except"};    
+              $result:= $append($result, $result_products);
+          
+              $fn := impl.kadzo."strategy.completeness"."strategy_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_strategy := {"strat": $valid."summary", "strat_except": $valid."sum_except"};
+              $result:= $append($result, $result_strategy);
+          
+              $fn := impl.kadzo."goals.completeness"."goals_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_goals := {"goals": $valid."summary", "goals_except": $valid."sum_except"};
+              $result:= $append($result, $result_goals);
+          
+              $fn := impl.kadzo."business_objects.completeness"."business_objects_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_business_objects := {"business_objects": $valid."summary", "bo_except": $valid."sum_except", "bo_errors" : $valid."errors"};
+              $result:= $append($result, $result_business_objects);
+          
+              $fn := impl.kadzo."data_objects.completeness"."data_objects_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_data_objects := {"data_objects": $valid."summary", "do_except": $valid."sum_except"};
+              $result:= $append($result, $result_data_objects);
+          
+              $fn := impl.kadzo."kb_systems.completeness"."kb_systems_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_kb_systems := {"kb_systems": $valid."summary", "kb_systems_except": $valid."sum_except"};
+              $result:= $append($result, $result_kb_systems);
+          
+              $fn := impl.kadzo."functions.completeness"."functions_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_functions := {"functions": $valid."summary", "functions_except": $valid."sum_except"};
+              $result:= $append($result, $result_functions);
+          
+              $fn := impl.kadzo."groups.completeness"."groups_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_groups := {"groups": $valid."summary", "groups_except": $valid."sum_except"};
+              $result:= $append($result, $result_groups);
+          
+              $fn := impl.kadzo."tech_params.completeness"."tech_params_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_tech_params := {"tech_params": $valid."summary", "tech_params_except": $valid."sum_except"};
+              $result:= $append($result, $result_tech_params);
+          
+              $fn := impl.kadzo."tech_services.completeness"."tech_services_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_tech_services := {"tech_services": $valid."summary", "tech_services_except": $valid."sum_except"};
+              $result:= $append($result, $result_tech_services);
+          
+              $fn := impl.kadzo."tasks.completeness"."tasks_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_tasks := {"tasks": $valid."summary", "tasks_except": $valid."sum_except"};
+              $result:= $append($result, $result_tasks);
+          
+              $errors_criticality := $count($vl[domain = $domain and validator_type = "criticality_passport" and error_group_code = "general"]) > 0 ? '*';
+              $result_criticality := {"criticality": $errors_criticality};
+              $result:= $append($result, $result_criticality);
+                    
+              $errors_mue := $count($vl[domain = $domain and validator_type = "unifying_elements" and error_group_code = "general"]) > 0 ? '*';
+              $result_MUEUsage := {"MUEUsage": $errors_mue};
+              $result:= $append($result, $result_MUEUsage);
+              
+              $errors_domain := $count($vl[domain = $domain and validator_type = "domain" and error_group_code = "foreign"]) > 0 ? '*';
+              $result_domain := {"domain_error": $errors_domain};
+              $result:= $append($result, $result_domain);
+          
+              $fn := impl.kadzo."endpoints.completeness"."endpoints_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_endpoints := {"endpoints": $valid."summary", "endpoints_except": $valid."sum_except"};
+              $result:= $append($result, $result_endpoints);
+          
+              $fn := impl.kadzo."completeness"."full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules, 'impl': impl});
+              $result_total := {"total": $valid."summary", "total_except": $valid."sum_except", "cross" : $valid."cross"};
+              $result:= $append($result, $result_total);
+              $merge($result) ~> |$|{'domain':$domain}|
+                    
+          )
+
+      validation.enterprise.full_md:
+        type: markdown
+        template: templates/complete_enterprise.md
+        origin:
+          ka: kadzo.v2023
+          vl: kadzo.v2023.validators
+          exceptions: kadzo.rules.exception
+          impl: kadzo.completeness.impl
+        source: >
+          (
+              $domain := $params.domain;
+              $rules := exceptions.$keys();
+              $ka := ka.$;
+              $vl := vl.$;
+              $fn := impl.kadzo."client.completeness"."clients_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_clients := {"clients": $valid."summary", "clients_except": $valid."sum_except", "cl_errors" : $valid."errors"};
+
+              $fn := impl.kadzo."systems.completeness"."systems_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_systems := {"systems": $valid."summary", "systems_except": $valid."sum_except", "systems_errors": $valid."errors"};
+              $result:= $append($result_clients, $result_systems);
+
+              $fn := impl.kadzo."integrations.completeness"."integrations_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_integrations := {"integrations": $valid."summary", "integrations_except" : $valid."sum_except"};    
+              $result:= $append($result, $result_integrations);
+
+              $fn := impl.kadzo."processes.completeness"."processes_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_processes := {"processes": $valid."summary", "processes_except": $valid."sum_except"};    
+              $result:= $append($result, $result_processes);
+
+              $fn := impl.kadzo."channels.completeness"."channels_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_channels := {"channels": $valid."summary", "channels_except": $valid."sum_except"};    
+              $result:= $append($result, $result_channels);
+
+              $fn := impl.kadzo."products.completeness"."products_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_products := {"products": $valid."summary", "products_except": $valid."sum_except"};    
+              $result:= $append($result, $result_products);
+
+              $fn := impl.kadzo."strategy.completeness"."strategy_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_strategy := {"strat": $valid."summary", "strat_except": $valid."sum_except"};
+              $result:= $append($result, $result_strategy);
+
+              $fn := impl.kadzo."goals.completeness"."goals_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_goals := {"goals": $valid."summary", "goals_except": $valid."sum_except"};
+              $result:= $append($result, $result_goals);
+
+              $fn := impl.kadzo."business_objects.completeness"."business_objects_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_business_objects := {"business_objects": $valid."summary", "bo_except": $valid."sum_except", "bo_errors" : $valid."errors"};
+              $result:= $append($result, $result_business_objects);
+
+              $fn := impl.kadzo."data_objects.completeness"."data_objects_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_data_objects := {"data_objects": $valid."summary", "do_except": $valid."sum_except"};
+              $result:= $append($result, $result_data_objects);
+
+              $fn := impl.kadzo."kb_systems.completeness"."kb_systems_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_kb_systems := {"kb_systems": $valid."summary", "kb_systems_except": $valid."sum_except"};
+              $result:= $append($result, $result_kb_systems);
+
+              $fn := impl.kadzo."functions.completeness"."functions_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_functions := {"functions": $valid."summary", "functions_except": $valid."sum_except"};
+              $result:= $append($result, $result_functions);
+
+              $fn := impl.kadzo."groups.completeness"."groups_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_groups := {"groups": $valid."summary", "groups_except": $valid."sum_except"};
+              $result:= $append($result, $result_groups);
+
+              $fn := impl.kadzo."tech_params.completeness"."tech_params_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_tech_params := {"tech_params": $valid."summary", "tech_params_except": $valid."sum_except"};
+              $result:= $append($result, $result_tech_params);
+
+              $fn := impl.kadzo."tech_services.completeness"."tech_services_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_tech_services := {"tech_services": $valid."summary", "tech_services_except": $valid."sum_except"};
+              $result:= $append($result, $result_tech_services);
+
+              $fn := impl.kadzo."tasks.completeness"."tasks_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_tasks := {"tasks": $valid."summary", "tasks_except": $valid."sum_except"};
+              $result:= $append($result, $result_tasks);
+          
+              $errors_criticality := $count($vl[domain = $domain and validator_type = "criticality_passport" and error_group_code = "general"]) > 0 ? '*';
+              $result_criticality := {"criticality": $errors_criticality};
+              $result:= $append($result, $result_criticality);
+          
+              $errors_mue := $count($vl[domain = $domain and validator_type = "unifying_elements" and error_group_code = "general"]) > 0 ? '*';
+              $result_MUEUsage := {"MUEUsage": $errors_mue};
+              $result:= $append($result, $result_MUEUsage);
+
+              $fn := impl.kadzo."endpoints.completeness"."endpoints_full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+              $result_endpoints := {"endpoints": $valid."summary", "endpoints_except": $valid."sum_except"};
+              $result:= $append($result, $result_endpoints); 
+              $result:= $append($result, $result_endpoints); 
+          
+              $fn := impl.kadzo."completeness"."full";
+              $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules, 'impl': impl});
+              $result_total := {"total": $valid."summary", "total_except": $valid."sum_except", "cross" : $valid."cross"};
+              $result:= $append($result, $result_total);
+              $merge($result) ~> |$|{'domain':$domain}|
+          )

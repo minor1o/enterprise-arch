@@ -1,0 +1,699 @@
+kadzo:
+    systems.validation:
+      parent_system: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+            [$each($objects, function($object, $id){(
+                $object.parent ? (
+                  $parent_id := $object.parent;
+                  $parent_system := $lookup($objects, $parent_id);
+                  $not($exists($parent_system)) ? (
+                      {
+                          'uid': 'systems-fp-parentID-range-v1-' & $id,
+                          'id': $id,
+                          'name': $object.title,
+                          'error_type': 'Контроль признака ФП',
+                          'error_text': 'Атрибут "parent" (Родительская АС) должен ссылаться на существующую систему. Проверисть, что АС ' &parent_id & ' существует',
+                          'error_group_code': 'fp',
+                          'attr_id': 'parent',
+                          'attr_name': 'Родительская АС',
+                          'bad_value_id': $parent_id,
+                          'bad_value_name': $parent_system.title,
+                          'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                      }
+                  ) :
+                    $parent_system.parent ? (
+                        {
+                              'uid': 'systems-fp-parentID-hierarhy-level-v1-' & $id,
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Контроль признака ФП',
+                              'error_text': 'Атрибут "parent" (Родительская АС) является признаком ФП. АС не может ссылаться на ФП. Проверить, что АС "' & $parent_system.title & '" не содержит атрибута "parent" (Родительская АС)',
+                              'error_group_code': 'fp',
+                              'attr_id': 'parent',
+                              'attr_name': 'Родительская АС',
+                              'bad_value_id': $parent_id,
+                              'bad_value_name': $parent_system.title,
+                              'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                        }
+                    )
+                  )
+             )})];
+        )
+
+      base_attributes: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+            $obj_full := $.schema;
+            $check_list := ['title', 'description', 'class'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+        
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              [$each($objects, function($object, $id){(
+                  $value := $lookup($object, $attr_id);
+                  $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                  $uidpref := "systems-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                  $nullcheck := $exist = false ? (
+                          {
+                                'uid': $uidpref & $id & "-notexist",
+                                'id': $id,
+                                'name': $object.title,
+                                'error_type': 'Общие атрибуты',
+                                'error_group_code': 'general',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                                'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                          }
+                      );
+                  $enumcheck := $attr.enum ? (
+                      $not($value in $attr.enum) and $exist = true ? (
+                          {
+                                'uid': $uidpref & $id & "-notinlist",
+                                'id': $id,
+                                'name': $system.title,
+                                'error_type': 'Общие атрибуты',
+                                'error_group_code': 'general',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                                'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                          }
+                      )
+                  );
+                  $exists($nullcheck) or $exists($enumcheck) ? [$nullcheck, $enumcheck]
+              )})]
+            )
+        )
+
+      ownership_attributes: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+            $obj_full := $.schema;
+            $check_list := ['ownership', 'location'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+        
+            [$each($objects, function($object, $id){(
+              $ls := $object."live-stage";
+              $live_stage_exist := $ls = null or $exists($ls) != true ? false : true;
+              $checks := $check_list.(
+                    $attr_id := $.$keys();
+                    $attr := $.*;
+                    $value := $lookup($object, $attr_id);
+                    $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                    $uidpref := "systems-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                    $nullcheck := $exist = false ? (
+                            {
+                                  'uid': $uidpref & $id & "-notexist",
+                                  'id': $id,
+                                  'name': $object.title,
+                                  'error_type': 'Атрибуты владения',
+                                  'error_group_code': 'ownership',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                                  'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                            }
+                        );
+                    $enumcheck := $attr.enum ? (
+                        $not($value in $attr.enum) and $exist = true ? (
+                            {
+                                  'uid': $uidpref & $id & "-notinlist",
+                                  'id': $id,
+                                  'name': $object.title,
+                                  'error_type': 'Атрибуты владения',
+                                  'error_group_code': 'ownership',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                                  'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                            }
+                        )
+                    );
+                    $exists($nullcheck) or $exists($enumcheck) ? [$nullcheck, $enumcheck];
+              );
+          
+               $exists($checks) 
+                  ? ($live_stage_exist = true and $object."live-stage" in ['Внедрение / Не введена в эксплуатацию', 'Опытная эксплуатация', 'Промышленная эксплуатация', 'Архивная'] ? $checks )  
+                  : ($live_stage_exist = false ?
+                      ({
+                         'uid': 'systems-live-stage2ol-v1-'& $id & "-notexist",
+                         'id': $id,
+                         'name': $object.title,
+                         'error_type': 'Атрибут "Этап жизненного цикла"',
+                         'error_group_code': 'ownership',
+                         'attr_id': 'live-stage',
+                         'attr_name': "Этап жизненного цикла",
+                         'error_text': 'Невозможно проверить условие (Исключением являются АС на этапе ЖЦ "Эскиз" и "В разработке / приобретение"). Атрибут live-stage не может быть пустым',
+                         'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                     })
+                    )
+              )})]
+        )
+
+      lifecycle_attributes: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+            $obj_full := $.schema;
+            $check_list := ['live-stage', 'live-stage-target', 'target-status'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+        
+            [$each($objects, function($object, $id){(
+              $ow := $object.ownership;
+              $ownership_exist := $ow = null or $exists($ow) != true ? false : true;
+              $checks := $check_list.(
+                    $attr_id := $.$keys();
+                    $attr := $.*;
+                    $value := $lookup($object, $attr_id);
+                    $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                    $uidpref := "systems-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                    $nullcheck := $exist = false ? (
+                            {
+                                  'uid': $uidpref & $id & "-notexist",
+                                  'id': $id,
+                                  'name': $object.title,
+                                  'error_type': 'Атрибуты жизненного цикла',
+                                  'error_group_code': 'lifecycle',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                                  'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                            }
+                        );
+                    $enumcheck := $attr.enum ? (
+                        $not($value in $attr.enum) and $exist = true ? (
+                            {
+                                  'uid': $uidpref & $id & "-notinlist",
+                                  'id': $id,
+                                  'name': $object.title,
+                                  'error_type': 'Атрибуты жизненного цикла',
+                                  'error_group_code': 'lifecycle',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                                  'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                            }
+                        )
+                    );
+                    $exists($nullcheck) or $exists($enumcheck) ? [$nullcheck, $enumcheck]
+              );
+              $ownership_exist = true and $exists($checks) ? ( $checks ) : (
+                      $ownership_exist = false and $exists($checks) ? ({
+                          'uid': 'systems-ownership2lc-v1-'& $ctx & "-notexist",
+                          'id': $id,
+                          'name': $object.title,
+                          'error_type': 'Атрибут "Степень владения"',
+                          'error_group_code': 'lifecycle',
+                          'attr_id': 'ownership',
+                          'attr_name': "Степень владения",
+                          'error_text': 'Невозможно проверить условие (Не применимо для систем "SaaS" и "Системы партнера".), не заполнен атрибут ownership.',
+                          'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                      })
+              )
+            )})]
+        )
+
+      criticality_attributes: >
+        (
+          $objects := $.systems."kadzo.v2023.systems";
+          $obj_full := $.schema;
+          $check_list := ['criticality'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+        
+          $criticalities := {
+              'Mission Critical': ['Mission Critical', 'Business Critical','Business Operational','Office Productivity'],
+              'Business Critical': ['Business Critical','Business Operational','Office Productivity'],
+              'Business Operational': ['Business Operational','Office Productivity'],
+              'Office Productivity': ['Office Productivity']
+          };
+        
+          [$each($objects, function($object, $id){(
+            $ow := $object.ownership;
+            $location := $object.location;
+            $parent := $object.parent;
+            $ownership_exist := $ow = null or $exists($ow) != true ? false : true;
+            $location_exist := $location = null or $exists($location) != true ? false : true;
+            $parent_exist := $parent = null or $exists($parent) != true ? false : true;
+            $checks := $check_list.(
+                  $attr_id := $.$keys();
+                  $attr := $.*;
+                  $value := $lookup($object, $attr_id);
+                  $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                  $uidpref := "systems-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                  $nullcheck := $exist = false ? (
+                          {
+                                'uid': $uidpref & $id & "-notexist",
+                                'id': $id,
+                                'name': $object.title,
+                                'error_type': 'Атрибуты критичности',
+                                'error_group_code': 'criticality',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                                'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                          }
+                      );
+                  $enumcheck := $attr.enum ? (
+                      $not($value in $attr.enum) and $exist = true ? (
+                          {
+                                'uid': $uidpref & $id & "-notinlist",
+                                'id': $id,
+                                'name': $object.title,
+                                'error_type': 'Атрибуты критичности',
+                                'error_group_code': 'criticality',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                                'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                          }
+                      )
+                  );
+                  $exists($nullcheck) or $exists($enumcheck) ? [$nullcheck, $enumcheck]
+            );
+            $fpchecks := $parent_exist = true ? (
+                $parent_system := $lookup($objects, $parent);
+                $exists($parent_system) and $not($object.criticality in $lookup($criticalities, $parent_system.criticality)) ? (
+                    {
+                        'id': $id,
+                        'uid': "systems-criticality-v1-" & $ctx & "-fperror",
+                        'name': $object.title,
+                        'error_type': 'Критичность ФП выше критичности родительской системы',
+                        'error_group_code': 'criticality',
+                        'attr_id': 'criticality',
+                        'attr_name': "Уровень критичности",
+                        'error_text': 'Класс критичности ФП не может быть выше класса критичности родительской системы',
+                        'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                    }
+                )
+            );
+            $checks_ow_ln := $ownership_exist = true and $location_exist = true and $exists($checks) ? ( $ow in ['Владеем экземпляром','Владеем исходным кодом'] or $location in ['Внутренняя'] ? $checks ) : (
+                    $o := $ownership_exist = false and $exists($checks) ? ({
+                        'id': $id,
+                        'uid': "systems-criticality-v1-" & $id & "-noownership",
+                        'name': $object.title,
+                        'error_type': 'Атрибут "Степень владения"',
+                        'error_group_code': 'criticality',
+                        'attr_id': 'ownership',
+                        'attr_name': "Степень владения",
+                        'error_text': 'Невозможно проверить условие (Применимо для систем с владением "Владеем исходных кодом", "Владеем экземпляром"). Атрибут ownership не божет быьть пустым.',
+                        'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                    });
+                    $l := $location_exist = false and $exists($checks) ? ({
+                        'id': $id,
+                        'uid': "systems-criticality-v1-" & $id & "-nolocation",
+                        'name': $object.title,
+                        'error_type': 'Атрибут "Размещение"',
+                        'error_group_code': 'criticality',
+                        'attr_id': 'location',
+                        'attr_name': "Размещение",
+                        'error_text': 'Невозможно проверить условие (Применимо для систем с размещением "Внутренняя"). Атрибут location не божет быьть пустым.',
+                        'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                    });
+                    $exists($o) or $exists($l) ? [$o, $l]
+            );
+            $exists($checks_ow_ln) or $exists($fpchecks) ?  [$checks_ow_ln, $fpchecks];
+
+          )})]
+        )
+
+      functionalities: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+            $functions := $.functions."kadzo.v2023.functions";
+            $systems_with_functions := $merge($distinct($functions.*.systems).{$ : 1});
+           
+            [$each($objects, function($object, $id){(
+              $not($exists($lookup($systems_with_functions, $id))) ? (
+                {
+                    'uid': "systems-functionalities-v1-" & $id & "-notexist",
+                    'id': $id,
+                    'name': $object.title,
+                    'attr_id': 'systems',
+                    'error_type': 'Функциональность АС',
+                    'error_text': 'Проверьте, что существует Функциональность "kadzo.v2023.functions" в атрибуте systems которой указана данная система.',
+                    'error_group_code': 'functionalities',
+                    'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                }
+              );
+            )})]
+        )
+        
+
+      groups: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+            $cgroups := $.groups."kadzo.v2023.groups";
+            $obj_full := $.schema;
+            $check_list := ['group'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+        
+            [$each($objects, function($object, $id){(
+              $check_list.(
+                    $attr_id := $.$keys();
+                    $attr := $.*;
+                    $value := $lookup($object, $attr_id);
+                    $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                    $uidpref := "systems-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+                    $nullcheck := $exist = false ? (
+                            {
+                                  'uid': $uidpref & $id & "-notexist",
+                                  'id': $id,
+                                  'name': $object.title,
+                                  'error_type': 'Атрибут "Группа систем"',
+                                  'error_group_code': 'groups',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                                  'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                            }
+                        );
+                    $linkcheck := $attr.'$ref' ? (
+                        $not($exists($lookup($cgroups, $value))) and $exist = true ? (
+                              {
+                                  'uid': $uidpref & $id & "-notinlist",
+                                  'id': $id,
+                                  'name': $object.title,
+                                  'error_type': 'Атрибут "Группа систем"',
+                                  'error_group_code': 'groups',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $value &'" не найдено среди идентификаторов групп систем "kadzo.v2023.groups"',
+                                  'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                              }
+                        )
+                    );
+                    $exists($nullcheck) or $exists($linkcheck) ?[$nullcheck, $linkcheck]
+              );
+            )})]
+        )
+
+
+#      change-type_old: >
+#        (
+#            $ctx := $.obj.$keys()[0];
+#            $system := $.obj;
+#            $obj_full := $.dataset.entities."kadzo.v2023.systems";
+#            $schema := $obj_full.schema;
+#            $check_list := ['change-type'];
+#            $check_list.(
+#                  $attr_id := $;
+#                  $attr := $lookup($schema.**.properties, $attr_id);
+#                  $value := $lookup($system.*, $attr_id);
+#                  $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+#                  $uidpref := "systems-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+#                  $nullcheck := $exist = false ? (
+#                          {
+#                                'uid': $uidpref & $ctx & "-notexist",
+#                                'id': $system.$keys()[0],
+#                                'name': $system.*.title,
+#                                'error_type': 'Тип изменений',
+#                                'attr_id': $attr_id,
+#                                'attr_name': $attr.title,
+#                                'error_text': 'Поле "Тип изменений/change-type" обязательно для заполнения',
+#                                'link': '/entities/kadzo.v2023.systems/card?id=' & $ctx
+#                          }
+#                      );
+#                  $enumcheck := $attr.enum ? (
+#                      $not($value in $attr.enum) and $exist = true ? (
+#                          {
+#                                'uid': $uidpref & $ctx & "-notinlist",
+#                                'id': $system.$keys()[0],
+#                                'name': $system.*.title,
+#                                'error_type': 'Тип изменений',
+#                                'attr_id': $attr_id,
+#                                'attr_name': $attr.title,
+#                                'error_text': 'Значение "' & $value &'" не из словаря допустимых значений: ' & $join($attr.enum, ', '),
+#                                'link': '/entities/kadzo.v2023.systems/card?id=' & $ctx
+#                          }
+#                      )
+#                  );
+#                  $append($nullcheck, $enumcheck)
+#            )
+#        )
+
+
+      change-type: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+                
+            $check := {
+                'Эскиз': ['Планируется'],
+                'В разработке / приобретение': ['Разрабатывается'],
+                'Внедрение / Не введена в эксплуатацию': ['Модифицируется'],
+                'Опытная эксплуатация': ['Модифицируется', 'Используется', 'Выводится из эксплуатации'],
+                'Промышленная эксплуатация': ['Модифицируется', 'Используется', 'Выводится из эксплуатации'],
+                'Архивная': [null, ''],
+                'Отменена': [null, '']
+            };
+            $check_ext := {
+                'Эскиз': ['Планируется'],
+                'В разработке / приобретение': ['Планируется'],
+                'Внедрение / Не введена в эксплуатацию': ['Планируется'],
+                'Опытная эксплуатация': ['Используется', 'Выводится из эксплуатации'],
+                'Промышленная эксплуатация': ['Используется', 'Выводится из эксплуатации'],
+                'Архивная': [null, ''],
+                'Отменена': [null, '']
+            };
+        
+            [$each($objects, function($object, $id){(
+              $ow := $object."ownership";
+              $ls := $object."live-stage";
+              $change := $object."change-type";
+              $values := $ls ? $lookup($check, $ls) : [];
+              $values_ext := $ls ? $lookup($check_ext, $ls) : [];
+              $ow_check := $ow in ['SaaS','Система партнера'] and $change in ['Планируется', 'Используется', 'Выводится из эксплуатации'] ? true : false;
+              $err := $ls in ['Архивная', 'Отменена'] ?
+                          $not($exists($change)) or $change in $values ? null : 'Error'
+                              :
+                                  $ow in ['Владеем исходным кодом','Владеем экземпляром'] ?
+                                      $exists($change) ? ($not($change in $values) ? 'Error') : 'Absent'
+                                          :
+                                              $ow in ['SaaS','Система партнера'] ?
+                                                   $exists($change) ? ($not($change in $values_ext) ? 'Error') : 'Absent';
+          
+              ($err = 'Error' or $err = 'Absent') and ($exists($ow) and $count($ow) > 0 and $ow != null) and ($exists($ls) and $count($ls) > 0 and $ls != null) ?
+                  ({
+                      'uid': 'systems-change_type-v1-' & $id & "-incorrect",
+                      'id': $id,
+                      'name': $object.title,
+                      'error_type': 'Жизненный цикл АС',
+                      'error_group_code': 'change-type',
+                      'attr_id': 'change-type',
+                      'attr_name': 'Тип изменений',
+                      'error_text': 'Данный атрибут должен заполняться значениями справочника change-type (_ecosystems_/kadzo/v2023/entities/application/systems.yaml). При этом установленное значение должно коррелировать со значением атрибутов "Этап жизненного цикла (текущий) / live-stage" и "Степень владения / ownership" текущей АС. Алгоритм проверки и перечень допустимых комбинаций атрибутов приведен в разделе описания проверок.',
+                      'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                  });
+            )})]
+
+        )
+
+      ls_vs_lst: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+
+            $check := {
+                'Эскиз': ['Эскиз', 'В разработке / приобретение', 'Внедрение / Не введена в эксплуатацию','Опытная эксплуатация',  'Промышленная эксплуатация'],
+                'В разработке / приобретение': ['В разработке / приобретение', 'Внедрение / Не введена в эксплуатацию','Опытная эксплуатация',  'Промышленная эксплуатация'],
+                'Внедрение / Не введена в эксплуатацию': ['В разработке / приобретение', 'Внедрение / Не введена в эксплуатацию','Опытная эксплуатация',  'Промышленная эксплуатация'],
+                'Опытная эксплуатация': ['В разработке / приобретение', 'Внедрение / Не введена в эксплуатацию','Опытная эксплуатация',  'Промышленная эксплуатация'],
+                'Промышленная эксплуатация': ['В разработке / приобретение',  'Промышленная эксплуатация', 'Архивная'],
+                'Архивная': ['Архивная']
+            };
+        
+            [$each($objects, function($object, $id){(
+              $ls := $object."live-stage";
+              $lst := $object."live-stage-target";
+              $values := $ls ? $lookup($check, $ls) : [];
+              $not($lst in $values) and $exists($lst) and $exists($ls) ? (
+                  {
+                      'uid': 'systems-live-stage-target-v1-' & $id & "-incorrect",
+                      'id': $id,
+                      'name': $object.title,
+                      'error_type': 'Комбинация атрибутов "Этап ЖЦ" и "Этап жизненного цикла на горизонт планирования"',
+                      'error_group_code': 'ls_vs_lst',
+                      'attr_id': '"live-stage", "live-stage-target"',
+                      'attr_name': '"Этап ЖЦ" и "Этап жизненного цикла на горизонт планирования"',
+                      'error_text': 'Некорректная комбинация атрибутов, установите правильные значения',
+                      'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                  }
+              )
+            )})]
+        )
+
+      # performance: >
+      #   (
+      #       $objects := $.systems."kadzo.v2023.systems";
+      #       $ownership := ['Владеем исходным кодом', 'Владеем экземпляром'];
+      #       $location := ['Внутренняя'];
+      #       $criticality := ['Business Critical', 'Mission Critical'];
+        
+      #       [$each($objects, function($object, $id){(
+      #         $value := $object.performance;
+      #         $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+      #         $error := ($object.ownership in $ownership or $object.location in $location) and $object.criticality in $criticality ? (
+      #             $exist = false ? (
+      #                 {
+      #                   'uid': 'systems-performance-v1-' & $id & "-incorrect",
+      #                   'id': $id,
+      #                   'name': $object.title,
+      #                   'error_type': 'Атрибут "Производительность" не может быть пустым',
+      #                   'error_group_code': 'performance',
+      #                   'attr_id': 'performance',
+      #                   'attr_name': 'Производительность',
+      #                   'error_text': 'Атрибут "Производительность" должен быть заполнен для данной АС',
+      #                   'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+      #                 }
+      #             )
+      #         )
+      #       )})]
+      #   )
+
+      # sla: >
+      #   (
+      #       $objects := $.systems."kadzo.v2023.systems";
+      #       $location := ['Внутренняя'];
+      #       $criticality := ['Business Critical', 'Mission Critical'];
+        
+      #       [$each($objects, function($object, $id){(
+      #         $value := $object.sla;
+      #         $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+      #         $error := $object.location in $location and $object.criticality in $criticality ? (
+      #             $exist = false ? (
+      #                 {
+      #                     'uid': 'systems-sla-v1-' & $id & "-incorrect",
+      #                     'id': $id,
+      #                     'name': $object.title,
+      #                     'error_type': 'Атрибут "SLA" не может быть пустым',
+      #                     'error_group_code': 'sla',
+      #                     'attr_id': 'sla',
+      #                     'attr_name': 'SLA',
+      #                     'error_text': 'Атрибут "SLA" должен быть заполнен для данной АС',
+      #                     'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+      #                 }
+      #             )
+      #         )
+      #       )})]
+      #   )
+
+      # rto: >
+      #   (
+      #       $objects := $.systems."kadzo.v2023.systems";
+      #       $ownership := ['Владеем исходным кодом', 'Владеем экземпляром'];
+      #       $location := ['Внутренняя'];
+      #       $criticality := ['Business Critical', 'Mission Critical'];
+        
+      #       [$each($objects, function($object, $id){(
+      #         $value := $object.rto;
+      #         $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+      #         $error := ($object.ownership in $ownership or $object.location in $location) and $object.criticality in $criticality ? (
+      #             $exist = false ? (
+      #                 {
+      #                     'uid': 'systems-rto-v1-' & $id & "-incorrect",
+      #                     'id': $id,
+      #                     'name': $object.title,
+      #                     'error_type': 'Атрибут "RTO" не может быть пустым',
+      #                     'error_group_code': 'rto',
+      #                     'attr_id': 'rto',
+      #                     'attr_name': 'RTO',
+      #                     'error_text': 'Атрибут "RTO" должен быть заполнен для данной АС',
+      #                     'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+      #                 }
+      #             )
+      #         )
+      #       )})]
+      #   )
+
+      # rpo: >
+      #   (
+      #       $objects := $.systems."kadzo.v2023.systems";
+      #       $ownership := ['Владеем исходным кодом', 'Владеем экземпляром'];
+      #       $location := ['Внутренняя'];
+      #       $criticality := ['Business Critical', 'Mission Critical'];
+        
+      #       [$each($objects, function($object, $id){(
+      #         $value := $object.rpo;
+      #         $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+      #         $error := ($object.ownership in $ownership or $object.location in $location) and $object.criticality in $criticality ? (
+      #             $exist = false ? (
+      #                 {
+      #                     'uid': 'systems-rpo-v1-' & $id & "-incorrect",
+      #                     'id': $id,
+      #                     'name': $object.title,
+      #                     'error_type': 'Атрибут "RPO" не может быть пустым',
+      #                     'error_group_code': 'rpo',
+      #                     'attr_id': 'rpo',
+      #                     'attr_name': 'RPO',
+      #                     'error_text': 'Атрибут "RPO" должен быть заполнен для данной АС',
+      #                     'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+      #                 }
+      #             )
+      #         )
+      #       )})]
+      #   )
+
+      # monitoring: >
+      #   (
+      #       $objects := $.systems."kadzo.v2023.systems";
+      #       $ownership := ['Владеем исходным кодом', 'Владеем экземпляром'];
+      #       $location := ['Внутренняя'];
+      #       $criticality := ['Business Critical', 'Mission Critical'];
+        
+      #       [$each($objects, function($object, $id){(
+      #         $value := $object.monitoring;
+      #         $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+      #         $error := ($object.ownership in $ownership or $object.location in $location) and $object.criticality in $criticality ? (
+      #             $exist = false ? (
+      #                 {
+      #                     'uid': 'systems-monitoring-v1-' & $id & "-incorrect",
+      #                     'id': $id,
+      #                     'name': $object.title,
+      #                     'error_type': 'Атрибут "Мониторинг" не может быть пустым',
+      #                     'error_group_code': 'monitoring',
+      #                     'attr_id': 'monitoring',
+      #                     'attr_name': 'Мониторинг',
+      #                     'error_text': 'Атрибут "Мониторинг" должен быть заполнен для данной АС',
+      #                     'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+      #                 }
+      #             )
+      #         )
+      #     )})]
+      #   )
+
+      fp_live_stage: >
+        (
+            $objects := $.systems."kadzo.v2023.systems";
+            $check := {
+                'Эскиз': ['Эскиз', 'Отменена'],
+                'В разработке / приобретение': ['Эскиз', 'Отменена', 'В разработке / приобретение'],
+                'Внедрение / Не введена в эксплуатацию': ['Эскиз', 'Отменена', 'В разработке / приобретение', 'Внедрение / Не введена в эксплуатацию'],
+                'Опытная эксплуатация': ['Эскиз', 'Отменена', 'В разработке / приобретение', 'Внедрение / Не введена в эксплуатацию', 'Опытная эксплуатация', 'Архивная'],
+                'Промышленная эксплуатация': ['Эскиз', 'Отменена', 'В разработке / приобретение', 'Внедрение / Не введена в эксплуатацию', 'Опытная эксплуатация', 'Архивная', 'Промышленная эксплуатация'],
+                'Архивная': ['Архивная', 'Отменена'],
+                'Отменена': ['Отменена']
+            };
+        
+            [$each($objects, function($object, $id){(
+              $object.parent != null and $exists($object.parent) = true and $count($object.parent) != 0 ? (
+                $parent_id := $object.parent;
+                $parent_system := $lookup($objects, $parent_id);
+                $fp_ls := $object."live-stage";
+                $as_ls := $parent_system."live-stage";
+                $values := $as_ls ? $lookup($check, $as_ls) : [];
+                $not($fp_ls in $values) and $exists($as_ls) and $exists($fp_ls) ? (
+                  {
+                    'uid': 'systems-fp-live-stage-v1-' & $id & "-incorrect",
+                    'id': $id,
+                    'name': $object.title,
+                    'error_type': 'Этап жизненного цикла ФП',
+                    'error_group_code': 'fp_live_stage',
+                    'attr_id': 'live-stage',
+                    'attr_name': 'Этап ЖЦ',
+                    'error_text': 'Исправьте значение атрибута Этап ЖЦ. Атрибуты Этап ЖЦ в ФП и родительской АС не согласованы.',
+                    'link': '/entities/kadzo.v2023.systems/card?id=' & $id
+                  }
+                )
+              )
+            )})]
+        )

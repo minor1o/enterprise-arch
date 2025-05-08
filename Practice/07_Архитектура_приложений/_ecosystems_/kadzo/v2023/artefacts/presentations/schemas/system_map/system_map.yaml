@@ -1,0 +1,76 @@
+entities:
+  kadzo.v2023.system_map:
+    data: >
+      (
+          $ctx := $.base;
+          $domain := $params.domain;
+
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $domain_systems :=$sift($.base."kadzo.v2023.systems", function($v, $k){$k ~> $matcher and $not($exists($v.parent))});
+          $domain_subsystems :=$sift($.base."kadzo.v2023.systems", function($v, $k){$k ~> $matcher and $exists($v.parent)});
+          $domain_functions :=$sift($.base."kadzo.v2023.functions", function ($v, $k){$k ~> $matcher});
+          $domain_kb_systems :=$sift($.base."kadzo.v2023.kb_systems", function ($v, $k){$k ~> $matcher});
+          $domain_tech_services :=$sift($.base."kadzo.v2023.tech_services", function ($v, $k){$k ~> $matcher});
+          $domain_groups :=$sift($.base."kadzo.v2023.groups", function ($v, $k){$k ~> $matcher});
+      
+          {
+              "systems": $each($domain_systems, function($v, $k){(
+                                           $lookup($$.schema.systems, $k) 
+                                     )}),
+              "kb_systems": [$each($domain_kb_systems, function ($v, $k){( $merge([$v, {"id" : $k}]))})],
+              "tech_services": [$each($domain_tech_services, function ($v, $k){($merge([$v, {"id" : $k}]))})]
+          }   
+      )
+
+    presentations:
+      system_map_select:
+        title: Карта систем
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен
+              type: string
+          required:
+            - domain
+        type: mkr-select
+        source: >
+          (
+              $domain := $params.domain;
+              [
+                  {
+                      "title": "Карта систем (текущая)",
+                      "src": "@entity/kadzo.v2023.system_map/system_map_as_is?domain=" & $domain
+                  },
+                  {
+                      "title": "Карта систем (целевая)",
+                      "src": "@entity/kadzo.v2023.system_map/system_map_to_be?domain=" & $domain
+                  }
+              ]
+          )
+
+      system_map_as_is:
+        type: plantuml
+        template: system_map.puml
+        origin:
+          entities: kadzo.v2023.entities
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $result := $eval(entities."kadzo.v2023.system_map".data);
+              $merge([$result, {"title": "Карта систем (текущая)"}]);
+          )
+
+      system_map_to_be:
+        type: plantuml
+        template: system_map.puml
+        origin:
+          entities: kadzo.v2023.entities
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $result := $eval(entities."kadzo.v2023.system_map".data);
+              $merge([$result, {"title": "Карта систем (целевая)"}]);
+          )

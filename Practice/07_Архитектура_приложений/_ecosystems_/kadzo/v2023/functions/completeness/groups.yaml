@@ -1,0 +1,36 @@
+kadzo:
+  groups.completeness:
+    groups_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $groups := $all."kadzo.v2023.groups".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "groups"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "groups" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_title := 1;
+          $weight_groups:=$weight_title;
+            $valid_title := [$validators[($.attr_id="title")].id];
+            $test_title:=$groups.(($keys() in $valid_title)? 0 : $weight_title);
+      
+          $total := $test_title;
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_groups;
+          $sum_except := $sum_except / $count($groups);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($groups));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )
+      
+      

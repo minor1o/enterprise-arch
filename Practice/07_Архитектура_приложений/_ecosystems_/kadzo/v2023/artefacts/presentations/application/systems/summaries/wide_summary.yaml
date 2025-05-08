@@ -1,0 +1,38 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      wide_summary:
+        title: Описание системы
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        widgets:
+          summary:
+            title: Сводка по системе
+            entity: kadzo.v2023.systems
+            presentation: summary
+            align: "<"
+            order: 10
+            style:
+              margin: 4px
+              border: true
+          system_functions:
+            title: Функции системы
+            entity: kadzo.v2023.functions
+            presentation: system_functions
+            align: ">"
+            order: 10
+            style:
+              margin: 4px
+              border: true
+        type: mkr-grid
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+            $lookup( $lookup($, "__widgets__.kadzo.v2023.systems.wide_summary"), $params.id);
+          )

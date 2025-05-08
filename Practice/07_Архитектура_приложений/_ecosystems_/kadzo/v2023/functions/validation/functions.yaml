@@ -1,0 +1,198 @@
+kadzo:
+    functions.validation:
+      base_attributes: >
+        (
+            $objects := $.functions."kadzo.v2023.functions";
+            $obj_full := $.schema;
+            $check_list := ['title', 'description'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+        
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "functions-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+    
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $nullcheck := $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id &' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                        }
+                    );
+                $enumcheck := $attr.enum ? (
+                    $not($value in $attr.enum) and $exist = true ? (
+                        {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                              'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                        }
+                    )
+                );
+                $append($nullcheck, $enumcheck)
+              )})
+            );
+        )
+
+      target_attributes: >
+        (
+            $objects := $.functions."kadzo.v2023.functions";
+            $obj_full := $.schema;
+            $check_list := ['target'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+                
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "functions-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+    
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $nullcheck := $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Атрибуты "Целевое размещение функциональности"',
+                              'error_group_code': 'target',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id &' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                        }
+                    );
+                $enumcheck := $attr.enum ? (
+                    $not($value in $attr.enum) and $exist = true ? (
+                        {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Атрибуты "Целевое размещение функциональности"',
+                              'error_group_code': 'target',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                              'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                        }
+                    )
+                );
+                $append($nullcheck, $enumcheck)
+              )})
+            );
+        )
+
+      systems_attributes: >
+        (
+            $objects := $.functions."kadzo.v2023.functions";
+            $csystems := $.systems."kadzo.v2023.systems";
+            $obj_full := $.schema;
+            $check_list := ['systems'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+        
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "functions-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+    
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $nullcheck := $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Атрибут "Системы, в которых реализована (планируется к реализации)"',
+                              'error_group_code': 'systems',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id &' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                        }
+                    );
+                $linkcheck := $attr.**.'$ref' ? (
+                     $exist = true ? $value.(
+                          $rid := $;
+                          $not($exists($lookup($csystems, $rid))) ? (
+                              {
+                                  'uid': $uidpref & $id & "-notinlist",
+                                  'id': $id,
+                                  'name': $object.title,
+                                  'error_type': 'Атрибут "Системы, в которых реализована (планируется к реализации)',
+                                  'error_group_code': 'systems',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов систем "kadzo.v2023.systems"',
+                                  'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                              }
+                          )
+                    )
+                );
+                $append($nullcheck, $linkcheck)
+              )})
+            );
+        )
+
+      status_attributes: >
+        (
+            $objects := $.functions."kadzo.v2023.functions";
+            $obj_full := $.schema;
+            $check_list := ['status'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+                
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "functions-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+    
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                
+                $nullcheck := $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Атрибут "Статус"',
+                              'error_group_code': 'status',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id &' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                        }
+                    );
+                $enumcheck := $attr.enum ? (
+                    $not($value in $attr.enum) and $exist = true ? (
+                        {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Атрибут "Статус"',
+                              'error_group_code': 'status',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                              'link': '/entities/kadzo.v2023.functions/card?id=' & $id
+                        }
+                    )
+                );
+                $append($nullcheck, $enumcheck)
+              )})
+            );
+        )

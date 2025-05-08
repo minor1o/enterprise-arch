@@ -1,0 +1,382 @@
+kadzo:
+  tech_params.validation:
+    base_attributes: >
+      (
+          $objects := $.tech_params."kadzo.v2023.tech_params";
+          $schema := $.schema;
+          $check_list := ['type', 'software', 'scalability'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+            
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $uidpref := "tech_params-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                      }
+                  );
+              $enumcheck := $attr.enum ? (
+                  $not($value in $attr.enum) and $exist = true ? (
+                      {
+                            'uid': $uidpref & $id & "-notinlist",
+                            'id': $id,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                            'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                      }
+                  )
+              );
+              $append($nullcheck, $enumcheck)
+            )})
+          );
+      )
+
+    ha_attributes: >
+      (
+          $objects := $.tech_params."kadzo.v2023.tech_params";
+          $schema := $.schema;
+          $subschema := $lookup($schema.**.properties, "high_availability");
+      
+          $check_list := ['type', 'capacity_reservation_type', 'capacity_management'];
+          $check_list := $check_list.{ $ : $lookup($subschema.**.properties, $) };
+      
+          $basechecks := $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "tech_params-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value_block := $lookup($object, "high_availability");
+              $value := $type($value_block) = "object" ? $lookup($value_block, $attr_id) : null;
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'error_type': 'Параметры HA',
+                            'error_group_code': 'ha',
+                            'attr_id': 'high_availability.' & $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут high_availability.' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                      }
+                  );
+              $enumcheck := $attr.enum ? (
+                  $not($value in $attr.enum) and $exist = true ? (
+                      {
+                            'uid': $uidpref & $id & "-notinlist",
+                            'id': $id,
+                            'error_type': 'Параметры HA',
+                            'error_group_code': 'ha',
+                            'attr_id': 'high_availability.' & $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                            'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                      }
+                  )
+              );
+              $append($nullcheck, $enumcheck)
+            )})
+          );
+      )
+
+    ha_consistency: >
+      (
+        $objects := $.tech_params."kadzo.v2023.tech_params";
+        $reference := {
+            'Да': {
+                'capacity_reservation_type': ['StandBy', 'Active'],
+                'capacity_management': ['Частичное', 'Полное']
+            },
+            'Нет': {
+                'capacity_reservation_type': ['Отсутствует'],
+                'capacity_management': ['Отсутствует']
+            }
+        };
+      
+        $each($objects, function($object, $id){(
+          $values_consistency := (
+              $hatype := $object.high_availability.type;
+              $enums := $type($hatype) = 'string' ? $lookup( $reference, $hatype ) : [];
+              $rt := $not($object.high_availability.capacity_reservation_type in $enums.capacity_reservation_type) ? (
+                  {
+                        'uid': "tech_params-ha_reservation_type-v1-" & $id & "-invalid",
+                        'id': $id,
+                        'error_type': 'Параметры HA - "Тип резервирования мощностей в пределах одной зоны доступности" к статусу резервации',
+                        'error_group_code': 'hac',
+                        'attr_id': 'capacity_reservation_type',
+                        'attr_name': 'Тип резервирования мощностей в пределах одной зоны доступности',
+                        'error_text': 'Для статуса резервации "' & $hatype &'" значение атрибута "Тип резервирования мощностей в пределах одной зоны доступности" должно быть одним из списка: ' & $enums.capacity_reservation_type,
+                        'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                  }
+              );
+              $cm := $not($object.high_availability.capacity_management in $enums.capacity_management) ? (
+                  {
+                        'uid': "tech_params-ha_capacity_management-v1-" & $id & "-invalid",
+                        'id': $id,
+                        'error_type': 'Параметры HA - "Полнота резервирования мощностей и данных в пределах одной зоны доступности" к статусу резервации',
+                        'error_group_code': 'hac',
+                        'attr_id': 'capacity_management',
+                        'attr_name': 'Полнота резервирования мощностей и данных в пределах одной зоны доступности',
+                        'error_text': 'Для статуса резервации "' & $hatype &'" значение атрибута "Тип резервирования мощностей в пределах одной зоны доступности" должно быть одним из списка: ' & $enums.capacity_management,
+                        'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                  }
+              );
+              $append($rt, $cm)
+          );
+        )})
+      )
+
+    dr_attributes: >
+      (
+          $objects := $.tech_params."kadzo.v2023.tech_params";
+          $schema := $.schema;
+          $subschema := $lookup($schema.**.properties, "disaster_recovery");
+
+          $check_list := ['type', 'capacity_reservation_type', 'capacity_management'];
+          $check_list := $check_list.{ $ : $lookup($subschema.**.properties, $) };
+      
+          $check_list.(
+                $attr_id := $.$keys();
+                $attr := $.*;
+                $uidpref := "tech_params-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+      
+                $each($objects, function($object, $id){(
+                  $value_block := $lookup($object, "disaster_recovery");
+                  $value := $type($value_block) = "object" ? $lookup($value_block, $attr_id) : null;
+                  $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                  
+                  $nullcheck := $exist = false ? (
+                          {
+                                'uid': $uidpref & $id & "-notexist",
+                                'id': $id,
+                                'error_type': 'Параметры DR',
+                                'error_group_code': 'dr',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Атрибут disaster_recovery.' & $attr_id & ' не может быть пустым',
+                                'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                          }
+                      );
+                  $enumcheck := $attr.enum ? (
+                      $not($value in $attr.enum) and $exist = true ? (
+                          {
+                                'uid': $uidpref & $id & "-notinlist",
+                                'id': $id,
+                                'error_type': 'Параметры DR',
+                                'error_group_code': 'dr',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                                'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                          }
+                      )
+                  );
+                  $append($nullcheck, $enumcheck)
+                )})
+          );
+      )
+
+    dr_consistency: >
+      (
+        $objects := $.tech_params."kadzo.v2023.tech_params";
+        $reference := {
+            'Да': {
+                'capacity_reservation_type': ['StandBy', 'Active'],
+                'capacity_management': ['Частичное', 'Полное']
+            },
+            'Нет': {
+                'capacity_reservation_type': ['Отсутствует'],
+                'capacity_management': ['Отсутствует']
+            }
+        };
+      
+        $each($objects, function($object, $id){(
+          $values_consistency := (
+              $hatype := $object.disaster_recovery.type;
+              $enums := $type($hatype) = 'string' ? $lookup( $reference, $hatype ) : [];
+      
+              $rt := $not($object.disaster_recovery.capacity_reservation_type in $enums.capacity_reservation_type) ? (
+                  {
+                        'uid': "tech_params-dr_reservation_type-v1-" & $id & "-invalid",
+                        'id': $id,
+                        'error_type': 'Параметры HA - "Тип резервирования мощностей в резервных зонах доступности" к статусу катастрофоустойчивости',
+                        'error_group_code': 'drc',
+                        'attr_id': 'capacity_reservation_type',
+                        'attr_name': 'Тип резервирования мощностей в резервных зонах доступности',
+                        'error_text': 'Для статуса катастрофоустойчивости "' & $hatype &'" значение атрибута "Тип резервирования мощностей в резервных зонах доступности" должно быть одним из списка: ' & $enums.*.capacity_reservation_type,
+                        'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                  }
+              );
+              $cm := $not($object.disaster_recovery.capacity_management in $enums.capacity_management) ? (
+                  {
+                        'uid': "tech_params-dr_capacity_management-v1-" & $id & "-invalid",
+                        'id': $id,
+                        'error_type': 'Параметры HA - "Полнота резервирования мощностей и данных в резервных зонах доступности" к статусу резервации',
+                        'error_group_code': 'drc',
+                        'attr_id': 'capacity_management',
+                        'attr_name': 'Полнота резервирования мощностей и данных в резервных зонах доступности',
+                        'error_text': 'Для статуса катастрофоустойчивости "' & $hatype &'" значение атрибута "Полнота резервирования мощностей и данных в резервных зонах доступности" должно быть одним из списка: ' & $enums.*.capacity_management,
+                        'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                  }
+              );
+              $append($rt, $cm)
+          );
+        )})
+      )
+
+    system_attributes: >
+      (
+          $objects := $.tech_params."kadzo.v2023.tech_params";
+          $csystems := $.systems."kadzo.v2023.systems";
+          $schema := $.schema;
+          $check_list := ['system'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "tech_params-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'error_type': 'Атрибут "Система"',
+                            'error_group_code': 'system',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                      }
+                  );
+              $linkcheck := $attr.**.'$ref' ? (
+                   $exist = true ? $value.(
+                        $rid := $;
+                        $not($exists($lookup($csystems, $rid))) ? (
+                            {
+                                'uid': $uidpref & $id & "-notinlist",
+                                'id': $id,
+                                'error_type': 'Атрибут "Система"',
+                                'error_group_code': 'system',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов систем "kadzo.v2023.systems"',
+                                'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                            }
+                        )
+                  )
+              );
+              $append($nullcheck, $linkcheck)
+            )})
+          );
+      )
+
+    monitoring_attributes: >
+      (
+          $objects := $.tech_params."kadzo.v2023.tech_params";
+          $schema := $.schema;
+          $check_list := ['monitoring'];      
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $uidpref := "tech_params-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'error_type': 'Атрибут "Мониторинг"',
+                            'error_group_code': 'monitoring',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                      }
+                  );
+            )})
+          );
+      )
+
+    backup_attributes: >
+      (
+        $objects := $.tech_params."kadzo.v2023.tech_params";
+        $reference := {
+              'Отсутствует': ['Отсутствует'],
+              'ЦОД': ['ЦОД', 'Резервный ЦОД', 'Offsite'],
+              'Резервный ЦОД': ['ЦОД', 'Резервный ЦОД', 'Offsite'],
+              'Offsite': ['ЦОД', 'Резервный ЦОД', 'Offsite']
+          };
+      
+        $each($objects, function($object, $id){(
+          $values_consistency := (
+              $bptype := $object.backup.placement;
+              $enums := $type($bptype) = 'string' ? $lookup($reference, $bptype) : [];
+              $res := $exists($bptype) ? ( $not($object.backup.backup_placement in $enums) ? (
+                  {
+                        'uid': "tech_params-backup_attributes-v1-" & $id & "-invalid",
+                        'id': $id,
+                        'error_type': 'Параметры резервного копирования',
+                        'error_group_code': 'backup',
+                        'attr_id': 'backup_placement',
+                        'attr_name': 'Резервное копирование дубликата (место хранения дубликата данных/резервной копии)',
+                        'error_text': 'Если значение "Резервное копирование (место хранение бекапа)" = ' & $bptype &', то значение атрибута "Резервное копирование дубликата (место хранения дубликата данных/резервной копии)" должно быть одним из списка: ' & $enums,
+                        'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                  }
+              ));
+          );
+        )})
+      )
+
+    crreq: >
+      (
+        $objects := $.tech_params."kadzo.v2023.tech_params";
+        $csystems := $.systems."kadzo.v2023.systems";
+      
+        $each($objects, function($object, $id){(
+          $systems := $lookup($csystems, $object.system);
+          $systems.criticality in ['Business Critical','Mission Critical'] ? (
+            $ha := $object.high_availability.type = 'Да' ? true : false;
+            $dr := $object.disaster_recovery.type = 'Да' ? true : false;
+            $ha_cm := $object.high_availability.capacity_management = 'Полное' ? true : false;
+            $ha_rt := $object.high_availability.capacity_reservation_type in ['Active', 'StandBy'] ? true : false;
+            $dr_cm := $object.disaster_recovery.capacity_management = 'Полное' ? true : false;
+            $dr_rt := $object.disaster_recovery.capacity_reservation_type in ['Active', 'StandBy'] ? true : false;
+            $not($ha = true and $dr = true and $ha_cm = true and $ha_rt = true and $dr_cm = true and $dr_rt = true) ? (
+                {
+                    'uid': "tech_params-criticality_correlation-v1-" & $id & "-invalid",
+                    'id': $id,
+                    'error_type': 'Выполнение требований для уровня критичности системы',
+                    'error_group_code': 'crreq',
+                    'attr_id': '"high_availability", "disaster_recovery"',
+                    'attr_name': 'Параметры отказоустойчивости и Параметры катастрофоустойчивости',
+                    'error_text': 'Параметры отказоустойчивости и катастрофоустойчивости не соответсвуют требовниям к MC и BC системам',
+                    'link': '/entities/kadzo.v2023.tech_params/card?id=' & $id
+                }
+            )
+          );
+        )})
+      )

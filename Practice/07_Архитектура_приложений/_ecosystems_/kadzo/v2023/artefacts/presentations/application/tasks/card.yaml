@@ -1,0 +1,29 @@
+entities:
+  kadzo.v2023.tasks:
+    presentations:
+      card:
+        title: Карточка задачи
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор задачи
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Описание задачи
+            entity: kadzo.v2023.tasks
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+            $lookup( $lookup($, "__widgets__.kadzo.v2023.tasks.card"), $params.id);
+          )

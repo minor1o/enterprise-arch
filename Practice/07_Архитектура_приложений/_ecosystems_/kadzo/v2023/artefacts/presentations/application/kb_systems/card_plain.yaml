@@ -1,0 +1,20 @@
+entities:
+  kadzo.v2023.kb_systems:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/kb_systems.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.kb_systems".$spread()[$keys()[0] =$params.id].{
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.kb_systems/card?id=" & $keys()[0],
+                "title": *.title,
+                "description": *.description,
+                "class": *.class,
+                "location": *.location,
+                "status": *.status
+            };          
+          )

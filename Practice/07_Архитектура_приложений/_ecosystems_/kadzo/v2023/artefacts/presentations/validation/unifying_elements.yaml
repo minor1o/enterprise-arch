@@ -1,0 +1,32 @@
+entities:
+  kadzo.v2023.MUE:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/unifying_elements_errors.md
+        origin: kadzo.v2023.validators.unified_elements
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="unifying_elements"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+      validation.MUE:
+        type: table
+        headers:
+          - value: id
+            text: №
+          - value: name
+            text: Имя ОЭ
+          - value: description
+            text: Описание ОЭ
+        origin: kadzo.v2023.validators.unified_elements
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="unifying_elements"];
+          )

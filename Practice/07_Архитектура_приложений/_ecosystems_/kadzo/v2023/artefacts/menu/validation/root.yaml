@@ -1,0 +1,22 @@
+imports:
+#  - systems.yaml
+#  - functions.yaml
+#  - kb_systems.yaml
+#  - groups.yaml
+#  - business_objects.yaml
+#  - data_objects.yaml
+#  - integrations.yaml
+#  - tech_params.yaml
+#  - tech_services.yaml
+#  - processes.yaml
+#  - products.yaml
+#  - channels.yaml
+#  - clients.yaml
+#  - unifying_elements.yaml
+#  - domain.yaml
+#  - goals.yaml
+#  - strategy.yaml
+#  - criticality_passport.yaml
+  - completeness.yaml
+  - alldataset_view.yaml
+#  - tasks.yaml

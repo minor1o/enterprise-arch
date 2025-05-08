@@ -1,0 +1,36 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      business_landscape:
+        title: Встраивание в бизнес-ландшафт
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        widgets:
+          system_channels:
+            title: Каналы взаимодействия с системой
+            entity: kadzo.v2023.channels
+            presentation: system_channels
+            order: 10
+            style:
+              margin: 4px
+              border: true
+          processes_by_system:
+            title: Бизнес-процессы, обеспечиваемые системой
+            entity: kadzo.v2023.processes
+            presentation: processes_by_system
+            order: 20
+            style:
+              margin: 4px
+              border: true
+        type: mkr-grid
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+              $lookup( $lookup($, "__widgets__.kadzo.v2023.systems.business_landscape"), $params.system_id);
+          )

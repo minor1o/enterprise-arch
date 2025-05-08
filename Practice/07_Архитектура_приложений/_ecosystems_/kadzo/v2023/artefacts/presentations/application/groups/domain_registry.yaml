@@ -1,0 +1,39 @@
+entities:
+  kadzo.v2023.groups:
+    presentations:
+      domain_registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название
+            link: link
+          - value: parent
+            text: Родительская группа
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.groups
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              ["kadzo.v2023.groups".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.groups/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "parent": ( *.parent ? $map(*.parent, function($v){$lookup($$."kadzo.v2023.groups", $v).title}) : ""),
+                  "comments": *.comments
+              }]
+          )

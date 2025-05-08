@@ -1,0 +1,8 @@
+imports:
+  - entities/root.yaml
+  - artefacts/root.yaml
+  - datasets/root.yaml
+  - functions/root.yaml
+  - rules/root.yaml
+  - tools/root.yaml
+  - config/root.yaml

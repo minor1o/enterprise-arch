@@ -1,0 +1,10 @@
+kadzo.v2023.processes:
+  ecogroup.bike_rent.processes.bike_rent:
+    title: Аренда байка клиентом
+    description: "Клиент арендует байк, выполняя следующие шаги: выбирает байк из каталога, резервирует байк, согласовывает сделку, оплачивает и забирает байк"
+    products:
+      - ecogroup.bike_rent.products.uid1
+    systems:
+      - ecogroup.bike_rent.external_systems.telegram
+    integrations:
+      - ecogroup.bike_rent.integrations.telegram-backend

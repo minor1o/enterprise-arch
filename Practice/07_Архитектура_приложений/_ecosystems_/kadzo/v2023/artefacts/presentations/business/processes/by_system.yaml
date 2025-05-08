@@ -1,0 +1,34 @@
+entities:
+  kadzo.v2023.processes:
+    presentations:
+      processes_by_system:
+        type: table
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        headers:
+          - value: title
+            text: Название
+            link: link_process
+          - value: description
+            text: Описание
+        origin: kadzo.v2023.processes
+        source: >
+          (
+              $system := $params.id;
+              [ $sift($."kadzo.v2023.processes", function($v, $k){ $system in $v.systems })
+                  ~> $each(?, function ($v, $k) {(
+                    {
+                        "id": $k,
+                        "title": $v.title,
+                        "link_process": "/entities/kadzo.v2023.processes/card?id=" & $k,
+                        "description": $v.description
+                    }
+                  )})
+              ]
+          )

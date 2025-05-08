@@ -1,0 +1,83 @@
+entities:
+  kadzo.v2023.tech_params:
+    presentations:
+      registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: system
+            text: Система
+            align: left
+            link: system_link
+          - value: type
+            text: Тип компонента
+          - value: software
+            text: Прикладное ПО
+          - value: vendor
+            text: Вендор
+          - value: scalability
+            text: Масштабируемость
+          - value: high_availibility
+            text: Отказоустойчивость
+          - value: ha_reservation_type
+            text: Тип резервирования мощностей в пределах одной зоны доступности
+          - value: ha_capacity_management
+            text: Полнота резервирования мощностей в пределах одной зоны доступности
+          - value: disaster_recovery
+            text: Катастрофоустойчивость
+          - value: dr_reservation_type
+            text: Тип резервирования мощностей в резервной зоне доступности
+          - value: dr_reservation_management
+            text: Полнота резервирования мощностей в резервной зоне доступности
+          - value: backup_placement
+            text: Место хранения бекапа
+          - value: backup_backup_placement
+            text: Место хранения дубликата бекапа
+          - value: monitoring
+            text: Мониторинг
+          - value: sec_zone
+            text: Зона безопасности
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: 
+          tech_params: kadzo.v2023.tech_params
+          systems: kadzo.v2023.systems.united
+
+        source: >
+          (
+              $systems := systems;
+              $tech_params := tech_params;
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              [$tech_params."kadzo.v2023.tech_params".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.tech_params/card?id=" & $keys()[0],
+                  "system": (*.system ? ($title := $lookup($$.$systems."kadzo.v2023.systems", *.system).title; $title ? $title : "АС не найдена: " & *.system) : ""),
+                  "system_link": "/entities/kadzo.v2023.systems/card?id=" & *.system,
+                  "type": *.type,
+                  "software": *.software,
+                  "vendor": *.vendor,
+                  "scalability": *.scalability,
+                  "high_availibility": *.high_availability.type,
+                  "ha_reservation_type": *.high_availability.capacity_reservation_type,
+                  "ha_capacity_management": *.high_availability.capacity_management,
+                  "disaster_recovery": *.disaster_recovery.type,
+                  "dr_reservation_type": *.disaster_recovery.capacity_reservation_type,
+                  "dr_reservation_management": *.disaster_recovery.capacity_management,
+                  "backup_placement": *.backup.placement,
+                  "backup_backup_placement": *.backup.backup_placement,
+                  "monitoring": *.monitoring,
+                  "sec_zone": *.sec_zone,
+                  "comments": *.comments
+              }]
+          )

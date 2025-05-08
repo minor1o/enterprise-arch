@@ -1,0 +1,74 @@
+entities:
+  kadzo.v2023.channels:
+    presentations:
+      registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: type
+            text: Тип канала
+            align: left
+          - value: location
+            text: Размещение/владение
+            align: left
+          - value: status
+            text: Статус
+            align: left
+          - value: products
+            text: Продукты, поставляемые в канале
+            align: left
+          - value: clients
+            text: Клиенты
+            align: left
+          - value: systems
+            text: Связи с АС
+            align: left
+          - value: security
+            text: Способы защиты канала
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+            align: left
+
+        origin: 
+          channels: kadzo.v2023.channels
+          prods: kadzo.v2023.products
+          clients: kadzo.v2023.clients
+          systems: kadzo.v2023.systems
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              [$$.channels."kadzo.v2023.channels".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.channels/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "type": *.type,
+                  "location": *.location,
+                  "status": *.status,
+                  "products": (*.products ? $map(*.products, function($v){$lookup($$.prods."kadzo.v2023.products", $v).title}) : ""),
+                  /*"products": *.products*/
+                  "clients": $map(*.clients, function($v){$lookup($$.clients."kadzo.v2023.clients", $v).title}),
+                  "systems": $map(*.systems, function($v){$lookup($$.systems."kadzo.v2023.systems", $v).title}),
+                  "security": *.security,
+                  "comments": *.comments
+              }]
+          )

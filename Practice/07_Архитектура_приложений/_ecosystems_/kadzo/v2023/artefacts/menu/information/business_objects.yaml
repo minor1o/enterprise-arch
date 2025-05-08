@@ -1,0 +1,14 @@
+entities:
+  menu.kadzo.v2023.business_objects:
+    menu: >
+      (
+          $not($exists(sber.kadzo.enterprise_mode)) and (sber.kadzo.menu.architecture.enabled = true or $not($exists(sber.kadzo.menu.architecture.enabled))) ? (
+              $menu_root := ($exists(sber.kadzo.menu.architecture.roots) and $count(sber.kadzo.menu.architecture.roots) > 0 and $not(sber.kadzo.menu.architecture.roots = null))  ? sber.kadzo.menu.architecture.roots :
+                              $exists(sber.kadzo.menu_root) ? sber.kadzo.menu_root : "Документы/Архитектура/КА ДЗО/2023";
+              $domain := sber.domain;
+              [$menu_root.({
+                  "location": $ & "/Данные архитектуры/Информационная архитектура/Бизнес-объекты",
+                  "link": "/entities/kadzo.v2023.business_objects/registry?domain=" & $domain
+              })]
+          )
+      )

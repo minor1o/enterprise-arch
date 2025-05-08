@@ -1,0 +1,18 @@
+entities:
+  kadzo.v2023.tasks:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/tasks.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.tasks".$spread()[$keys()[0] =$params.id].{
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.tasks/card?id=" & $keys()[0],
+                "task": *.task,
+                "planned": *.planned,
+                "status": *.status
+            };          
+          )

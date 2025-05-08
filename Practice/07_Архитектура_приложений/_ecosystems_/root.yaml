@@ -1,0 +1,11 @@
+$package:
+  kadzo:
+    name: kadzo
+    vendor: Sber
+    description: Шаблон описания корпоративной архитектуры компании
+    version: 4.1.0
+    dependencies:
+
+imports:
+  - kadzo/root.yaml
+  - extentions/root.yaml

@@ -1,0 +1,33 @@
+entities:
+  kadzo.v2023.endpoints:
+    presentations:
+      card:
+        widgets:
+          summary:
+            title: Сводная информация
+            entity: kadzo.v2023.endpoints
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+
+          summary_tech:
+            title: Технологическая информация
+            entity: kadzo.v2023.endpoints
+            presentation: summary_tech
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+
+          integrations_usage:
+            title: Использование в интеграционных потоках
+            entity: kadzo.v2023.integrations
+            presentation: by_endpoint
+            order: 20
+            style:
+              margin: 4px
+              border: true

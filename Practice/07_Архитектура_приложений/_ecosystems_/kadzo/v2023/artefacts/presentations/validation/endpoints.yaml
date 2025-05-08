@@ -1,0 +1,81 @@
+entities:
+  kadzo.v2023.endpoints:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/endpoints_errors.md
+        origin: kadzo.v2023.validators.endpoints
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="endpoints"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "owners" : $errors."owners",
+                  "gates" : $errors."gates",
+                  "iserrors" : $boolean($errors)
+              }
+          
+          )
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id точки взаимодействия
+            link: link
+          - value: name
+            text: Название точки взаимодействия
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.endpoints
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="endpoints" and error_group_code="general"] ];
+          )
+      validation.owners_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id точки взаимодействия
+            link: link
+          - value: name
+            text: Название точки взаимодействия
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.endpoints
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="endpoints" and error_group_code="owners"] ];
+          )
+      validation.gates_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id точки взаимодействия
+            link: link
+          - value: name
+            text: Название точки взаимодействия
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.endpoints
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="endpoints" and error_group_code="gates"] ];
+          )

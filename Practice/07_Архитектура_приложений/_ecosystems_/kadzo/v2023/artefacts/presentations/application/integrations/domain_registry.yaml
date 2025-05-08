@@ -1,0 +1,101 @@
+entities:
+  kadzo.v2023.integrations:
+    presentations:
+      domain_registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: code
+            text: Код на схеме
+          - value: description
+            text: Описание
+            align: left
+          - value: source
+            text: Источник данных (поставщик)
+            align: left
+            link: source_link
+          - value: consumer
+            text: Потребитель данных
+            align: left
+            link: consumer_link
+          - value: endpoint
+            text: Точка взаимодействия
+            align: left
+            link: endpoint_link
+          - value: data-objects
+            text: Объекты данных
+            align: left
+          - value: technologies
+            text: Технологии
+            align: left
+          - value: technical-use
+            text: Механизм использования
+            align: left
+          - value: async
+            text: Асинхронный информационный поток
+            align: left
+          - value: status
+            text: Статус информационных потоков
+            align: left
+          - value: protected
+            text: Средства защиты потока
+            align: left
+          - value: load_average
+            text: Нагрузочные характеристики потока (среднее)
+            align: left
+          - value: load_max
+            text: Нагрузочные характеристики потока (пик)
+            align: left
+          - value: changes
+            text: Описание изменений
+            align: left
+          - value: agreement
+            text: Основание для обмена данными (договор)
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: 
+          v2023 : kadzo.v2023
+          integrations: kadzo.v2023.integrations
+          systems: kadzo.v2023.systems.united
+          data_objects: kadzo.v2023.data_objects
+
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              [$$.integrations."kadzo.v2023.integrations".$spread()[$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.integrations/card?id=" & $keys()[0],
+                  "code": *.code,
+                  "description": *.description,
+                  "source": (*.source ? ($title := $lookup($$.systems."kadzo.v2023.systems", *.source).title; $title ? $title : "АС не найдена: " & *.source) : ""),
+                  "source_link": "/entities/kadzo.v2023.systems/card?id=" & *.source,
+                  "consumer": (*.consumer ? ($title := $lookup($$.systems."kadzo.v2023.systems", *.consumer).title; $title ? $title : "АС не найдена: " & *.consumer) : ""),
+                  "consumer_link": "/entities/kadzo.v2023.systems/card?id=" & *.consumer,
+                  "endpoint": (*.endpoint ? ($title := $lookup($$.v2023."kadzo.v2023.endpoints", *.endpoint).title; $title ? $title : *.endpoint) : ""),
+                  "endpoint_link": "/entities/kadzo.v2023.endpoints/card?id=" & *.endpoint,
+                  "data-objects": ( *."data-objects" ? ($title := $map(*."data-objects", function($v){$lookup($$.data_objects."kadzo.v2023.data_objects", $v).title}); $title ? $title : "Объекты данных не найдены: " & *."data-objects") : ""),
+                  "technologies": *.technologies,
+                  "technical-use": *."technical-use",
+                  "async": *.async,
+                  "status": *.status,
+                  "protected": *.protected,
+                  "load_average": *.load.average,
+                  "load_max": *.load.maximum, 
+                  "changes": *.changes,
+                  "agreement": *.agreement,
+                  "comments": *.comments
+              }]
+          )

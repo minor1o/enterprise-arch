@@ -1,0 +1,44 @@
+entities:
+  kadzo.v2023.products:
+    presentations:
+      registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название продукта
+            align: left
+            link: link
+          - value: description
+            text: Описание продукта
+            align: left
+          - value: status
+            text: Статус
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.products
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              ["kadzo.v2023.products".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.products/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "status": *.status,
+                  "comments": *.comments
+              }]
+          )

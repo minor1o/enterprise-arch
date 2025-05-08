@@ -1,0 +1,22 @@
+imports:
+  - domain_registry.yaml
+#  - card_plain.yaml
+  - card.yaml
+  - summaries/summary_performance.yaml
+  - summaries/summary_ownership.yaml
+  - summaries/summary_livestage.yaml
+  - summaries/summary.yaml
+  - summaries/wide_summary.yaml
+  - by_functions.yaml
+  - by_group.yaml
+#  - by_process.yaml
+#  - by_channels.yaml
+  - contexts.yaml
+  - integrations.yaml
+  - landscapes/in_landscapes.yaml
+  - landscapes/tech_landscape.yaml
+  - landscapes/business_landscape.yaml
+  - landscapes/app_landscape.yaml
+  - as.yaml
+  - fp.yaml
+  - external_as.yaml

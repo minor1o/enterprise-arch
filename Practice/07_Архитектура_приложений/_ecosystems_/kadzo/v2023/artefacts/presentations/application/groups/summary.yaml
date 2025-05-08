@@ -1,0 +1,36 @@
+entities:
+  kadzo.v2023.groups:
+    presentations:
+      summary:
+        title: Сводка по группе
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор группы
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+              $group_id := $params.id;
+              $ctx:= base;
+              $append(
+                [
+                  {
+                      "title": "Идентификатор",
+                      "data": [{"content": $group_id}]
+                  }
+                ],
+                $props_to_summary($group_id,
+                                  $ctx."kadzo.v2023.groups",
+                                  schema."kadzo.v2023.groups".schema.patternProperties.*.properties,
+                                  $ctx, refs)
+              );
+          )

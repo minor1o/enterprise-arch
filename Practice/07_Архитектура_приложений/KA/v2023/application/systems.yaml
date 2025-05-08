@@ -1,0 +1,85 @@
+kadzo.v2023.systems:
+  ecogroup.bike_rent.systems.bike_rent_back:
+    title: Бэкенд Маркетплейса аренды байков
+    description: Система на монолитной архитектуре, реализующая прикладную функциональность маркетплейса
+    class: Продуктовая фабрика (основная деятельность)
+    group: ecogroup.bike_rent.groups.system
+    location: Внутренняя
+    ownership: Владеем исходным кодом
+    target-status: Целевая
+    live-stage: Промышленная эксплуатация
+    live-stage-target: Промышленная эксплуатация
+    change-type: Модифицируется
+    changes: Перевод нашей системы на микросервисную архитектуру с горизонтальным масштабированием и геораспределением
+    criticality: Business Critical
+    performance: Обработка не менее 15 запросов в секунду со средним временем отклика 1 секунда и максимальным временем отклика 15 секунд
+    sla: 95
+
+  ecogroup.bike_rent.systems.new_system:
+    title: Очень нужная новая система
+    description: Демонстируем, как выглядит новая система на диаграмме
+    class: Продуктовая фабрика (основная деятельность)
+    group: ecogroup.bike_rent.groups.system
+    location: Внутренняя
+    ownership: Владеем исходным кодом
+    target-status: Целевая
+    live-stage: В разработке / приобретение
+    live-stage-target: Промышленная эксплуатация
+    change-type: Разрабатывается
+    criticality: Business Critical
+
+  ecogroup.bike_rent.systems.bike_rent_back.telegram_adapter:
+    title: Адаптер для работы с Telegram
+    description: Адаптер для работы с Telegram API
+    class: Продуктовая фабрика (основная деятельность)
+    group: ecogroup.bike_rent.groups.system
+    parent: ecogroup.bike_rent.systems.bike_rent_back
+    location: Внутренняя
+    ownership: Владеем исходным кодом
+    target-status: Целевая
+    live-stage: Промышленная эксплуатация
+    live-stage-target: Промышленная эксплуатация
+    change-type: Модифицируется
+    criticality: Business Critical
+    performance: Обработка не менее 15 запросов в секунду со средним временем отклика 1 секунда и максимальным временем отклика 15 секунд
+    sla: 95
+
+  ecogroup.bike_rent.external_systems.telegram:
+    title: Telegram
+    description: Telegram
+    class: Мессенджеры
+    location: Внешняя
+    live-stage-target: Промышленная эксплуатация
+    target-status: Целевая
+    ownership: Система партнера
+    live-stage: Промышленная эксплуатация
+    change-type: Используется
+    group: ecogroup.bike_rent.groups.external_partners
+    criticality: Mission Critical
+
+  ecogroup.bike_rent.external_systems.cloud_accounting:
+    title: Облачный сервис бухгалтерии
+    description: Облачный сервис для ведения бухгалтерского учета и сдачи отчетности 
+    class: Бухгалтерия и финансы
+    location: Внешняя
+    live-stage-target: Промышленная эксплуатация
+    target-status: Целевая
+    ownership: Система партнера
+    live-stage: Промышленная эксплуатация
+    change-type: Используется
+    group: ecogroup.bike_rent.groups.external_partners
+    criticality: Office Productivity
+
+  ecogroup.bike_rent.external_systems.CRM:
+    title: Cloud CRM 
+    description: Cloud CRM  
+    class: CRM-операционный
+    location: Внешняя
+    live-stage-target: Промышленная эксплуатация
+    target-status: Целевая
+    ownership: Система партнера
+    live-stage: Промышленная эксплуатация
+    change-type: Используется
+    group: ecogroup.bike_rent.groups.external_partners
+    criticality: Office Productivity
+

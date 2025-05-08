@@ -1,0 +1,149 @@
+kadzo:
+  helpers.functions:
+    data_schema_data: >
+      (
+          $ctx := ctx;
+          $v_systems := var.systems;
+          $v_data_objects := var.data_objects;
+          $v_subsystems := var.subsystems;
+          $v_groups := var.groups;
+          $v_integrations := var.integrations;
+          $v_channels := var.channels;
+          $v_clients := var.clients;
+          $v_tech_services := var.tech_services;
+      
+          /*$log($v_data_objects, "[data_schema_data]: v_data_objects");*/
+      
+          /* Делаем обратный маппинг система -> список данных */
+          $system_data := $eval(helpers.kadzo."helpers.functions".system_data, {"ctx": $ctx, "var": $v_data_objects});
+          /*$log($system_data, "[data_schema_data]: system_data");*/
+      
+          $systems_subsystems := $v_subsystems.$spread() {$.*.parent: {"subsystems": [$.$keys()] }};
+      
+          $system_flow_data := $eval(helpers.kadzo."helpers.functions".system_flow_data, {"ctx": $ctx, "var": $v_integrations});
+          /*$log($system_flow_data, "[data_schema_data]: system_flow_data");*/
+      
+          /* Атачим к подсистемам функции */
+          $subsystems := [$v_subsystems.$spread().(
+            $f := $lookup($system_data, $keys()[0]).data;
+            $fnames := $map($f, function($v) {(
+                        $resf := $lookup($v_data_objects, $v);
+                        $icon := [$lookup({
+                            "Выводится из эксплуатации": "❌",
+                            "Планируется": "➕"
+                            }, $resf.status), ""][0];
+                         { $resf.title : {"icon": $icon} };
+                       )});
+            /*$log($, "[data_schema_data]: atach to subsystem");
+            $log($fnames, "[data_schema_data]: atach fnames");*/
+            $flow_data := $lookup($system_flow_data, $keys()[0]).data;
+            $flow_names := $distinct($map($flow_data, function($v) {(
+                        $resf := $lookup($v_data_objects, $v);
+                        $icon := [$lookup({
+                                    "Выводится из эксплуатации": "❌",
+                                    "Планируется": "➕"
+                                    }, $resf.status), ""][0];
+                        ($exists($resf) and $not($resf.title in $fnames.$keys())) ? { $resf.title : {"icon": $icon} };
+                       )}));
+            /*$log($flow_names, "[data_schema_data]: atach flow_names");*/
+            {
+              $keys()[0] :
+              { 
+                "ss_id": $keys()[0],
+                "ss_title": *.titleIcon & *.title,
+                "ss_notation": *.notation,
+                "ss_has_functions": $count($fnames) or $count($flow_names) ? 1 : 0,
+                "ss_functions": $fnames.($.*.icon & $keys()[0]),
+                "ss_flow_data": $flow_names.($.*.icon & $keys()[0])
+              }
+            }
+          )];
+          /* Атачим к системам подсистемы (с функциями) и сами функции */
+          $systems := [$v_systems.$spread().(
+            /*$log($, "[data_schema_data]: atach to system");*/
+            $f := $lookup($system_data, $keys()[0]).data;
+            $fnames := $map($f, function($v) {( 
+                            $resf := $lookup($v_data_objects, $v);
+                            $icon := [$lookup({
+                                "Выводится из эксплуатации": "❌",
+                                "Планируется": "➕"
+                                }, $resf.status), ""][0];
+                            { $resf.title : {"icon": $icon} };
+                         )});
+            $flow_data := $lookup($system_flow_data, $keys()[0]).data;
+            /*$log($flow_data, "[data_schema_data]: atach flow data");*/
+            $flow_names := $distinct($map($flow_data, function($v) {(
+                        $resf := $lookup($v_data_objects, $v);
+                        $icon := [$lookup({
+                                    "Выводится из эксплуатации": "❌",
+                                    "Планируется": "➕"
+                                    }, $resf.status), ""][0];
+                        ($exists($resf) and $not($resf.title in $fnames.$keys())) ? { $resf.title : {"icon": $icon} };
+                       )}));
+            /*$log($flow_names, "[data_schema_data]: atach flow names");*/
+            $ss := [$lookup($systems_subsystems, $keys()[0]).subsystems.($lookup($subsystems, $))];
+            $sg := $eval($$.helpers.kadzo."helpers.functions".extract_parent_groups, {"var": {"group_id": *.group, "groups": $v_groups}});
+            $sg := $reverse([$sg.(
+                      $g := $lookup($v_groups, $);
+                      $exists($g) ?
+                      {
+                        "id": $,
+                        "title": $g.title
+                      }
+                    )]);
+            {
+              $keys()[0] :
+              { 
+                "id": $keys()[0],
+                "title": *.titleIcon & *.title,
+                "notation": *.notation,
+                "groups": $sg,
+                "has_functions": $count($fnames) or $count($flow_names) ? 1 : 0,
+                "functions": $fnames.($.*.icon & $keys()[0]),
+                "flow_data": $flow_names.($.*.icon & $keys()[0]),
+                "has_subsystems": $count($ss) ? 1 : 0,
+                "subsystems": $ss
+              }
+            }
+          )];
+          /*$log($systems, "schema data func: systems");*/
+      
+          $res_channels := [$v_channels.$spread().{"id": $keys()[0], "title": $.*.title, "type": $.*.location, "description": $.*.description}];
+          /* Собираем результат */
+          {
+            "systems": $systems.($.*),
+            "integrations": [$v_integrations.$spread().{
+                                  "id": $.$keys(),
+                                  "link_id": $.*.extends ? $.*.extends : $.$keys(),
+                                  "from": $.*.source,
+                                  "to": $.*.consumer,
+                                  "is_new": $.*.status = "Создается" ? 1 : 0,
+                                  "is_deleted": $.*.status = "Удаляется" ? 1 : 0,
+                                  "code_icon": [$lookup({
+                                            "Удаляется": "<U+002B>",
+                                            "Создается": "<U+002B>"
+                                            }, $.*.status)][0],
+                                  "code": $.*.code,
+                                  "color": [$lookup({
+                                      "Создается": "red",
+                                      "Удаляется": "red",
+                                      "Дорабатывается": "red"
+                                  }, $.*.status), "black"][0]
+                            }],
+            "tech_services": [$v_tech_services.$spread().{"id": $keys()[0], "title": $.*.title}],
+            "channels": $res_channels,
+            "channels_links": [$v_channels.$spread().(
+                                  $channel := $keys()[0];
+                                  $.*.systems.(
+                                      $exists($lookup($systems, $)) ? {"channel": $channel, "system": $} 
+                                          : $exists($lookup($subsystems, $)) ? {"channel": $channel, "system": $}  
+                                  )
+                              )],
+            "has_channels": $count($res_channels) > 0 ? 1 : 0,
+            "clients": [$v_clients.$spread().{"id": $keys()[0], "title": $.*.title}],
+            "clients_links": [$v_channels.$spread().(
+                                $channel := $keys()[0];
+                                $.*.clients.{"client": $, "channel": $channel};
+                              )]
+          };
+      )

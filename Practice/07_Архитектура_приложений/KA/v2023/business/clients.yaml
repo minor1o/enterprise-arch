@@ -1,0 +1,18 @@
+kadzo.v2023.clients:
+  ecogroup.bike_rent.clients.leaser:
+    title: Арендатор
+    type: Физические лица
+    measure: ед.
+    count: 1000
+
+  ecogroup.bike_rent.clients.lessor:
+    title: Арендодатель
+    type: Микро/Малый бизнес
+    measure: ед.
+    count: 50
+
+  ecogroup.bike_rent.clients.employee:
+    title: Внутренние сотрудники
+    type: Сотрудники компании / компаний Группы
+    measure: ед.
+    count: 5

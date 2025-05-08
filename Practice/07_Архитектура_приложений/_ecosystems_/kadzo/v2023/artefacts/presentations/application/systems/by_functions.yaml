@@ -1,0 +1,81 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      systems_by_functions:
+        type: table
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор функциональности
+              type: string
+          required:
+            - id
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: parent
+            text: Родительская АС
+            link: parent_link
+            align: left
+          - value: class
+            text: Класс
+            align: left
+          - value: location
+            text: Размещение
+            align: left
+          - value: group
+            text: Группа систем
+            align: left
+            link: group_link
+          - value: ownership
+            text: Степень владения
+            align: left
+          - value: live-stage
+            text: Этап жизненного цикла
+            align: left
+          - value: live-stage-target
+            text: Этап жизненного цикла на горизонт планирования
+            align: left
+          - value: status
+            text: Целевой статус (решение принято)
+            align: left
+          - value: criticality
+            text: Уровень критичности
+            align: left
+        origin:
+          functions: kadzo.v2023.functions.united
+          systems: kadzo.v2023.systems.united
+        source: >
+          (
+              $system_function := [$lookup(functions."kadzo.v2023.functions", $params.id).systems];
+              [$sift(systems."kadzo.v2023.systems", function($v, $k) {$k in $system_function})
+                  ~> $each(?, function ($v, $k){(
+                    {
+                        "id": $k,
+                        "link": "/entities/kadzo.v2023.systems/card?id=" & $k,
+                        "title": $v.title,
+                        "description": $v.description,
+                        "parent": $v.parent,
+                        "parent_link": $exists($v.parent) ? "/entities/kadzo.v2023.systems/card?id=" & $v.parent,
+                        "class": $v.class,
+                        "location": $v.location,
+                        "group": $V.group,
+                        "group_link": "/entities/kadzo.v2023.groups/card?id=" & $v.group,
+                        "ownership": $v.ownership,
+                        "live-stage": $v."live-stage",
+                        "live-stage-target": $v."live-stage-target",
+                        "status": $v."target-status",
+                        "criticality": $v.criticality
+                    }
+                )})
+              ]
+          )

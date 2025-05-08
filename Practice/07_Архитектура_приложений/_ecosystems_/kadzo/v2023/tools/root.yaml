@@ -1,0 +1,4 @@
+imports:
+  - mm-discovery/dochub.yaml
+  - metamodel.yaml
+  - reports.yaml

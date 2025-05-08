@@ -1,0 +1,61 @@
+entities:
+  kadzo.v2023.integrations:
+    presentations:
+      integrations_by_bp:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: source_title
+            text: Источник данных (поставщик)
+            align: left
+            link: src_link
+          - value: consumer_title
+            text: Потребитель данных
+            align: left
+            link: consumer_link
+          - value: endpoint
+            text: Точка взаимодействия
+            align: left
+            link: endpoint_link
+          - value: technologies
+            text: Технологии
+            align: left
+          - value: technical-use
+            text: Механизм использования
+            align: left
+          - value: protected
+            text: Средства защиты потока
+            align: left
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $integration_bp := [$lookup($."kadzo.v2023.processes", $params.process).integrations];
+            [$."kadzo.v2023.integrations".$spread().(
+              $source := $lookup($ctx."kadzo.v2023.systems", *.source);
+              $consumer := $lookup($ctx."kadzo.v2023.systems", *.consumer);
+              ($keys()[0] in $integration_bp) ?
+              {
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.integrations/card?id=" & $keys()[0],
+                "description": *.description,
+                "source": *.source,
+                "source_title": $source.title,
+                "src_link": "/entities/kadzo.v2023.systems/card?id=" & *.source,
+                "consumer": *.consumer,
+                "consumer_title": $consumer.title,
+                "consumer_link": "/entities/kadzo.v2023.systems/card?id=" & *.consumer,
+                "endpoint": (*.endpoint ? ($title := $lookup($ctx."kadzo.v2023.endpoints", *.endpoint).title; $title ? $title : *.endpoint) : ""),
+                "endpoint_link": "/entities/kadzo.v2023.endpoints/card?id=" & *.endpoint,
+                "technologies": *.technologies,
+                "technical-use": *."technical-use",
+                "status": *.status,
+                "protected": *.protected
+              }
+            )]
+          )

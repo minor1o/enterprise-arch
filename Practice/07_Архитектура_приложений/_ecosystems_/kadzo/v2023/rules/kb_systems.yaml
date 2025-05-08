@@ -1,0 +1,26 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.kb_systems.general:
+      uid: kb_systems-error-general
+      description: >
+        В атрибутах заполнены поля "Наименование", "Описание", "Класс систем КБ", "Размещение", "Статус". Значение атрибутов "Класс систем КБ", "Размещение", "Статус" соответствует справочнику
+      title: Общие параметры
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.kb_systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="kb_systems" and error_group_code="general"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

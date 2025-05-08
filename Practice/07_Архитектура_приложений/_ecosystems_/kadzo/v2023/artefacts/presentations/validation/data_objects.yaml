@@ -1,0 +1,83 @@
+entities:
+  kadzo.v2023.data_objects:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/data_objects_errors.md
+        origin: kadzo.v2023.validators.data_objects
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="data_objects"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "parent" : $errors."business_object",
+                  "master_system" : $errors."master_system",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Объекта данных
+            link: link
+          - value: name
+            text: Название объекта данных
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.data_objects
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="data_objects" and error_group_code="general"] ];
+          )
+
+      validation.parent_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Объекта данных
+            link: link
+          - value: name
+            text: Название объекта данных
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.data_objects
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="data_objects" and error_group_code="business_object"] ];
+          )
+
+      validation.master_system_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Объекта данных
+            link: link
+          - value: name
+            text: Название объекта данных
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.data_objects
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="data_objects" and error_group_code="master_system"] ];
+          )

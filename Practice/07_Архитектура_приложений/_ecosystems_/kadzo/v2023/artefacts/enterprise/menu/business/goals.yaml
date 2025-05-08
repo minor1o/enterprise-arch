@@ -1,0 +1,61 @@
+entities:
+  menu.kadzo.v2023.enterprise.goals:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Бизнес-архитектура/Бизнес цели",
+                    "link": "entities/kadzo.v2023.goals/registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.goals:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Бизнес-архитектура/Бизнес цели",
+                             "link": "/entities/kadzo.v2023.goals/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.goals:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: goal
+            text: Бизнес-цель
+            align: left
+          - value: horizont
+            text: Горизонт
+            sortable: true
+            align: left
+
+        origin:
+          goals: kadzo.v2023.goals
+          goals_domains: kadzo.v2023.goals_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (   
+              [$each(goals."kadzo.v2023.goals", function ($v, $k){({
+                  "domain": $lookup($$.goals_domains."kadzo.v2023.goals", $k).domain,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.goals_domains."kadzo.v2023.goals", $k).domain).title,
+                  "link": "/entities/kadzo.v2023.goals/card?id=" & $k,
+                  "id": $k,
+                  "goal": $v.goal,
+                  "horizont": $v.horizont
+              })})]
+          )

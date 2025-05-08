@@ -1,0 +1,68 @@
+functions:
+  seaf_key_mapper:
+    params:
+      - alias: keys
+        type: array
+        title: Массив объектов
+        required: true
+      - alias: domain
+        type: string
+        title: Домен построения КА
+        required: true
+    result:
+      type: array
+    code: >
+      (
+          $domain := domain;
+          $matcher := $eval('/^' & $domain & '/i');
+          [keys.($.$keys() ~> $matcher or $.$keys() ~> /^sber.systems/ or $.$keys() ~> /^sber.ecosystem.enablers/ ? 
+                      { $.$keys() : $.* }
+                  : { $domain & "." & $.$keys() : $.* } )
+          ];
+      )
+
+  seaf_single_array_mapper:
+    params:
+      - alias: keys
+        type: array
+        title: Идентификатор объекта
+      - alias: domain
+        type: string
+        title: Домен построения КА
+        required: true
+    result:
+      type: array
+    code: >
+      (
+          $domain := domain;
+          $matcher := $eval('/^' & $domain & '/i');
+
+          [$map(keys, function ($key){(
+                $key ~> $matcher or $key ~> /^sber.systems/ or $key ~> /^sber.ecosystem.enablers/
+                    ? $key : $domain & "." & $key
+            )})];
+      )
+
+  seaf_single_key_mapper:
+    params:
+      - alias: key
+        type: string
+        title: Идентификатор объекта
+        required: true
+      - alias: domain
+        type: string
+        title: Домен построения КА
+        required: true
+    result:
+      type: string
+    code: >
+      (
+          $domain := domain;
+          $matcher := $eval('/^' & $domain & '/i');
+      
+          $key := key;
+      
+          $exists($key) ?
+              $key ~> $matcher or $key ~> /^sber.systems/ or $key ~> /^sber.ecosystem.enablers/
+                  ? $key : $domain & "." & $key;
+      )

@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.strategy:
+    presentations:
+      summary:
+        title: Сводка по стратегической задаче
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор стратегической задачи
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $strategy_id := $params.id;
+            $ctx:= base;
+            $append([
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $strategy_id}]
+                }
+              ],
+              $props_to_summary($strategy_id,
+                            $ctx."kadzo.v2023.strategy",
+                            schema."kadzo.v2023.strategy".schema.patternProperties.*.properties,
+                            $ctx, refs)
+            );
+          )

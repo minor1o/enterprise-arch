@@ -1,0 +1,46 @@
+entities:
+  kadzo.v2023.business_objects:
+    presentations:
+      registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: status
+            text: Статус
+            align: left
+          - value: processes
+            text: Используется в бизнес-процессах
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: 
+          business_objects: kadzo.v2023.business_objects
+          processes: kadzo.v2023.processes
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              [$.business_objects."kadzo.v2023.business_objects".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.business_objects/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "status": *.status,
+                  "processes": (*.processes ? $map(*.processes, function($v){$lookup($$.processes."kadzo.v2023.processes", $v).title}) : ""),
+                  "comments": *.comments
+              }]
+          )

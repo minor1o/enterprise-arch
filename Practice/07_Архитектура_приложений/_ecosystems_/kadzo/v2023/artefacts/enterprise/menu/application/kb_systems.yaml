@@ -1,0 +1,68 @@
+entities:
+  menu.kadzo.v2023.enterprise.kb_systems:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Системы КБ",
+                    "link": "/entities/kadzo.v2023.kb_systems/domain_registry?domain=" & $domain
+                }
+            );
+      )
+      
+  menu.kadzo.v2023.enterprise.portal.kb_systems:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Прикладная архитектура/Системы КБ",
+                             "link": "/entities/kadzo.v2023.kb_systems/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.kb_systems:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            link: link
+          - value: description
+            text: Описание
+          - value: class
+            text: Класс
+          - value: location
+            text: Размещение
+          - value: status
+            text: Статус
+
+        origin:
+          kb_systems: kadzo.v2023.kb_systems
+          kb_systems_domains: kadzo.v2023.kb_systems_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(kb_systems."kadzo.v2023.kb_systems", function ($v, $k){({
+                  "domain": $lookup($$.kb_systems_domains."kadzo.v2023.kb_systems", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.kb_systems/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.kb_systems_domains."kadzo.v2023.kb_systems", $k).domain).title,
+                  "title": $v.title,
+                  "description": $v.description,
+                  "class": $v.class,
+                  "location": $v.location,
+                  "status": $v.status
+              })})]
+          )

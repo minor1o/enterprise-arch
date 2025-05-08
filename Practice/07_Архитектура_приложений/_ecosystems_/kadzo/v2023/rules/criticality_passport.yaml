@@ -1,0 +1,27 @@
+rules:
+  validators:
+    kadzo.methodology.v2023.criticality_passport:
+      uid: criticality-passport-error
+      description: >
+        Указанное в паспорте значение критичности должно соответсвовать расчетному по методике Группы
+      title: Паспорта критичности
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.criticality_passports
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="criticality_passport" and error_group_code="general"];
+                [$errors#$i.(
+                    {
+                        "uid": $.uid,
+                        "title": $.id & ' - ' & $.attr_id,
+                        "location": $.link,
+                        "correction": 'Критичность должна совпадать расчетой. Для исключений создайте exception',
+                        "description": $self.description,
+                        "standard": 'https://confluence.sberbank.ru/pages/viewpage.action?pageId=3883469861'
+                    }
+                )]
+            )
+        )

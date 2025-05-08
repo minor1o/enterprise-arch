@@ -1,0 +1,59 @@
+kadzo:
+  data_objects.completeness:
+    data_objects_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $data_objects := $all."kadzo.v2023.data_objects".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "data_objects"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "data_objects" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_status := 1;
+          $weight_business_object := 1;
+          $weight_category := 1;
+          $weight_master_system := 1;
+          $weight_title := 1;
+          $weight_data_objects:= $weight_title + $weight_status + $weight_category + $weight_business_object + $weight_master_system;
+            $valid_title := [$validators[($.attr_id="title")].id];
+            $valid_status := [$validators[($.attr_id="status")].id];
+            $valid_category := [$validators[($.attr_id="category")].id];
+            $test_title:=$data_objects.(($keys() in $valid_title)? 0 : $weight_title);
+            $test_status:=$data_objects.(($keys() in $valid_status) ? 0 : $weight_status);
+            $test_category:=$data_objects.(($keys() in $valid_category) ? 0 : $weight_category);
+            $valid_business_object := [$validators[($.attr_id="business_object")].id];
+            $test_business_object:=$data_objects.(($keys() in $valid_business_object)? 0 : $weight_business_object);
+            $valid_master_system := [$validators[($.attr_id="master_system")].id];
+            $test_master_system:=$data_objects.(($keys() in $valid_master_system)? 0 : $weight_master_system);
+      
+          $total := $zip($test_category, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_business_object) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_master_system) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_title) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_data_objects});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_data_objects;
+          $matcher := $eval('/^.*' & "parent" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_business_object / $weight_data_objects;
+          $matcher := $eval('/^.*' & "systems" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_master_system / $weight_data_objects;
+          $sum_except := $sum_except / $count($data_objects);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($data_objects));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )
+      
+      

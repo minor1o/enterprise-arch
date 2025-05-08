@@ -1,0 +1,19 @@
+kadzo:
+  rules:
+    integrity:
+      integrations:
+        systems_exists: >
+          (
+              $ctx := ctx;
+              $var := var;
+              $source := $var.*.source;
+              $consumer := $var.*.consumer;
+          
+              $exists($source) and $source
+              and $exists($consumer) and $consumer;
+          )
+
+        false: >
+          (
+              true;
+          )

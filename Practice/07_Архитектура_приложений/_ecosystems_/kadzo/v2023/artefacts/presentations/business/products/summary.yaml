@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.products:
+    presentations:
+      summary:
+        title: Сводка по продукту
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор продукта
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $product_id := $params.id;
+            $ctx:= base;
+            $append([
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $product_id}]
+                }
+              ],
+              $props_to_summary($product_id,
+                            $ctx."kadzo.v2023.products",
+                            schema."kadzo.v2023.products".schema.patternProperties.*.properties,
+                            $ctx, refs)
+            );
+          )

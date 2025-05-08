@@ -1,0 +1,32 @@
+entities:
+  docs:
+    title: Документы
+    # Конфигурация
+    config:
+      root_menu: Документы # Корневой элемент меню
+    # Строим меню по объектам документа
+    menu: >
+      (
+          sber.kadzo.docs.enabled = true or $not($exists(sber.kadzo.docs.enabled)) ? (
+              $root_menu := $exists(sber.kadzo.docs.root) and sber.kadzo.docs.root != null  ? sber.kadzo.docs.root : entities.docs.config.root_menu;
+              $append([
+                  {
+                    "title": 'Документы',
+                    "location": $root_menu,
+                    "expand": true,
+                    "icon": 'description'
+                  }
+                ],
+                docs.$spread().(
+                    $location := *.location~>$substring(0, 1) = "/"
+                      ? *.location~>$substring(1)
+                      : $root_menu & "/" & *.location;
+                    *.location ? {
+                        "location": $location,
+                        "order": *.order,
+                        "link": "entities/docs/blank?dh-doc-id=" & $keys()[0]
+                    }
+                )
+              )
+          )
+      )

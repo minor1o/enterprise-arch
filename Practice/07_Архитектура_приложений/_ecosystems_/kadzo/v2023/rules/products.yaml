@@ -1,0 +1,26 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.products.general:
+      uid: products-error-general
+      description: >
+        В атрибутах заполнено поле "Наименование", "Описание", "Статус". Значение атрибута "Статус" соответствует справочнику.
+      title: Общие параметры
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.products
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="products" and error_group_code="general"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

@@ -1,0 +1,32 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      integrations:
+        title: Интеграционные потоки
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        type: mkr-select
+        source: >
+          (
+            $system := $params.id;
+            [
+                {
+                    "title": "Все интеграционные потоки",
+                    "src": "@entity/kadzo.v2023.integrations/in_and_out_integrations?system_id=" & $system
+                },
+                {
+                    "title": "Исходящие интеграционные потоки",
+                    "src": "@entity/kadzo.v2023.integrations/integrations_by_src?system_id=" & $system
+                },
+                {
+                    "title": "Входящие интеграционные потоки",
+                    "src": "@entity/kadzo.v2023.integrations/integrations_by_consumer?system_id=" & $system
+                }
+            ]
+          )

@@ -1,0 +1,74 @@
+entities:
+  kadzo.v2023.integrations:
+    presentations:
+      integrations_by_src:
+        type: table
+        headers:
+          - value: code
+            text: Код потока
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: source_title
+            text: Источник данных (поставщик)
+            align: left
+          - value: consumer_title
+            text: Потребитель данных
+            align: left
+            link: consumer_link
+          - value: endpoint
+            text: Точка взаимодействия
+            align: left
+            link: endpoint_link
+          - value: data_objects
+            text: Объекты данных
+          - value: technologies
+            text: Технологии
+            align: left
+          - value: technical-use
+            text: Механизм использования
+            align: left
+          - value: async
+            text: Асинхронный информационный поток
+            align: left
+          - value: status
+            text: Статус информационных потоков
+            align: left
+        origin:
+          integrations: kadzo.v2023.integrations
+          systems: kadzo.v2023.systems
+          data_objects: kadzo.v2023.data_objects
+          endpoints: kadzo.v2023.endpoints
+        source: >
+          (
+            [$sift(integrations."kadzo.v2023.integrations", function($v, $k){$v.source=$params.system_id})
+              ~> $each(?, function($v, $k){(
+                    $source := $exists($v.source) and $v.source != null ? $lookup(systems."kadzo.v2023.systems", $v.source);
+                    $consumer := $exists($v.consumer) and $v.consumer != null ? $lookup(systems."kadzo.v2023.systems", $v.consumer);
+                    $data_objs := $v."data-objects".(
+                                            $lookup($$.data_objects."kadzo.v2023.data_objects", $).title
+                                        );
+                    {
+                      "id": $k,
+                      "code": $v.code,
+                      "link": "/entities/kadzo.v2023.integrations/card?id=" & $k,
+                      "description": $v.description,
+                      "source": $v.source,
+                      "source_title": $source.title,
+                      "src_link": "/entities/kadzo.v2023.systems/card?id=" & $v.source,
+                      "consumer": $v.consumer,
+                      "consumer_title": $consumer.title,
+                      "consumer_link": "/entities/kadzo.v2023.systems/card?id=" & $v.consumer,
+                      "endpoint": ($v.endpoint ? ($title := $lookup(endpoints."kadzo.v2023.endpoints", $v.endpoint).title; $title ? $title : $v.endpoint) : ""),
+                      "endpoint_link": "/entities/kadzo.v2023.endpoints/card?id=" & $v.endpoint,
+                      "data_objects": $data_objs,
+                      "technologies": $v.technologies,
+                      "technical-use": $v."technical-use",
+                      "async": $v.async,
+                      "status": $v.status,
+                      "protected": $v.protected
+                  }
+              )})
+            ]
+          )

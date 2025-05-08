@@ -1,0 +1,67 @@
+entities:
+  companies:
+    presentations:
+      blank:
+        title: Карточка компании
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор компании
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          about_company:
+            title: Общая информация
+            entity: companies
+            presentation: about_company
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          company_systems:
+            title: Системы (внутренние/внешние)
+            entity: companies
+            presentation: company_systems
+            order: 20
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          company_data:
+            title: Категории данных
+            entity: companies
+            presentation: company_data
+            order: 30
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          architecture_version:
+            title: Версия архитектуры
+            entity: companies
+            presentation: architecture_version
+            order: 30
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          company_completeness:
+            title: Полнота расчета
+            entity: kadzo.v2023.full
+            presentation: validation.enterprise.full_md
+            order: 40
+            align: "="
+            style:
+              margin: 4px
+              border: true
+        source: >
+          (
+                /* Получаем идентификатор компонента для карточки */
+                $ctx := $;
+                $domain := $params.id;
+                $widgets_on_card($ctx.entities.companies.presentations.blank, "domain", $domain);
+          )

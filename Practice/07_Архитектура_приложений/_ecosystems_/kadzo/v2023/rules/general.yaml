@@ -1,0 +1,51 @@
+rules:
+  validators:
+    kadzo:
+      title: КА ДЗО
+    kadzo.metamodel:
+      title: Форматно-логический контроль
+    kadzo.metamodel.v2023:
+      title: v2023
+    kadzo.metamodel.v2023.systems:
+      title: Системы
+    kadzo.metamodel.v2023.groups:
+      title: Группы
+    kadzo.metamodel.v2023.functions:
+      title: Функциональности
+    kadzo.metamodel.v2023.products:
+      title: Продукты
+    kadzo.metamodel.v2023.processes:
+      title: Процессы
+    kadzo.metamodel.v2023.channels:
+      title: Каналы
+    kadzo.metamodel.v2023.integrations:
+      title: Интеграции
+    kadzo.metamodel.v2023.kb_systems:
+      title: Системы кибербезопасности
+    kadzo.metamodel.v2023.clients:
+      title: Клиенты
+    kadzo.metamodel.v2023.business_objects:
+      title: Бизнес-объекты
+    kadzo.metamodel.v2023.data_objects:
+      title: Объекты данных
+    kadzo.metamodel.v2023.tech_params:
+      title: Параметры ТА
+    kadzo.metamodel.v2023.tech_services:
+      title: Технологический сервис
+    kadzo.metamodel.v2023.domain:
+      title: Домен
+    kadzo.metamodel.v2023.strategy:
+      title: Стратегические задачи
+    kadzo.metamodel.v2023.goals:
+      title: Цели
+    kadzo.metamodel.v2023.endpoints:
+      title: Точки взаимодействия
+
+    kadzo.methodology:
+      title: Архитектурный контроль
+    kadzo.methodology.v2023:
+      title: v2023
+    kadzo.methodology.v2023.processes:
+      title: Бизнес-процессы
+    kadzo.methodology.v2023.tech_params:
+      title: Параметры ТА

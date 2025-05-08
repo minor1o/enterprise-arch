@@ -1,0 +1,20 @@
+entities:
+  kadzo.v2023.processes:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/processes.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.processes".$spread()[$keys()[0] =$params.id].{
+              "id": $keys()[0],
+              "link": "/entities/kadzo.v2023.processes/card?id=" & $keys()[0],
+              "title": *.title,
+              "description": *.description,
+              "systems": *.systems,
+              "products": *.products,
+              "integrations": *.integrations
+            };          
+          )

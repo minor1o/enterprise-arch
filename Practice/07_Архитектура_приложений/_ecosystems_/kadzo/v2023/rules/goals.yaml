@@ -1,0 +1,27 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.goals.existence:
+      uid: goals-error-existence
+      description: >
+        Должны быть определены и описаны все стратегические цели компании
+      title: Наличие целей
+      origin:
+        base: kadzo.__sber_settings__
+        validation: kadzo.v2023.validators
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;
+              $domain_errors := validation[domain=$domain and validator_type="goals"];                                        
+          
+              [$boolean($domain_errors) = true ? (
+                  {
+                      "uid": $self.uid & "-" & $domain,
+                      "title": "Отсутствуют цели",
+                      "location": "entities/kadzo.v2023.goals/registry?domain=" & $domain,
+                      "correction": 'Необходимо заполнить сущность "kadzo.v2023.goals" перечислив все стратегические цели компании',
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

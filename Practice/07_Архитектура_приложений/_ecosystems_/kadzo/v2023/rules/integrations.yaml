@@ -1,0 +1,152 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.integrations.general:
+      uid: integrations-error-general
+      description: >
+        В атрибутах заполнено поле "Описание", "Статус". Значение атрибута "Статус" соответствует справочнику.
+      title: Общие параметры
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.integrations
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="integrations" and error_group_code="general"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.integrations.params:
+      uid: integrations-error-params
+      description: >
+        Для каждого интеграционного потока должны быть заполнены атрибуты "Технологии интеграции", "Механизм использования", "Асинхронный информационный поток", "Средства защиты потока". Значение атрибутов "Механизм использования", "Асинхронный информационный поток" соответствует справочнику.
+      title: Характеристики интеграционного потока
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.integrations
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="integrations" and error_group_code="params"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.integrations.changes:
+      uid: integrations-error-changes
+      description: >
+        Для интеграционных потоков со статусом "Дорабатывается" необходимо заполнение атрибута "Описание изменений".
+      title: Описание изменений
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.integrations
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="integrations" and error_group_code="change"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.integrations.srcdst:
+      uid: integrations-error-srcdst
+      description: >
+        Для каждого интеграционного потока должны быть заполнены атрибуты "Источник данных", "Потребитель данных", "Объекты данных" со ссылкой на связанные реестры (Р11_АС, Р08_Объекты данных)
+      title: Источник/потребитель данных
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.integrations
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="integrations" and error_group_code="src_dst"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.integrations.status:
+      uid: integrations-status-v1
+      description: >
+        Данный атрибут должен заполняться значениями справочника status (_ecosystems_/kadzo/v2023/entities/application/intehrations.yaml). При этом установленное значение должно коррелировать со значением атрибутов "Этап жизненного цикла (текущий) / live-stage" АС Источника и АС потребителя.
+        Алгоритм проверки и перечень допустимых комбинаций атрибутов приведен в разделе описания проверок.
+      title: Статус интеграционного потока
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.integrations
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="integrations" and error_group_code="status"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.integrations.endPoint:
+      uid: integrations-endpoints-consist-v1
+      description: >
+       Ошибка консистентности описаний интеграционного потока и ассоциированной с ним точки интеграции
+      title: Консистентность интеграций с точками взаимодействия
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.integrations
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="integrations" and error_group_code="endPoint"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

@@ -1,0 +1,85 @@
+entities:
+  kadzo.v2023.business_schema:
+    data: >
+      (
+        $domain := $params.domain;
+        $matcher := $eval('/^' & $domain & '\\./i');
+        $domain_channels := $merge($.base."kadzo.v2023.channels".$spread()[$.$keys() ~> $matcher]);
+        $domain_products := $merge($.base."kadzo.v2023.products".$spread()[$.$keys() ~> $matcher]);
+        $domain_clients := $merge($.base."kadzo.v2023.clients".$spread()[$.$keys() ~> $matcher]);
+
+        $channels := [$domain_channels.$spread()[*.products].(
+            $merge([{"id": $keys()[0]}, $.*]);
+        )];
+
+
+        $clients := [$distinct($channels.clients).(
+            $c := $;
+            $var := $lookup($domain_clients, $);
+            $exists($var) ? $merge([{"id": $c}, $var]);
+        )];
+        {
+            "channels": $channels,
+            "clients": $clients,
+            "clients_links": [$channels.(
+                                $channel := $.id;
+                                $.clients.{"client": $, "channel": $channel};
+                              )],
+            "products": [$domain_products.$spread().{"id": $keys()[0], "title": $.*.title}],
+            "products_links": [$domain_channels.$spread().(
+                                  $channel := $keys()[0];
+                                  $.*.products.(
+                                      /*$log($, "[kadzo.v2023.business_schema]: data: products_links");*/
+                                      $exists($lookup($domain_products, $string($))) ? {"channel": $channel, "product": $}
+                                  );
+                              )]
+        };
+      )
+    presentations:
+      business_schema_select:
+        title: Схема бизнес слоя
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен
+              type: string
+          required:
+            - domain
+        type: mkr-select
+        source: >
+          (
+              $domain := $params.domain;
+              [
+                  {
+                      "title": "Схема бизнес слоя (текущая)",
+                      "src": "@entity/kadzo.v2023.business_schema/business_schema_asis?domain=" & $domain
+                  },
+                  {
+                      "title": "Схема бизнес слоя (целевая)",
+                      "src": "@entity/kadzo.v2023.business_schema/business_schema?domain=" & $domain
+                  }
+              ]
+          )
+
+      business_schema_asis:
+        type: plantuml
+        template: business_schema.puml
+        origin:
+          entities: kadzo.v2023.entities
+          base: kadzo.v2023.asis
+        source: >
+          (
+            $result := $eval(entities."kadzo.v2023.business_schema".data);
+          )
+
+      business_schema:
+        type: plantuml
+        template: business_schema.puml
+        origin:
+          entities: kadzo.v2023.entities
+          base: kadzo.v2023.tobe
+        source: >
+          (
+            $result := $eval(entities."kadzo.v2023.business_schema".data);
+          )

@@ -1,0 +1,41 @@
+entities:
+  kadzo.v2023.system_map_crit:
+    data: >
+      (
+          $ctx := $.base;
+          $domain := $params.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+
+          $domain_systems :=$sift($.base."kadzo.v2023.systems", function ($v, $k){$k ~> $matcher and $not($exists($v.parent))});
+          $domain_subsystems :=$sift($.base."kadzo.v2023.systems", function ($v, $k){$k ~> $matcher and $exists($v.parent)});
+          $domain_functions :=$sift($.base."kadzo.v2023.functions", function ($v, $k){$k ~> $matcher});
+          $domain_kb_systems :=$sift($.base."kadzo.v2023.kb_systems", function ($v, $k){$k ~> $matcher});
+          $domain_tech_services :=$sift($.base."kadzo.v2023.tech_services", function ($v, $k){$k ~> $matcher});
+          $domain_groups :=$sift($.base."kadzo.v2023.groups", function ($v, $k){$k ~> $matcher});
+      
+          {
+              "systems": $each($domain_systems, function($v, $k){(
+                                  $r := $lookup($$.schema.systems, $k);
+                                  $r_subsystems := $map($r.subsystems, function($v){(
+                                      $v ~> | $ | {"notation": $lookup($domain_subsystems, $v.id).criticality} |
+                                  )});
+                                  $lookup($$.schema.systems, $k) ~> | $ | {"subsystems": $r_subsystems}, "notation" |
+                                      ~> | $ | {"notation": $v.criticality} |
+                           )})
+          }   
+      )
+      
+
+    presentations:
+      system_map_criticality:
+        type: plantuml
+        template: system_map_crit.puml
+        origin:
+          entities: kadzo.v2023.entities
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $result := $eval(entities."kadzo.v2023.system_map_crit".data);
+              $merge([$result, {"title": "Карта систем (текущая, по критичности)"}]);
+          )

@@ -1,0 +1,16 @@
+kadzo:
+    v2022_migration_pack:
+      strategy: >
+        (
+            $domain := sber.domain;
+            $key := sber.domain & "." & "v2022.r1_2";
+            $subject := $lookup(kadzo, $key);
+            $horizon := $subject.horizon;
+            $strategy := $map($subject.strategy, function($v, $i){
+                                  { $domain &".strategy.id" & $i : {
+                                    "strategy": $v,
+                                    "horizont": $horizon
+                                    }}
+                                });
+            { "kadzo.v2023.strategy" : $merge($strategy) };
+        )

@@ -1,0 +1,6 @@
+kadzo:
+  seaf_slice_pack:
+    processes: >
+      (
+          { "kadzo.v2023.processes" : $."seaf.ba.processes" };
+      )

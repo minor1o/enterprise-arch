@@ -1,0 +1,265 @@
+entities:
+  kadzo.v2023.criticality_passport:
+    presentations:
+      registry:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор паспорта
+            link: link
+          - value: evaluated_object
+            text: Идентификатор обьекта оценки
+            align: left
+            link: link_object
+          - value: object_workload
+            text: Нагрузка
+            sortable: true
+            align: left
+          - value: object_consumers_type
+            text: Тип клиента
+            sortable: true
+            align: left
+          - value: object_outage_impact
+            text: Влияние
+            sortable: true
+            align: left
+          - value: object_sla
+            text: SLA
+            sortable: true
+            align: left
+          - value: object_criticality_estimation
+            text: Критичность
+            sortable: true
+            align: left
+          - value: object_criticality_calculated
+            text: Критичность расчетная
+            sortable: true
+            align: left
+        source: >
+          (
+          $dataset := $ /* $$."kadzo.v2023.criticality_calculator"*/;
+          $matcher := $eval("/^" & $params.domain & "\\..*/");
+          $out :=    [$dataset."kadzo.v2023.criticality_passport".$spread().{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.criticality_passport/card2?id=" & $keys()[0],
+                  "evaluated_object": *.evaluated_object,
+                  "link_object": "/entities/kadzo.v2023.systems/card?id=" & *.evaluated_object,
+                  "object_criticality_estimation": *.object_criticality_estimation,
+                  "object_workload": *.object_workload,
+                  "object_consumers_type": *.object_consumers_type,
+                  "object_outage_impact": *.object_outage_impact,
+                  "object_sla": *.object_sla,
+                  "object_criticality_calculated": $criticality_By_Params(*.object_workload,*.object_consumers_type,*.object_outage_impact,*.object_sla,$dataset."kadzo.v2023.criticality_calculator" )
+                  }[$matcher(id)]]
+          )
+
+      card:
+        type: markdown
+        template: templates/criticality_passport_card.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $dataset := $$."kadzo.v2023.criticality_calculator";
+            $ctx."kadzo.v2023.criticality_passport".$spread()[$keys()[0] =$params.id].{
+                "company_name": "aaa" & $params.id,
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.goals/card?id=" & $keys()[0],
+                "evaluated_object": *.evaluated_object,
+                "link_object": "/entities/kadzo.v2023.systems/card?id=" & *.evaluated_object,
+                "object_criticality_estimation": *.object_criticality_estimation,
+                "object_criticality_calculated": $criticality_By_Params(*.object_workload,*.object_consumers_type,*.object_outage_impact,*.object_sla,$dataset ),
+                "object_workload": *.object_workload,
+                "object_consumers_type": *.object_consumers_type,
+                "object_outage_impact": *.object_outage_impact,
+                "object_sla": *.object_sla
+            };          
+          )
+      card2:
+        title: Паспорт критичности - Карточка
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор Паспорта
+              type: string
+          required:
+            - id
+        origin:
+          kadzo: kadzo.v2023
+          entities: kadzo.v2023.entities
+        widgets:
+          summary:
+            title: Паспорт критичности - Общая информация
+            entity: kadzo.v2023.criticality_passport
+            presentation: summary
+            align: "<"
+            order: 10
+          system_functions:
+            title: Сценарии недоступности (списком)
+            entity: kadzo.v2023.criticality_passport
+            presentation: outage_scenarios_list
+            align: ">"
+            order: 10
+            style:
+              margin: 4px
+              border: true
+          landscape:
+            title: Сценарии недоступности
+            entity: kadzo.v2023.criticality_passport
+            presentation: outage_scenarios
+            order: 20
+          smart:
+            title:
+            entity: kadzo.v2023.criticality_passport
+            presentation: smart
+        type: mkr-grid
+        source: >
+          (
+            /* Получаем идентификатор компонента для карточки */
+            $ctx := $;
+            $log(entities,'lake1');
+            $log(entities."kadzo.v2023.criticality_passport".presentations.card2,"presentations.outage_card2)");
+            $system_id := $params."id";
+            $id := $params.id;
+            /* $widgets_on_card($ctx.entities."kadzo.v2023.criticality_passport".presentations.card2, "system_id", $system_id); */
+            $widgets_on_card2(entities."kadzo.v2023.criticality_passport".presentations.card2, "system_id", $system_id,"scenario_id", $id);
+          )
+      outage_card:
+        type: mkr-grid
+        title: outage_card2
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        widgets:
+          clients_impact:
+            title: Клиентские потери (списком)
+            entity: kadzo.v2023.criticality_passport
+            presentation: outage_clients_list
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          financial_impact:
+            title: Финансовые потери
+            entity: kadzo.v2023.criticality_passport
+            presentation: financial_impact
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          reputational_impact:
+            title: Репутационные потери
+            entity: kadzo.v2023.criticality_passport
+            presentation: reputational_impact
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          legal_impact:
+            title: Юридические последствия
+            entity: kadzo.v2023.criticality_passport
+            presentation: legal_impact
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+        source: >
+          (
+            /* Получаем идентификатор компонента для карточки */
+            $ctx := $;
+           $log($ctx.entities."kadzo.v2023.criticality_passport".presentations.outage_card,"presentations.outage_card)");
+            $system_id := $params."system_id";
+            $id := $params."scenario_id";
+            $widgets_on_card2($ctx.entities."kadzo.v2023.criticality_passport".presentations.outage_card, "system_id", $system_id,"scenario_id", $id);
+          )
+functions:
+  widgets_on_card2:
+    params:
+      - alias: presentation
+        type: object
+        title: Представление, кля которого строится разбивка на виджеты
+        required: true
+      - alias: param_name
+        type: string
+        title: Название переменной в пути, принимающей идентификатор сущности
+        minLength: 1
+        required: true
+      - alias: object_id
+        type: string
+        title: Идентификатор объекта
+        minLength: 1
+        required: true
+      - alias: param_name2
+        type: string
+        title: Название переменной в пути, принимающей идентификатор сущности
+        minLength: 1
+        required: true
+      - alias: object_id2
+        type: string
+        title: Идентификатор объекта
+        minLength: 1
+        required: true
+    result:
+      type: object
+    code: >
+      (
+        /* Получаем идентификатор компонента для карточки */
+        $obj := object_id;
+        $name := param_name;
+        $obj2 := object_id2;
+        $name2 := param_name2;
+      
+        /* Получаем виджеты, которые нужно отобразить */
+        $widgets := presentation.widgets;
+        $wleft := $widgets.*[align="<"]^(order);
+        $wright := $widgets.*[align=">"]^(order);
+        $wcenter := $widgets.*[$not(align=">" or align="<")]^(order);
+
+        /* Функция генерации  профиля виджета для секции разметки */
+        $makeWidget := function($widgets) {(
+          [$widgets.{
+              "title": title,
+              "icon": icon,
+              "style": style ? style : {},
+              "src": "@entity/" & entity & "/" & presentation & "?" & $name & "=" & $obj  & "&" & $name2 & "=" & $obj2
+          }];
+        )};
+
+        /* Строим разметку страницы */
+        {
+          "type": "rows",
+          "items": $append(
+            [
+              {
+                "type": "columns",
+                "items": [
+                  {
+                    "type": "rows",
+                    "width": "60%",
+                    /* Строим список виджетов левой секции */
+                    "items": $makeWidget($wleft)
+                  },
+                  {
+                    "type": "rows",
+                    "width": "40%",
+                    /* Строим список виджетов правой секции */
+                    "items": $makeWidget($wright)
+                  }
+                ]
+              }
+            ],
+            /* Добавляем центральные виджеты */
+            $makeWidget($wcenter)
+          )
+        }
+      )

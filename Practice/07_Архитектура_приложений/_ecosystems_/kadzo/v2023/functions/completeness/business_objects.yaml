@@ -1,0 +1,50 @@
+kadzo:
+  business_objects.completeness:
+    business_objects_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $business_objects := $all."kadzo.v2023.business_objects".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "business_objects"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "business_objects" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_status := 1;
+          $weight_title := 1;
+          $weight_processes := 1;
+          $weight_business_objects:=$weight_status + $weight_processes + $weight_title;
+            $valid_title := [$validators[($.attr_id="title")].id];
+            $valid_status := [$validators[($.attr_id="status")].id];
+            $test_title:=$business_objects.(($keys() in $valid_title)? 0 : $weight_title);
+            $test_status:=$business_objects.(($keys() in $valid_status) ? 0 : $weight_status);
+            $valid_processes := [$validators[($.attr_id="processes")].id];
+            $test_processes:=$business_objects.(($keys() in $valid_processes) ? 0 : $weight_processes);
+
+          $errors := $count($validators[error_group_code = "less_data_object"]) > 0 ? '*';
+          $total := $zip($test_processes, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_title) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_business_objects});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_business_objects;
+          $matcher := $eval('/^.*' & "processes" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_processes / $weight_business_objects;
+          $sum_except := $sum_except / $count($business_objects);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4); 
+          $summary := ($reduce ($total, $sum) / $count($business_objects));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary,
+          "errors" : $errors
+          }
+      )
+      
+      

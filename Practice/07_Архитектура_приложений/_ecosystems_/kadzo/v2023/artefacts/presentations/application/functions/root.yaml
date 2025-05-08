@@ -1,0 +1,7 @@
+imports:
+  - domain_registry.yaml
+  - card.yaml
+#  - card_plain.yaml
+  - summary.yaml
+  - summary_livestage.yaml
+  - system_functions.yaml

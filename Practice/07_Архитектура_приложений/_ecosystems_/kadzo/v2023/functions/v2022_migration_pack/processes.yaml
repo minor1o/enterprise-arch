@@ -1,0 +1,19 @@
+kadzo:
+  v2022_migration_pack:
+    processes: >
+      (
+          $domain := sber.domain;
+          $key := sber.domain & "." & "v2022.r2_2";
+          $subject := $lookup(kadzo, $key);
+          $processes := $map(
+              $subject, function($v, $i){
+                { $domain &".title" & $i & "_" & $v.code:  {"title" : $v.name,
+                                                            "systems" : $v.by_systems.($domain & "." & $),
+                                                            "comments" : $v.comments & $v.risks & $v.problems,
+                                                            "integrations" : $$.components.*.links[$v.code in sber.processes].sber.code ~> $distinct()
+                                                            }
+                  }
+                }
+          );
+          { "kadzo.v2023.processes" : $merge($processes) };
+      )

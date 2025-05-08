@@ -1,0 +1,64 @@
+entities:
+  menu.kadzo.v2023.enterprise.groups:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Группы",
+                    "link": "/entities/kadzo.v2023.groups/domain_registry?domain=" & $domain
+                }
+            );
+      )
+      
+  menu.kadzo.v2023.enterprise.portal.groups:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Прикладная архитектура/Группы",
+                             "link": "/entities/kadzo.v2023.groups/domain_enterprise"
+                         }
+      )
+      
+  kadzo.v2023.groups:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название
+            link: link
+          - value: parent
+            text: Родительская группа
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin:
+          groups: kadzo.v2023.groups
+          groups_domains: kadzo.v2023.groups_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              $ctx:=$;
+              [$each(groups."kadzo.v2023.groups", function ($v, $k){({
+                  "domain": $lookup($$.groups_domains."kadzo.v2023.groups", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.groups/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.groups_domains."kadzo.v2023.groups", $k).domain).title,
+                  "title": $v.title,
+                  "parent": $v.parent,
+                  "comments": $v.comments
+              })})]
+          )

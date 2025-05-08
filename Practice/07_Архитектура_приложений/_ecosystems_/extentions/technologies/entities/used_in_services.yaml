@@ -1,0 +1,49 @@
+entities:
+  kadzo.technologies:
+    presentations:
+      blank:
+        widgets:
+          tech_used_in_services:
+            title: Используется в сервисах
+            presentation: tech_used_in_services
+            order: 30
+            style:
+              margin: 4px
+              border: true
+
+      tech_used_in_services:
+        type: table
+        params:
+          type: object
+          properties:
+            technologies-id:
+              title: Идентификатор объекта технологии
+              type: string
+          required:
+            - technologies-id
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: system_link
+          - value: description
+            text: Описание
+          - value: class
+            text: Класс сервиса
+
+        origin:
+          tech_services: kadzo.tech_services.with_tech
+
+        source: >
+          (
+              [tech_services.$spread()[*.tech_id=$params."technologies-id"].{
+                  "id": $keys()[0],
+                  "link": "/entities/" & *.type & "/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "class": *.class
+              }]
+          )

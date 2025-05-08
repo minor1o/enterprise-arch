@@ -1,0 +1,5 @@
+datasets:
+  kadzo.v2023__criticality_calculator__:
+    origin: "criticality_calculator.yaml"
+    source: >
+      ( {"kadzo.v2023.criticality_calculator": $."kadzo.v2023.criticality_calculator"})

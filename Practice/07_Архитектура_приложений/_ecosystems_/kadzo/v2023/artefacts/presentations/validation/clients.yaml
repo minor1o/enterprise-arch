@@ -1,0 +1,57 @@
+entities:
+  kadzo.v2023.clients:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/clients_errors.md
+        origin: kadzo.v2023.validators.clients
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="clients"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "client_channel" : $errors."less_channel",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Клиента
+            link: link
+          - value: name
+            text: Название клиента
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.clients
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="clients" and error_group_code="general"] ];
+          )
+
+      validation.client_channel:
+        type: table
+        headers:
+          - value: id
+            text: Id Клиента
+            link: link
+          - value: name
+            text: Наименование клиента
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.clients
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="clients" and error_group_code="less_channel"] ];
+          )

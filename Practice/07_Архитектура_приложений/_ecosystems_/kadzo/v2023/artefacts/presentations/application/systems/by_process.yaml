@@ -1,0 +1,70 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      systems_by_process:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: parent
+            text: Родительская АС
+            link: parent_link
+            align: left
+          - value: class
+            text: Класс
+            align: left
+          - value: location
+            text: Размещение
+            align: left
+          - value: group
+            text: Группа систем
+            align: left
+            link: group_link
+          - value: ownership
+            text: Степень владения
+            align: left
+          - value: live-stage
+            text: Этап жизненного цикла
+            align: left
+          - value: live-stage-target
+            text: Этап жизненного цикла на горизонт планирования
+            align: left
+          - value: status
+            text: Целевой статус (решение принято)
+            align: left
+          - value: criticality
+            text: Уровень критичности
+            align: left
+        origin: kadzo.v2023
+        source: >
+          (
+              $system_process := [$lookup($."kadzo.v2023.processes", $params.process).systems];
+              [$."kadzo.v2023.systems".$spread().(
+                  ($keys()[0] in $system_process) ?
+                  {
+                      "id": $keys()[0],
+                      "link": "/entities/kadzo.v2023.systems/card?id=" & $keys()[0],
+                      "title": *.title,
+                      "description": *.description,
+                      "parent": *.parent,
+                      "parent_link": $exists(*.parent) ? "/entities/kadzo.v2023.systems/card?id=" & *.parent,
+                      "class": *.class,
+                      "location": *.location,
+                      "group": *.group,
+                      "group_link": "/entities/kadzo.v2023.groups/card?id=" & *.group,
+                      "ownership": *.ownership,
+                      "live-stage": *."live-stage",
+                      "live-stage-target": *."live-stage-target",
+                      "status": *."target-status",
+                      "criticality": *.criticality
+                  }
+              )]
+          )

@@ -1,0 +1,115 @@
+entities:
+  menu.kadzo.v2023.enterprise.integrations:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Интеграционные потоки",
+                    "link": "/entities/kadzo.v2023.integrations/domain_registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.integrations:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Прикладная архитектура/Интеграционные потоки",
+                             "link": "/entities/kadzo.v2023.integrations/domain_enterprise"
+                         }
+      )
+      
+  kadzo.v2023.integrations:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: code
+            text: Код на схеме
+          - value: description
+            text: Описание
+            align: left
+          - value: source
+            text: Источник данных (поставщик)
+            align: left
+            link: source_link
+          - value: consumer
+            text: Потребитель данных
+            align: left
+            link: consumer_link
+          - value: data-objects
+            text: Объекты данных
+            align: left
+          - value: technologies
+            text: Технологии
+            align: left
+          - value: technical-use
+            text: Механизм использования
+            align: left
+          - value: async
+            text: Асинхронный информационный поток
+            align: left
+          - value: status
+            text: Статус информационных потоков
+            align: left
+          - value: protected
+            text: Средства защиты потока
+            align: left
+          - value: load_average
+            text: Нагрузочные характеристики потока (среднее)
+            align: left
+          - value: load_max
+            text: Нагрузочные характеристики потока (пик)
+            align: left
+          - value: changes
+            text: Описание изменений
+            align: left
+          - value: agreement
+            text: Основание для обмена данными (договор)
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin:
+          systems: kadzo.v2023.systems
+          integrations: kadzo.v2023.integrations
+          integrations_domains: kadzo.v2023.integrations_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(integrations."kadzo.v2023.integrations", function ($v, $k){({
+                  "domain": $lookup($$.integrations_domains."kadzo.v2023.integrations", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.integrations/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.integrations_domains."kadzo.v2023.integrations", $k).domain).title,
+                  "code": $v.code,
+                  "description": $v.description,
+                  "source": ($title := $lookup($$.systems."kadzo.v2023.systems", $v.source).title; $title ? $title : "АС не найдена: " & $v.source),
+                  "source_link": "/entities/kadzo.v2023.systems/card?id=" & $v.source,
+                  "consumer": ($title := $lookup($$.systems."kadzo.v2023.systems", $v.consumer).title; $title ? $title : "АС не найдена: " & $v.consumer),
+                  "consumer_link": "/entities/kadzo.v2023.systems/card?id=" & $v.consumer,
+                  "data-objects": $v."data-objects",
+                  "technologies": $v.technologies,
+                  "technical-use": $v."technical-use",
+                  "async": $v.async,
+                  "status": $v.status,
+                  "protected": $v.protected,
+                  "load_average": $v.load.average,
+                  "load_max": $v.load.maximum, 
+                  "changes": $v.changes,
+                  "agreement": $v.agreement,
+                  "comments": $v.comments
+              })})]
+          )

@@ -1,0 +1,25 @@
+datasets:
+  kadzo.completeness.impl:
+    origin:
+      business_objects: "business_objects.yaml"
+      channels: "channels.yaml"
+      clients: "clients.yaml"
+      completeness: "completeness.yaml"
+      data_objects: "data_objects.yaml"
+      functions: "functions.yaml"
+      goals: "goals.yaml"
+      groups: "groups.yaml"
+      integrations: "integrations.yaml"
+      kb_systems: "kb_systems.yaml"
+      processes: "processes.yaml"
+      products: "products.yaml"
+      strategy: "strategy.yaml"
+      systems: "systems.yaml"
+      tasks: "tasks.yaml"
+      tech_params: "tech_params.yaml"
+      tech_services: "tech_services.yaml"
+      endpoints: "endpoints.yaml"
+    source: >
+      (
+          $mergedeep( [ $.* ] )
+      )

@@ -1,0 +1,14 @@
+entities:
+  kadzo.enterprise.menu.validation.criticality_passport:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                {
+                    "location": "ДЗО/" & $title & '/Проверки/Паспорта критичности',
+                    "link": 'entities/kadzo.v2023.criticality_passport/validation.errors_md?domain=' & $domain
+                }
+            );
+      )

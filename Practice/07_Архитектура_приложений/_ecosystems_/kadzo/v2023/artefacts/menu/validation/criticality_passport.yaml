@@ -1,0 +1,15 @@
+entities:
+  criticality_passport.validation.menu:
+    menu: >
+      (
+          $not($exists(sber.kadzo.enterprise_mode)) and (sber.kadzo.menu.validators.enabled = true or $not($exists(sber.kadzo.menu.validators.enabled))) = true ? (
+              $menu_root := ($exists(sber.kadzo.menu.validators.roots) and $count(sber.kadzo.menu.validators.roots) > 0 and $not(sber.kadzo.menu.validators.roots = null))  ? sber.kadzo.menu.validators.roots :
+                $exists(sber.kadzo.menu_root) ? sber.kadzo.menu_root : "Документы/Архитектура/КА ДЗО/2023";
+              [$menu_root.(
+                  {
+                      'location': $ & '/Проверки/Паспорта критичности',
+                      'link': 'entities/kadzo.v2023.criticality_passport/validation.errors_md?domain=' & $domain
+                  }
+              )]
+          )   
+      )

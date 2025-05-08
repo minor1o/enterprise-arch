@@ -1,0 +1,156 @@
+entities:
+  kadzo.config:
+    title: Описание настроек
+    schema:
+      $defs:
+        kadzo.config.arch_schema:
+          title: Описание настроек для архитектурной схемы
+          type: object
+          properties:
+            elk:
+              title: Флаг использования elk-движка для рендеринга plantuml схем
+              type: boolean
+            sber_frame:
+              title: Флаг использования дополнительных фреймов
+              type: boolean
+        kadzo.config.menu_root:
+          title: Корневое размешение меню КА ДЗО
+          type: string
+      patternProperties:
+        "[a-zA-z]*":
+          type: object
+          properties:
+            menu_root:
+              $ref: "#/$defs/kadzo.config.menu_root"
+            settings:
+              type: object
+              properties:
+                schemas:
+                  type: object
+                  properties:
+                    arch_schema:
+                      $ref: "#/$defs/kadzo.config.arch_schema"
+                    group_schema:
+                      $ref: "#/$defs/kadzo.config.arch_schema"
+                    system_context_schema:
+                      $ref: "#/$defs/kadzo.config.arch_schema"
+
+  # Описание секции настроек sber
+  sber:
+    schema:
+      patternProperties:
+        "^kadzo$":
+          type: object
+          properties:
+            menu_root:
+              $ref: "#/$defs/kadzo.config.menu_root"
+            settings:
+              type: object
+              properties:
+                schemas:
+                  type: object
+                  properties:
+                    arch_schema:
+                      $ref: "#/$defs/kadzo.config.arch_schema"
+                    group_schema:
+                      $ref: "#/$defs/kadzo.config.arch_schema"
+                    system_context_schema:
+                      $ref: "#/$defs/kadzo.config.arch_schema"
+            docs:
+              type: object
+              title: Настройки управления разделом "Документы"
+              properties:
+                enabled:
+                  type: boolean
+                  title: Флаг включения и выключения раздела
+                root:
+                  type: string
+                  title: Корневой элемент для размещения раздела
+            menu:
+              type: object
+              title: Настройки управления меню
+              properties:
+                architecture:
+                  type: object
+                  title: Раздел меню "Данные архитектуры"
+                  properties:
+                    enabled:
+                      type: boolean
+                      title: Флаг включения и выключения раздела
+                    roots:
+                      type: array
+                      title: Список корневых элементов меню для размещения раздела
+                      items:
+                        type: string
+                validators:
+                  type: object
+                  title: Раздел меню "Проверки"
+                  properties:
+                    enabled:
+                      type: boolean
+                      title: Флаг включения и выключения раздела
+                    roots:
+                      type: array
+                      title: Список корневых элементов меню для размещения раздела
+                      items:
+                        type: string
+                company_card:
+                  type: object
+                  title: Раздел меню "Карточка компании" (пункт "2023" по-умлочанию)
+                  properties:
+                    enabled:
+                      type: boolean
+                      title: Флаг включения и выключения раздела
+                    roots:
+                      type: array
+                      title: Список корневых элементов меню для размещения раздела
+                      items:
+                        type: string
+                completeness:
+                  type: object
+                  title: Раздел меню "Расчет полнотыы"
+                  properties:
+                    enabled:
+                      type: boolean
+                      title: Флаг включения и выключения раздела
+                    roots:
+                      type: array
+                      title: Список корневых элементов меню для размещения раздела
+                      items:
+                        type: string
+                summary:
+                  type: object
+                  title: Раздел меню "Сводный"
+                  properties:
+                    enabled:
+                      type: boolean
+                      title: Флаг включения и выключения раздела
+                    roots:
+                      type: array
+                      title: Список корневых элементов меню для размещения раздела
+                      items:
+                        type: string
+                summary_criticality:
+                  type: object
+                  title: Раздел меню "Сводный - Паспорта критичности"
+                  properties:
+                    enabled:
+                      type: boolean
+                      title: Флаг включения и выключения раздела
+                    roots:
+                      type: array
+                      title: Список корневых элементов меню для размещения раздела
+                      items:
+                        type: string
+                schemas:
+                  type: object
+                  title: Раздел меню "Схемы"
+                  properties:
+                    enabled:
+                      type: boolean
+                      title: Флаг включения и выключения раздела
+                    roots:
+                      type: array
+                      title: Список корневых элементов меню для размещения раздела
+                      items:
+                        type: string

@@ -1,0 +1,14 @@
+entities:
+  kadzo.enterprise.menu.validation.alldataset:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                {
+                    "location": "ДЗО/" & $title & '/Проверки КА ДЗО/Реестр ошибок' ,
+                    'link': "entities/kadzo.v2023.errors/allerrors?domain=" & $domain
+                }
+            );
+      )

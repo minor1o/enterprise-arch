@@ -1,0 +1,25 @@
+kadzo:
+  domain_enterprise.validation:
+    foreign: >
+      (
+          $objects := $.dataset.sber.domains;      
+          $companies := $.companies;
+          $each($objects, function($v, $k) {(
+              $value:= $lookup($companies, $k);
+              $exist := $value = null or $exists($value) != true ? false : true;
+              $nullcheck := $exist = false ? (
+                                {
+                                      'uid': "companies-v1-" & $k & "-invaliddomain",
+                                      'id': $k,
+                                      'name': $v.title,
+                                      'error_type': 'Домен не описан в реестре компаний',
+                                      'error_group_code': 'invalid_domain',
+                                      'attr_id': 'Идентификатор объекта',
+                                      'attr_name': 'sber.domains',
+                                      'error_text': 'Домен компании (sber.domains) ' & $k &' должен содержаться в справочнике доменов участников Группы (companies)',
+                                      'link': '/entities/domain_title/domain_index'
+                                  }
+                            );
+              )}
+            )
+      )

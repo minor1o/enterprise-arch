@@ -1,0 +1,48 @@
+kadzo:
+  groups.validation:
+    base_attributes: >
+      (
+          $objects := $.groups."kadzo.v2023.groups";
+          $obj_full := $.schema;
+          $check_list := ['title'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          [$check_list.(
+            $attr_id := $.$keys() ;
+            $attr := $.*;
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': "groups-base_attributes-v1-" & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.groups/card?id=' & $id
+                      }
+                  );
+              $enumcheck := $attr.enum ? (
+                  $not($value in $attr.enum) and $exist = true ? (
+                      {
+                            'uid': "groups-base_attributes-v1-" & $id & "-notinlist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                            'link': '/entities/kadzo.v2023.groups/card?id=' & $id
+                      }
+                  )
+              );
+              $append($nullcheck, $enumcheck)
+            )})
+          )]
+      )

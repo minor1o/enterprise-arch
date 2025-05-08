@@ -1,0 +1,28 @@
+entities:
+  kadzo.v2023.kb_systems:
+    presentations:
+      summary_livestage:
+        title: Жизненный цикл
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы КБ
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $kb_system_id := $params.id;
+            $ctx:= base;
+            $props_to_summary($kb_system_id,
+                              $ctx."kadzo.v2023.kb_systems",
+                              schema."kadzo.v2023.kb_systems".schema."$defs"."kadzo.v2023.kb_systems.livestage".properties,
+                              $ctx, refs)
+          )

@@ -1,0 +1,30 @@
+kadzo.v2023.channels:
+  ecogroup.bike_rent.channels.telegram:
+    title: Telegram
+    description: Канал взаимодействия с клиентами через Telegram
+    type: Цифровой
+    location: Внешний
+    status: Используется
+    clients:
+      - ecogroup.bike_rent.clients.leaser
+      - ecogroup.bike_rent.clients.lessor
+    products:
+      - ecogroup.bike_rent.products.uid1
+    systems:
+      - ecogroup.bike_rent.external_systems.telegram
+    security: IAM
+
+  ecogroup.bike_rent.channels.employee_workspace:
+    title: Рабочее место сотрудника
+    description: Канал для рабочих мест сотрудников Маркетплейса
+    type: Цифровой
+    location: Внешний
+    status: Используется
+    clients:
+      - ecogroup.bike_rent.clients.employee
+    products:
+      - ecogroup.bike_rent.products.uid1
+    systems:
+      - ecogroup.bike_rent.external_systems.cloud_accounting
+    security: IAM
+

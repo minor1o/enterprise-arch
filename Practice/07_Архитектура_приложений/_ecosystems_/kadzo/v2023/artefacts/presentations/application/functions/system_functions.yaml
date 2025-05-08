@@ -1,0 +1,45 @@
+entities:
+  kadzo.v2023.functions:
+    presentations:
+      system_functions:
+        type: table
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        headers:
+          - value: title
+            text: Наименование
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: target
+            text: Целевое размещение функциональности
+            align: left
+          - value: status
+            text: Статус
+
+        origin: kadzo.v2023.functions.united
+
+        source: >
+          (
+              $system := $params.id;
+              [ $sift($."kadzo.v2023.functions", function($v, $k){ $system in $v.systems })
+                  ~> $each(?, function($v, $k) {(
+                    {
+                      "id": $k,
+                      "link": "/entities/kadzo.v2023.functions/card?id=" & $k,
+                      "title": $v.title,
+                      "description": $v.description,
+                      "systems": $v.systems,
+                      "target": $v.target,
+                      "status": $v.status
+                    }
+                  )})
+              ]
+          )

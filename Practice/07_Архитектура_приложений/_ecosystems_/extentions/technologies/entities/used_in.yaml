@@ -1,0 +1,90 @@
+entities:
+  kadzo.technologies:
+    presentations:
+      blank:
+        widgets:
+          tech_used_in:
+            title: Используется в компонентах
+            presentation: tech_used_in
+            order: 20
+            style:
+              margin: 4px
+              border: true
+
+      tech_used_in:
+        type: table
+        params:
+          type: object
+          properties:
+            technologies-id:
+              title: Идентификатор объекта технологии
+              type: string
+          required:
+            - technologies-id
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: system
+            text: Система
+            align: left
+            link: system_link
+          - value: type
+            text: Тип компонента
+          - value: scalability
+            text: Масштабируемость
+          - value: high_availibility
+            text: Отказоустойчивость
+          - value: ha_reservation_type
+            text: Тип резервирования мощностей в пределах одной зоны доступности
+          - value: ha_capacity_management
+            text: Полнота резервирования мощностей в пределах одной зоны доступности
+          - value: disaster_recovery
+            text: Катастрофоустойчивость
+          - value: dr_reservation_type
+            text: Тип резервирования мощностей в резервной зоне доступности
+          - value: dr_reservation_management
+            text: Полнота резервирования мощностей в резервной зоне доступности
+          - value: backup_placement
+            text: Место хранения бекапа
+          - value: backup_backup_placement
+            text: Место хранения дубликата бекапа
+          - value: monitoring
+            text: Мониторинг
+          - value: sec_zone
+            text: Зона безопасности
+
+        origin:
+          used_in: kadzo.technologies_used_in
+          tech_params: kadzo.v2023.tech_params
+          systems: kadzo.v2023.systems.united
+
+        source: >
+          (
+              $systems := systems;
+              $tech_params := tech_params;
+              $tech_used := $lookup(used_in."kadzo.technologies", $params."technologies-id").used_in;
+              [$tech_used.(
+                  $tparams := $lookup($tech_params."kadzo.v2023.tech_params", $);
+                  {
+                      "id": $,
+                      "link": "/entities/kadzo.v2023.tech_params/card?id=" & $,
+                      "system": ($tparams.system ? ($title := $lookup($$.$systems."kadzo.v2023.systems", $tparams.system).title; $title ? $title : "АС не найдена: " & $tparams.system) : ""),
+                      "system_link": "/entities/kadzo.v2023.systems/card?id=" & $tparams.system,
+                      "type": $tparams.type,
+                      "software": $tparams.software,
+                      "vendor": $tparams.vendor,
+                      "scalability": $tparams.scalability,
+                      "high_availibility": $tparams.high_availability.type,
+                      "ha_reservation_type": $tparams.high_availability.capacity_reservation_type,
+                      "ha_capacity_management": $tparams.high_availability.capacity_management,
+                      "disaster_recovery": $tparams.disaster_recovery.type,
+                      "dr_reservation_type": $tparams.disaster_recovery.capacity_reservation_type,
+                      "dr_reservation_management": $tparams.disaster_recovery.capacity_management,
+                      "backup_placement": $tparams.backup.placement,
+                      "backup_backup_placement": $tparams.backup.backup_placement,
+                      "monitoring": $tparams.monitoring,
+                      "sec_zone": $tparams.sec_zone
+                  }
+              )];
+          )

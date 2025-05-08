@@ -1,0 +1,164 @@
+kadzo:
+  data_objects.validation:
+    base_attributes: >
+      (
+          $objects := $.data_objects."kadzo.v2023.data_objects";
+          $obj_full := $.schema;
+          $check_list := ['title', 'category', 'status'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "data_objects-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              
+              $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.data_objects/card?id=' & $id
+                      }
+                  ) : (
+                $attr.enum ? (
+                    $not($value in $attr.enum) ? (
+                        {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                              'link': '/entities/kadzo.v2023.data_objects/card?id=' & $id
+                        }
+                    )
+                )
+              );
+            )})
+          );
+      )
+
+    parent_attributes: >
+      (
+          $objects := $.data_objects."kadzo.v2023.data_objects";
+          $cbusiness_objects := $.business_objects."kadzo.v2023.business_objects";
+          $obj_full := $.schema;
+          $check_list := ['business_object'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+            
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "data_objects-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Атрибут "Родительский бизнес-объект"',
+                            'error_group_code': 'business_object',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.data_objects/card?id=' & $id
+                      }
+                  );
+              $linkcheck := $attr.'$ref' ?
+                $exist = true ? $value.(
+                  $rid := $;
+                  $not($exists($lookup($cbusiness_objects, $rid))) ?
+                        {
+                            'uid': $uidpref & $id & "-notinlist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Атрибут "Родительский бизнес-объект"',
+                            'error_group_code': 'business_object',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов бизнес-сущностей "kadzo.v2023.business_objects"',
+                            'link': '/entities/kadzo.v2023.data_objects/card?id=' & $id
+                        }
+                );
+              $type_check := $type($value) = 'array' ? (
+                {
+                    'uid': $uidpref & $id & "-invalidtype",
+                    'id': $id,
+                    'name': $object.title,
+                    'error_type': 'Атрибут "Родительский бизнес-объект"',
+                    'error_group_code': 'business_object',
+                    'attr_id': $attr_id,
+                    'attr_name': $attr.title,
+                    'error_text': 'Значение "' & $value &'" не может быть массивом',
+                    'link': '/entities/kadzo.v2023.data_objects/card?id=' & $id
+                }
+              );
+              $append($type_check, $append($nullcheck, $linkcheck))
+            )})
+          );
+      )
+
+    master_system_attributes: >
+      (
+          $objects := $.data_objects."kadzo.v2023.data_objects";
+          $csystems := $.systems."kadzo.v2023.systems";
+          $obj_full := $.schema;
+          $check_list := ['master_system'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+            
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "data_objects-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Атрибут "АС, являющаяся мастер системой для объекта данных"',
+                            'error_group_code': 'master_system',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.data_objects/card?id=' & $id
+                      }
+                  ) : (
+                  $value.(
+                    $rid := $;
+                    $not($exists($lookup($csystems, $rid))) ?
+                          {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Атрибут "АС, являющаяся мастер системой для объекта данных"',
+                              'error_group_code': 'master_system',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов систем "kadzo.v2023.systems"',
+                              'link': '/entities/kadzo.v2023.data_objects/card?id=' & $id
+                          }
+                  )
+              );
+            )});
+          );
+      )

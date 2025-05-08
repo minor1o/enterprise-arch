@@ -1,0 +1,33 @@
+kadzo:
+  MUEUsage.validation:
+    NotUsedMUESelection: >
+      (
+          $domain := $.domain;                             /*sber.domain to select ofjects related to particular DC*/
+          $matcher := $eval('/^' & $domain & '\\./i');
+      
+          $MUESelectedObjects := $sift($.dataset."kadzo.v2023.systems", function($v, $k){
+                        $split($k, ".")[0] = "sber" and $split($k, ".")[2] = "enablers"
+                        and (($v.type = "Бизнес" and $v.required = "Обязательный") or ($v.type = "Обязательный бизнес"))
+                    });
+
+          $ListOfIntegrations := ($sift( $.dataset."kadzo.v2023.integrations", function($v, $k){$k ~> $matcher})
+                                            ~> $each(?, function($v, $k){[$v.source, $v.consumer]})).$map($, $append(?)) ~> $distinct();
+
+          $ListOfIntegratedSystems := $ListOfIntegrations.$map($, $append(?)) ~> $distinct();
+
+          $MUESelectedObjects ~> | $ | {}, $ListOfIntegratedSystems |
+                ~> $each(?, function($v, $k) {(
+                      {
+                          "uid": "enabler-" & $k.$split(".")[-1],
+                          "id": $k,
+                          "name" : $v.title,
+                          "pattern": $k,
+                          "error_text": "Не используюсят обязательные Объединяющие элементы",
+                          'error_group_code': 'general',
+                          "description" : $v.description,
+                          "validator_type": "unifying_elements",
+                          "domain" : $domain
+                      };
+                )});
+      
+      )

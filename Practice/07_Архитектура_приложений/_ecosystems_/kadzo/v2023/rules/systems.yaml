@@ -1,0 +1,377 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.systems.fp:
+      uid: systems-error-fp
+      title: Функциональные подсистемы
+      description: >
+        Родительская АС может быть указана только для ФП
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="fp"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.general:
+      uid: systems-error-general
+      title: Общие параметры
+      description: >
+        Атрибут "Наименование / title" обязателен для заполнения.
+        Атрибут "Описание / description" обязателен для заполнения.
+        Атрибут "Класс / class" обязателен для заполнения значением, соответствующим справочнику class (_ecosystems_/kadzo/v2023/entities/application/systems.yaml).
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="general"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+    kadzo.metamodel.v2023.systems.change-type:
+      uid: systems-change-type-v1
+      title: Тип изменений
+      description: >
+          Данный атрибут должен заполняться значениями справочника change-type (_ecosystems_/kadzo/v2023/entities/application/systems.yaml). При этом установленное значение должно коррелировать со значением атрибутов "Этап жизненного цикла (текущий) / live-stage" и "Степень владения / ownership" текущей АС. Алгоритм проверки и перечень допустимых комбинаций атрибутов приведен в разделе описания проверок.
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="change-type"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.ownership:
+      uid: systems-error-ownership
+      title: Владение АС/ФП
+      description: >
+        Заполнены атрибуты "Размещение" и "Степень владения". Атрибуты соответствуют справочникам. Исключением являются АС на этапе ЖЦ "Эскиз"
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="ownership"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.lifecycle:
+      uid: systems-error-lifecycle
+      title: Управление ЖЦ
+      description: >
+        Заполнены атрибуты "Этап ЖЦ", "Этап ЖЦ на горизонт", "Целевой статус". Значение атрибутов соответствует справочникам.
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="lifecycle"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.criticality:
+      uid: systems-error-criticality
+      title: Уровень критичности
+      description: >
+        Заполнен атрибут "Уровень критичности". Применимо для систем с владением "Владеем исходных кодом", "Владеем экземпляром". Значение атрибута соответствует справочникам.
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="criticality"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.functionalities:
+      uid: systems-functionalities-v1
+      title: Наличие функциональности
+      description: >
+        Для каждой системы в домене компании, указанной в реестре АС (Р11_АС/kadzo.v2023.systems), должна быть указана как минимум одна функциональность.
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="functionalities"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.groups:
+      uid: systems-error-groups
+      title: Группа АС
+      description: >
+        Для каждой АС должна быть указана группа со ссылкой на связанный реестр (Р12_Группы)
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="groups"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.ls_vs_lst:
+      uid: systems-error-ls_vs_lst
+      title: Этап ЖЦ к Этапу ЖЦ на горизонт планирования
+      description: >
+        Недопустимая комбинация Этапа ЖЦ и Этапа ЖЦ на горизонт планирования
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="ls_vs_lst"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.performance:
+      uid: systems-error-performance
+      title: Производительность
+      description: >
+        Отсутствует описание параметров производительности системы
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="performance"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.sla:
+      uid: systems-error-sla
+      title: SLA
+      description: >
+        Отсутствует описание параметров SLA системы
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="sla"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.rto:
+      uid: systems-error-rto
+      title: RTO
+      description: >
+        Отсутствует описание параметров RTO системы
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="rto"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.rpo:
+      uid: systems-error-rpo
+      title: RPO
+      description: >
+        Отсутствует описание параметров RPO системы
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="rpo"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.monitoring:
+      uid: systems-error-monitoring
+      title: Мониторинг
+      description: >
+        Отсутствует описание параметров мониторинга системы
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="monitoring"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.systems.fp_live_stage:
+      uid: systems-fp-live-stage-v1
+      title: Этап жизненного цикла ФП
+      description: >
+        Данный атрибут должен заполняться значениями справочника live-stage (_ecosystems_/kadzo/v2023/entities/application/systems.yaml). При этом установленное значение должно коррелировать со значением атрибутов "Этап жизненного цикла (текущий) / live-stage" родительской АС.
+        Алгоритм проверки и перечень допустимых комбинаций атрибутов приведен в разделе описания проверок.
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.systems
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="systems" and error_group_code="fp_live_stage"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

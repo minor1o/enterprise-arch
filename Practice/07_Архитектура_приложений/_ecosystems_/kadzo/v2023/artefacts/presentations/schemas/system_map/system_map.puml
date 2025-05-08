@@ -1,0 +1,461 @@
+'!pragma ratio 0.3
+!pragma horizontalLineBetweenDifferentPackageAllowed
+'!pragma layout elk
+'Общее позиционирование
+
+skinparam {
+
+	'wrapWidth 150
+
+	'maxMessageSize 200
+
+	'hide stereotype
+
+    sameClassWidth true
+	tabSize 5
+
+	defaultfontname Arial
+
+	roundCorner 10
+
+	linetype ortho
+
+	'linetype polyline
+
+	nodesep 5
+
+	ranksep 5
+
+	shadowing true
+
+	'padding 10
+
+    hyperlinkColor black
+
+    hyperlinkUnderline false
+
+}
+
+'top to bottom direction
+left to right direction
+
+hide circle
+
+hide empty members
+
+
+'skinparam component{
+'
+'	fontsize 14
+'
+'	fontstyle bold
+'
+'	borderthickness 1
+'
+'	attributefontsize 11
+'
+'	bordercolor #4e4948
+'
+'	backgroundcolor #92d050
+'
+'}
+
+'Стили для (АС)
+
+'skinparam class {
+'
+'    wrapWidth 250
+'	fontsize 14
+'
+'	'attributeFontSize 10
+'
+'	fontstyle bold
+'
+'	borderthickness 1
+'
+'	attributefontsize 11
+'
+'	bordercolor #4e4948
+'
+'    'hide stereotype
+'
+'	stereotypefontcolor<<Нецелевая>> darkgray
+'	fontcolor<<Нецелевая>> white
+'	backgroundcolor<<Нецелевая>> #006600
+'	bordercolor<<Нецелевая>> gray
+'	attributefontcolor<<Нецелевая>> white
+'
+'	fontcolor<<Нецелевая модифицируется>> white
+'	backgroundcolor<<Нецелевая модифицируется>> #006600
+'	bordercolor<<Нецелевая модифицируется>> red
+'	attributefontcolor<<Нецелевая модифицируется>> white
+'
+'	backgroundcolor<<Целевая требуется выбор>> orange
+'	bordercolor<<Целевая требуется выбор>> red
+'
+'	backgroundcolor<<Целевая разработка>> ffff8a
+'	bordercolor<<Целевая разработка>> red
+'
+'	backgroundcolor<<Целевая частично внедрена>> #ffff8a
+'
+'	backgroundcolor<<Целевая частично внедрена модифицируется>> #ffff8a
+'	bordercolor<<Целевая частично внедрена модифицируется>> red
+'
+'	backgroundcolor<<Целевая внедрена полностью>> #92d050
+'
+'	backgroundcolor<<Целевая внедрена полностью модифицируется>> #92d050
+'	bordercolor<<Целевая внедрена полностью модифицируется>> red
+'
+'	backgroundcolor<<Внешняя>> lightblue
+'	bordercolor<<Внешняя>> gray
+'
+'	'backgroundcolor<<Внешний>> lightblue
+'	'bordercolor<<Внешний>> gray
+'
+'	'backgroundcolor<<Банк>> #e9f6dc
+'
+'}
+
+'Стили регионов
+
+'skinparam rectangle {
+'
+'	stereotypefontcolor<<Нецелевая>> darkgray
+'	fontcolor<<Нецелевая>> white
+'	backgroundcolor<<Нецелевая>> #006600
+'	bordercolor<<Нецелевая>> gray
+'	attributefontcolor<<Нецелевая>> white
+'
+'	fontcolor<<Нецелевая модифицируется>> white
+'	backgroundcolor<<Нецелевая модифицируется>> #006600
+'	bordercolor<<Нецелевая модифицируется>> red
+'	attributefontcolor<<Нецелевая модифицируется>> white
+'
+'	backgroundcolor<<Целевая требуется выбор>> orange
+'	bordercolor<<Целевая требуется выбор>> red
+'
+'	backgroundcolor<<Целевая разработка>> ffff8a
+'	bordercolor<<Целевая разработка>> red
+'
+'	backgroundcolor<<Целевая частично внедрена>> #ffff8a
+'
+'	backgroundcolor<<Целевая частично внедрена модифицируется>> #ffff8a
+'	bordercolor<<Целевая частично внедрена модифицируется>> red
+'
+'	backgroundcolor<<Целевая внедрена полностью>> #92d050
+'
+'	backgroundcolor<<Целевая внедрена полностью модифицируется>> #92d050
+'	bordercolor<<Целевая внедрена полностью модифицируется>> red
+'
+'	backgroundcolor<<Внешняя>> lightblue
+'	bordercolor<<Внешняя>> gray
+'
+'	bordercolor<<External-сеть>> transparent
+'
+'	backgroundcolor<<External-сеть>> #ddd5e4
+'
+'	bordercolor<<Internal-сеть>> transparent
+'
+'	backgroundcolor<<Internal-сеть>> #c5d7ef
+'
+'	borderstyle<<Группа систем>> dashed
+'
+'	bordercolor<< ДБ/ДЗО >> transparent
+'
+'	backgroundcolor<< ДБ/ДЗО >> #f0f0f0
+'
+'	bordercolor<<Каналы>> transparent
+'
+'	backgroundcolor<<Каналы>> #84b5f5
+'
+'	bordercolor<<Банк>> transparent
+'
+'	backgroundcolor<<Банк>> #e9f6dc
+'
+'	bordercolor<<ОЭ>> transparent
+'
+'	backgroundcolor<<ОЭ>> #a1f1dc
+'
+'	bordercolor<<Cloud>> transparent
+'
+'	backgroundcolor<<Cloud>> #a1f1dc
+'
+'	backgroundcolor<<Платформа>> #ffcc66
+'
+'}
+
+'Стили Person
+'skinparam component<<Person>> {
+'	backgroundColor Transparent
+'	borderColor Transparent
+'	shadowing false
+'	hide stereotype
+'	borderthickness 1
+'	FontSize 14
+'    FontStyle Bold
+'}
+
+skinparam package {
+    borderthickness 1
+	fontstyle bold
+
+	attributefontsize 11
+    backgroundcolor<<Frame>> #GreenYellow/LightGoldenRodYellow
+}
+
+<style>
+    classDiagram {
+        maximumWidth 150
+        minimumWidth 100
+        roundCorner 10
+
+        class {
+            backgroundcolor #fcfcee
+            linethickness 1
+            linecolor #4e4948
+
+            'stereotypefontsize 9
+
+            header {
+                fontstyle bold
+                fontsize 11
+            }
+
+            .Внешняя {
+                linecolor gray
+                header {
+                    backgroundcolor lightblue/%lighten("#lightblue", 40)
+                }
+            }
+
+            .Нецелевая {
+                linecolor gray
+                'fontcolor white
+                'stereotypefontcolor darkgray
+                header {
+                    'fontcolor white
+                    backgroundcolor #006600-%lighten("#006600", 40)
+                }
+            }
+
+            .Нецелевая модифицируется {
+                linecolor red
+                'fontcolor white
+                'stereotypefontcolor darkgray
+                header {
+                    'fontcolor white
+                    backgroundcolor #006600/%lighten("#006600", 40)
+                }
+            }
+
+            .Целевая требуется выбор {
+                linecolor red
+                header {
+                    backgroundcolor orange/%lighten("#orange", 40)
+                }
+            }
+
+            .Целевая разработка {
+                linecolor red
+                header {
+                    backgroundcolor ffff8a/%lighten("#ffff8a", 40)
+                }
+            }
+
+            .Целевая частично внедрена {
+                header {
+                    backgroundcolor #ffff8a/%lighten("#ffff8a", 40)
+                }
+            }
+
+            .Целевая частично внедрена модифицируется {
+                linecolor red
+                header {
+                    backgroundcolor #ffff8a/%lighten("#ffff8a", 40)
+                }
+            }
+
+            .Целевая внедрена полностью {
+                header {
+                    backgroundcolor #92d050/%lighten("#92d050", 40)
+                }
+            }
+
+            .Целевая внедрена полностью модифицируется {
+                linecolor red
+                header {
+                    backgroundcolor #92d050/%lighten("#92d050", 40)
+                }
+            }
+
+            .Технический сервис {
+                header {
+                    backgroundcolor de924b/%lighten("de924b", 40)
+                }
+            }
+        }
+
+        node {
+            fontstyle bold
+            fontsize 14
+            linestyle 8
+            linethickness 2
+            backgroundcolor #GreenYellow/LightGoldenRodYellow
+            'backgroundcolor #84b5f5
+        }
+
+        frame {
+            fontstyle bold
+            fontsize 11
+            linestyle 8
+            linethickness 2
+
+            'backgroundColor #ffcc66
+        }
+
+        file {
+            backgroundcolor transparent
+            'borderColor transparent
+            linethickness 2
+            textcolor white
+            fontcolor transparent
+            fontsize 0
+        }
+
+        component {
+            .Person {
+                backgroundcolor transparent
+                lineColor transparent
+                linethickness 1
+                fontsize 14
+                fontstyle Bold
+            }
+        }
+
+        rectangle {
+            linethickness 1
+            fontstyle bold
+            backgroundcolor #f0f0f0
+
+            .Внешняя {
+                linecolor gray
+                header {
+                    backgroundcolor lightblue/%lighten("#lightblue", 40)
+                }
+            }
+
+            .Нецелевая {
+                linecolor gray
+                fontcolor white
+                'stereotypefontcolor darkgray
+                backgroundcolor #006600-%lighten("#006600", 40)
+            }
+
+            .Нецелевая модифицируется {
+                linecolor red
+                'fontcolor white
+                'stereotypefontcolor darkgray
+                backgroundcolor #006600/%lighten("#006600", 40)
+            }
+
+            .Целевая требуется выбор {
+                linecolor red
+                backgroundcolor orange/%lighten("#orange", 40)
+            }
+
+            .Целевая разработка {
+                linecolor red
+                backgroundcolor ffff8a/%lighten("#ffff8a", 40)
+            }
+
+            .Целевая частично внедрена {
+                backgroundcolor #ffff8a/%lighten("#ffff8a", 40)
+            }
+
+            .Целевая частично внедрена модифицируется {
+                linecolor red
+                backgroundcolor #ffff8a/%lighten("#ffff8a", 40)
+            }
+
+            .Целевая внедрена полностью {
+                backgroundcolor #92d050/%lighten("#92d050", 40)
+            }
+
+            .Целевая внедрена полностью модифицируется {
+                linecolor red
+                backgroundcolor #92d050/%lighten("#92d050", 40)
+            }
+        }
+    }
+</style>
+
+hide stereotype
+
+set namespaceSeparator none
+title {{&title}}
+
+@startuml
+hide << Внешняя >> stereotype
+
+{{#systems}}
+!if ({{is_external}})
+'rectangle "Внешние системы" as external_systems{
+!else
+'rectangle "Системы" as systems{
+!endif
+{{#groups}}
+rectangle "{{&title}}" as {{id}} {
+{{/groups}}
+!if ({{has_subsystems}})
+    rectangle "{{&title}}" as {{id}} <<{{notation}}>> [[/entities/kadzo.v2023.systems/card?id={{id}}]]{
+    {{#subsystems}}
+        class "{{&title}}" as {{id}} <<{{notation}}>> [[/entities/kadzo.v2023.systems/card?id={{id}}]]
+        !if ({{has_functions}})
+            {
+            {{#functions}}
+                {field} <color:{{color}}><size:8><U+25E6>{{&title}}</size></color>
+            {{/functions}}
+            }
+        !endif
+    {{/subsystems}}
+    }
+!else
+class "{{&title}}" as {{id}} << {{notation}} >> [[/entities/kadzo.v2023.systems/card?id={{id}}]]
+    !if ({{has_functions}})
+        {
+        {{#functions}}
+            {field} <color:{{color}}><size:8><U+25E6>{{&title}}</size></color>
+        {{/functions}}
+        }
+
+    !endif
+!endif
+{{#groups}}
+}
+{{/groups}}
+'}
+{{/systems}}
+
+
+{{#kb_systems}}
+rectangle "Системы КБ" {
+class "{{&title}}" as {{id}} << {{notation}} >> [[/entities/kadzo.v2023.kb_systems/card?id={{id}}]]
+{
+{field} <size:8><U+25E6> {{class}}</size>
+}
+}
+{{/kb_systems}}
+
+
+
+{{#tech_services}}
+rectangle "Технологические сервисы" {
+class "{{&title}}" as {{id}} << {{notation}} >> [[/entities/kadzo.v2023.tech_services/card?id={{id}}]]
+{
+{field} <size:8><U+25E6> {{class}}</size>
+}
+}
+{{/tech_services}}
+
+
+@enduml

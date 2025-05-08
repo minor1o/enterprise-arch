@@ -1,0 +1,37 @@
+entities:
+  kadzo.v2023.functions:
+    presentations:
+      summary:
+        title: Сводка по функциональности
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор функциональности
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $function_id := $params.id;
+            $ctx:= base;
+          
+            $append(
+              [
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $function_id}]
+                }
+              ],
+              $props_to_summary($function_id,
+                                $ctx."kadzo.v2023.functions",
+                                schema."kadzo.v2023.functions".schema.patternProperties.*.properties,
+                                $ctx, refs)
+            );
+          )

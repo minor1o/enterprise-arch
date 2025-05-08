@@ -1,0 +1,38 @@
+entities:
+  kadzo.v2023.products:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/products_errors.md
+        origin: kadzo.v2023.validators.products
+        source: >
+          (          
+              $domain_errors := $[domain=$params.domain and validator_type="products"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Продукта
+            link: link
+          - value: name
+            text: Название продукта
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.products
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="products" and error_group_code="general"] ];
+          )

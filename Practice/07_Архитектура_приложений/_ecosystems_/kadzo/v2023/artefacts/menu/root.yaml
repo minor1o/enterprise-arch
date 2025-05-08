@@ -1,0 +1,24 @@
+imports:
+  - business/goals.yaml
+  - business/strategy.yaml
+  - business/clients.yaml
+  - business/products.yaml
+  - business/channels.yaml
+  - business/processes.yaml
+  - information/business_objects.yaml
+  - information/data_objects.yaml
+  - application/functions.yaml
+  - application/systems.yaml
+  - application/tasks.yaml
+  - application/groups.yaml
+  - application/kb_systems.yaml
+  - application/integrations.yaml
+  - application/endpoints.yaml
+  - technical/tech_services.yaml
+  - technical/tech_params.yaml
+  - validation/root.yaml
+  - context/root.yaml
+  - schemas/root.yaml
+  - kadzo.yaml
+  - company_card/root.yaml
+  - docs/root.yaml

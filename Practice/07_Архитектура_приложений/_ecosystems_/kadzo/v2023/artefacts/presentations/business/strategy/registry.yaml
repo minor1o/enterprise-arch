@@ -1,0 +1,47 @@
+entities:
+  kadzo.v2023.strategy:
+    presentations:
+      registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: strategy
+            text: Задача стратегии
+            align: left
+            link: link
+          - value: goal
+            text: Бизнес-цель
+            align: left
+            link: goal_link
+          - value: horizont
+            text: Горизонт
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.strategy
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              ["kadzo.v2023.strategy".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.strategy/card?id=" & $keys()[0],
+                  "strategy": *.strategy,
+                  "goal": *.goal,
+                  "goal_link": "/entites/kadzo.v2023.goals/card?id=" & $keys()[0],
+                  "horizont": *.horizont,
+                  "comments": *.comments
+                  }
+              ]
+          )

@@ -1,0 +1,11 @@
+imports:
+  - registry.yaml
+  - card.yaml
+#  - card_plain.yaml
+  - summary.yaml
+  - software.yaml
+  - ta_params.yaml
+  - base_ta_params.yaml
+  - hadr_params.yaml
+  - backup_ta_params.yaml
+  - by_systems.yaml

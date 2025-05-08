@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.errors:
+    presentations:
+      allerrors:
+        type: table
+        headers:
+          - value: uid
+            text: Уникальный ID ошибки
+          - value: id
+            text: ID объекта
+            link: link
+          - value: name
+            text: Наименование объекта
+          - value: domain
+            text: Домен
+          - value: validator_type
+            text: Тип валидатора
+          - value: error_type
+            text: Тип ошибки
+          - value: error_text
+            text: Текст ошибки
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Наименование атрибута
+          - value: pattern
+            text: Паттерн
+          - value: description
+            text: Описание
+        origin: kadzo.v2023.validators
+        source: >
+          (
+              $domain := $params.domain;
+              $[domain = $domain]
+          )

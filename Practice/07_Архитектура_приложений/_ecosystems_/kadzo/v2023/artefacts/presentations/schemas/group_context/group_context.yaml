@@ -1,0 +1,173 @@
+entities:
+  kadzo.v2023.group_context:
+    config:
+      sber_frame: false
+      elk: true
+    data: >
+      (
+          $ctx := $.base;
+          $current_group_id := $params.group;
+           /* Находим группу, для которой строим контекст */
+          $current_group := {$current_group_id : $lookup($ctx."kadzo.v2023.groups", $current_group_id) };
+       
+          /* Вытаскиваем все дочерние группы */
+          $dgroups := $ctx."kadzo.v2023.groups";
+          /* Функция проверки, что группа gr является дочерней для группы parent */
+          $isChild := function($gr, $parent, $checked){(
+            $not($gr in $checked) ? (
+              $g := $lookup($dgroups, $gr);
+              $exists($g.parent) ? (
+                $g.parent = $parent ? true : (
+                  $ch := $append($checked, $gr);
+                  $isChild($g.parent, $parent, $ch);
+                )
+              ) : false
+            ) : false
+          )};
+      
+          $groups := $append($dgroups.$keys()[$isChild($, $current_group_id, [])], $current_group_id);
+          
+          /* Вытаскиваем системы, которые попадают в контекст */
+          $group_systems := $sift($ctx."kadzo.v2023.systems", function ($v, $k){ $v.group in $groups });
+      
+          /* Находим интеграции с системой */
+          $current_integrations :=$sift($ctx."kadzo.v2023.integrations", function ($v, $k){ $v.source in $group_systems.$keys() or $v.consumer in $group_systems.$keys() });
+          $extend_integrations := $sift($ctx."kadzo.v2023.integrations", function ($v, $k){$v.extends in $current_integrations.*.extends});
+          $current_integrations := $merge([$current_integrations, $extend_integrations]);
+          $domain_integrations := $current_integrations;
+      
+          /* Получаем все системы, которые встречаются в интеграциях */
+          $bound_systems := $sift($ctx."kadzo.v2023.systems", function($v, $k) {$k in [$current_integrations.*.source, $current_integrations.*.consumer]});
+
+          $context_systems := $merge([$bound_systems, $group_systems]);
+      
+          $ss := $context_systems;
+          $toSystem := function($v){(
+            $res := $v;
+            $parent_src := $lookup($ss, $v.*.source).parent;
+            $res := $exists($parent_src) ? { $res.$keys() : $merge([$res.*, {"source": $parent_src}])} : $res;
+            $parent_consumer := $lookup($ss, $v.*.consumer).parent;
+            $res := $exists($parent_consumer) ? { $res.$keys() : $merge([$res.*, {"consumer": $parent_consumer}])} : $res;
+          )};
+
+          $domain_integrations := $scParams.hide_fp ? $merge($domain_integrations.$spread().($toSystem($))) : $domain_integrations;
+      
+          $subsystems := $sift($context_systems, function($v, $k) { $exists($v.parent) });
+      
+          $parents_systems := $sift($ctx."kadzo.v2023.systems", function($v, $k){ $k in $subsystems.*.parent });
+      
+          $systems := $merge([$sift($context_systems, function($v, $k){$not($exists($v.parent))}), $parents_systems]);
+      
+          $endpoint_ids := [$domain_integrations.*.endpoint];
+          $ts_used_ep := $endpoint_ids.(
+            $point := $lookup($ctx."kadzo.v2023.endpoints", $);
+            $point.gates.($lookup($ctx."kadzo.v2023.tech_services", $) ? $)
+          );
+
+          $domain_tech_services := $ctx."kadzo.v2023.tech_services".$spread()[$.$keys()[0] in $ts_used_ep];
+      
+          $channels := $sift($ctx."kadzo.v2023.channels", function($v, $k){ ($v.systems)@$a1.($group_systems.$keys())@$a2[$a1=$a2].$k  } );
+      
+          $context_clients := $sift($ctx."kadzo.v2023.clients", function($v, $k){ $k in $channels.*.clients });
+
+            $r_systems := $each($systems, function($v, $k){(
+                 $scParams.hide_fp ? 
+                      ( $var := $lookup($$.schema.systems, $k); $var ~> | $ | {"has_subsystems" : 0 }, "subsystems" | )
+                      : $lookup($$.schema.systems, $k) 
+                )});
+            $r_channels := $each($channels, function($v, $k){(
+                   $lookup($$.schema.channels, $k)
+               )});
+             $mergedeep([
+                {
+                  "systems": $r_systems,
+                  "has_external": $count($r_systems[$.is_external = 1]) > 0 ? 1 : 0,
+                  "has_sber": $count($r_systems[$.is_sber = 1]) > 0 ? 1 : 0,
+                  "integrations": $each($domain_integrations, function($v, $k){(
+                                $merge([ $lookup($$.schema.integrations, $k), {"from": $v.source, "to": $v.consumer}])
+                          )}),
+                  "tech_services": $each($domain_tech_services, function($v, $k){(
+                              $lookup($$.schema.tech_services, $k)
+                          )}),
+                  "channels": $r_channels,
+                  "channels_links": [$r_channels.$spread().(
+                                        $channel := $.id;
+                                        $lookup($channels, $.id).systems.(
+                                            $exists($lookup($systems, $)) ? {"channel": $channel, "system": $} 
+                                                : $exists($lookup($subsystems, $)) ? {"channel": $channel, "system": $}  
+                                        )
+                                    )],
+                  "has_channels": $count($r_channels) > 0 ? 1 : 0,
+                  "clients": $each($context_clients, function($v, $k){(
+                                   $lookup($$.schema.clients, $k)
+                               )}),
+                  "clients_links": [$r_channels.$spread().(
+                                      $channel := $.id;
+                                      $lookup($channels, $.id).clients.({"client": $, "channel": $channel});
+                                    )]
+                },   
+                {"title": $scParams.title & " " & $current_group.*.title},
+                { "config": $merge([$.entities."kadzo.v2023.group_context".config, $.settings.schemas.group_schema])}
+             ])
+      )
+
+    presentations:
+      group_context_asis:
+        template: ../templates/arch_schema.puml
+        title: Схема контекста группы (текущая)
+        type: plantuml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $scParams := {"title":  "Текущий контекст группы"};
+              $eval(entities."kadzo.v2023.group_context".data);
+          )
+
+      group_context_asis_exclude_details:
+        template: ../templates/arch_schema.puml
+        title: Схема контекста группы (текущая, без ФП)
+        type: plantuml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $scParams := { "title":  "Текущий контекст группы (без ФП)", "hide_fp": true };
+              $eval(entities."kadzo.v2023.group_context".data);
+          )
+
+      group_context_tobe:
+        template: ../templates/arch_schema_to_be.puml
+        title: Схема контекста группы (целевая)
+        type: plantuml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title":  "Целевой контекст группы"};
+              $eval(entities."kadzo.v2023.group_context".data);
+          )
+
+      group_context_tobe_exclude_details:
+        template: ../templates/arch_schema_to_be.puml
+        title: Схема контекста группы (целевая, без ФП)
+        type: plantuml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title":  "Целевой контекст группы (без ФП)", "hide_fp": true };
+              $eval(entities."kadzo.v2023.group_context".data);
+          )

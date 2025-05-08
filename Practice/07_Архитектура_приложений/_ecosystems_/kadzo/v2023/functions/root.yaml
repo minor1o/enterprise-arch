@@ -1,0 +1,10 @@
+imports:
+  - v2022_migration_pack/root.yaml
+  - helpers/root.yaml
+  - validation/root.yaml
+  - completeness/root.yaml
+  - presentations/root.yaml
+  - criticality_passport/root.yaml
+
+  # Подключения пакета для получения среза КА ДЗО из SEAF
+  - seaf_slice_pack/root.yaml

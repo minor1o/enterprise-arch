@@ -1,0 +1,358 @@
+kadzo:
+    integrations.validation:
+      base_attributes: >
+        (
+            $objects := $.integrations."kadzo.v2023.integrations";
+            $obj_full := $.schema;
+            $check_list := ['description', 'status'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+                
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "integrations-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+    
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.description,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                        }
+                    ) : (
+                    $attr.enum ? (
+                        $not($value in $attr.enum) ? (
+                        {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.description,
+                              'error_type': 'Базовые атрибуты',
+                              'error_group_code': 'general',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                        }
+                        )
+                    )
+                );
+              )})
+            );
+        )
+
+      params_attributes: >
+        (
+            $objects := $.integrations."kadzo.v2023.integrations";
+            $obj_full := $.schema;
+            $check_list := ['async'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "integrations-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.description,
+                              'error_type': 'Атрибут "' & $attr.title & '"',
+                              'error_group_code': 'params',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                        }
+                    ) : (
+                        $attr.enum ? (
+                          $not($value in $attr.enum) ? (
+                              {
+                                    'uid': $uidpref & $id & "-notinlist",
+                                    'id': $id,
+                                    'name': $object.description,
+                                    'error_type': 'Атрибут "' & $attr.title & '"',
+                                    'error_group_code': 'params',
+                                    'attr_id': $attr_id,
+                                    'attr_name': $attr.title,
+                                    'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                                    'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                              }
+                          )
+                    ));
+              )})
+            );
+        )
+
+      change_attributes: >
+        (
+            $objects := $.integrations."kadzo.v2023.integrations";
+            $obj_full := $.schema;
+            $check_list := ['changes'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+
+            $check_list.(
+                  $attr_id := $.$keys();
+                  $attr := $.*;
+                  $uidpref := "integrations-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+
+                  $each($objects, function($object, $id){(
+                    $value := $lookup($object, $attr_id);
+                    $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                    $nullcheck := ($object.status = 'Дорабатывается') and ($exist = false) ? (
+                            {
+                                  'uid': $uidpref & $id & "-notexist",
+                                  'id': $id,
+                                  'name': $object.description,
+                                  'error_type': 'Атрибут "Описание изменений"',
+                                  'error_group_code': 'change',
+                                  'attr_id': $attr_id,
+                                  'attr_name': $attr.title,
+                                  'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым если поток в статусе "Дорабатывается"',
+                                  'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                            }
+                        );
+                    $statuscheck := $object.status = null or $exists($object.status) != true ? (
+                          {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.description,
+                              'error_type': 'Атрибут "Статус"',
+                              'error_group_code': 'change',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут "Статус" (status) не может быть пустым',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                          }
+                    );
+                    $append($nullcheck, $statuscheck)
+                  )})
+            );
+        )
+
+      src_dst_attributes: >
+        (
+            $objects := $.integrations."kadzo.v2023.integrations";
+            $systems := $.systems."kadzo.v2023.systems";
+            $obj_full := $.schema;
+            $check_list := ['source', 'consumer'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "integrations-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.description,
+                              'error_type': 'Атрибут "' & $attr.title & '"',
+                              'error_group_code': 'src_dst',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                        }
+                ) : (
+                    $value.(
+                      $rid := $;
+                      $not($exists($lookup($systems, $rid))) ? (
+                          {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.description,
+                              'error_type': 'Атрибут "' & $attr.title & '"',
+                              'error_group_code': 'src_dst',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $rid & '" не найдено среди идентификаторов "' & $ref_link & '"',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                          }
+                      )
+                      )
+                  );
+              )})
+            )
+        )
+
+      data_attributes: >
+        (
+            $objects := $.integrations."kadzo.v2023.integrations";
+            $data_objects := $.data_objects."kadzo.v2023.data_objects";
+            $obj_full := $.schema;
+            $check_list := ['data-objects'];
+            $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+
+            $check_list.(
+              $attr_id := $.$keys();
+              $attr := $.*;
+              $uidpref := "integrations-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+
+              $each($objects, function($object, $id){(
+                $value := $lookup($object, $attr_id);
+                $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+                $exist = false ? (
+                        {
+                              'uid': $uidpref & $id & "-notexist",
+                              'id': $id,
+                              'name': $object.description,
+                              'error_type': 'Атрибут "' & $attr.title & '"',
+                              'error_group_code': 'src_dst',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                        }
+                ) : (
+                    $value.(
+                        $rid := $;
+                        $not($exists($lookup($data_objects, $rid))) ? (
+                            {
+                                'uid': $uidpref & $id & "-notinlist",
+                                'id': $id,
+                                'name': $object.description,
+                                'error_type': 'Атрибут "' & $attr.title & '"',
+                                'error_group_code': 'src_dst',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $rid & '" не найдено среди идентификаторов "' & $ref_link & '"',
+                                'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                            }
+                        )
+                    )
+                );
+              )})
+            )
+        )
+
+      status: >
+        (
+            $objects := $.integrations."kadzo.v2023.integrations";
+            $csystems := $.systems."kadzo.v2023.systems";
+
+            $matcher := {
+                'Эскиз': ['Создается'],
+                'В разработке / приобретение': ['Создается'],
+                'Внедрение / Не введена в эксплуатацию': ['Создается', 'Дорабатывается'],
+                'Опытная эксплуатация': ['Создается', 'Дорабатывается', 'Используется', 'Удаляется'],
+                'Промышленная эксплуатация': ['Создается', 'Дорабатывается', 'Используется', 'Удаляется']
+            };
+
+            $each($objects, function($object, $id){(
+              $consumer := $object.consumer and $exists($lookup($csystems, $object.consumer)) ? {$object.consumer : $lookup($csystems, $object.consumer) };
+              $source := $object.source and $exists($lookup($csystems, $object.source)) ? {$object.source: $lookup($csystems, $object.source)};
+              /* Исключаем АС Экосистемы из проверки */
+              /* Исключили */
+              $sum_systems := [];
+              $exists($lookup($consumer.*, "live-stage")) and $consumer.*."live-stage" ? $sum_systems := $append($sum_systems, $consumer);
+              $exists($lookup($source.*, "live-stage")) and $source.*."live-stage" ? $sum_systems := $append($sum_systems, $source);
+              $disabled := 'Архивная' in $sum_systems.*."live-stage" or 'Отменена' in $sum_systems.*."live-stage" ? true : false;
+              $disabled_system := $sum_systems[*."live-stage" in ['Архивная', 'Отменена']];
+              $valid := $count($sum_systems) > 1 ?
+                                      $distinct(($lookup($matcher, $consumer.*."live-stage"))@$a1.($lookup($matcher, $source.*."live-stage"))@$a2[$a1 = $a2].$append($a1, $a2))
+                                      :
+                                          $distinct($lookup($matcher, $sum_systems.*."live-stage"));
+              $disabled ?
+                          {
+                              'id': $id,
+                              'uid': 	'integrations-status-v1-' & $id & "-invalid",
+                              'name': $object.description,
+                              'error_type': 'Статус интеграционного потока',
+                              'error_group_code': 'status',
+                              'attr_id': 'kadzo.v2023.integrations',
+                              'attr_name': 'Интеграции',
+                              'error_text': 'Система ' & $disabled_system.*.title & ' (' & $disabled_system.$keys()[0] & ') имеет статус "Архивная" или "Отменена". Интеграционного потока с системами в статусе "Архивная" или "Отменена" не должно существовать. Удалите этот интеграционный поток.',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                          }
+                      :
+                      $not($object.status in $valid) ?
+                          {
+                              'id': $id,
+                              'uid': 	'integrations-status-v1-' & $id & "-correlationerror",
+                              'name': $object.description,
+                              'error_type': 'Статус интеграционного потока',
+                              'error_group_code': 'status',
+                              'attr_id': 'status',
+                              'attr_name': 'Статус информационных потоков',
+                              'error_text': 'Проверьте, что установленное значение атрибута "Статус интеграционного потока" коррелирует со значением атрибутов "Этап жизненного цикла (текущий) / live-stage" АС Источника и АС потребителя.',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                          }
+            )})
+
+        )
+
+      integrations_endpoints_consist: >
+        (
+            $objects := $.integrations."kadzo.v2023.integrations";
+            $endpoints := $.endpoints."kadzo.v2023.endpoints";
+
+            $each($objects, function($object, $id){(
+              $result1 := $exists($object.endpoint) and $object.'technical-use'="По запросу" ?
+              (
+                $object.
+                (
+                      $name := $.description;
+                      $ep_id := $.endpoint;
+                      $ep_obj := $lookup($endpoints, $ep_id);
+                      $owners := $ep_obj.owners;
+                      $src := $.source;
+                      $a := $exists($src) and $not($src in $owners) ?
+                      (
+                          {
+                              'id': $id,
+                              'uid': 	'integrations-endpoints-consist-v1-' & $id & "-invalid",
+                              'name': $name,
+                              'error_type': 'ФЛК - Требования по заполнению архитектуры (проверка корректности вносимых данных)',
+                              'error_group_code': 'endPoint',
+                              'attr_id': 'kadzo.v2023.integrations',
+                              'attr_name': 'Интеграции',
+                              'error_text': 'Значение поля Source интеграционного потока не найдено в массиве значений поля owners точки взаимодействия ' & $ep_id & ' : "' & $ep_obj.title & '"',
+                              'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                          }
+                      );
+                )
+              );
+              $result2 := $exists($object.endpoint) and $object.'technical-use'="По событию" ?
+              (
+                  $object.
+                  (
+                      $name := $.description;
+                      $ep_id := $.endpoint;
+                      $ep_obj := $lookup($endpoints, $ep_id);
+                      $owners := $ep_obj.owners;
+                      $cns := $.consumer;
+                      $a := $exists($cns) and $not($cns in $owners) ?
+                          (
+                              {
+                                  'id': $id,
+                                  'uid': 	'integrations-endpoints-consist-v1-' & $id & "-invalid",
+                                  'name': $name,
+                                  'error_type': 'ФЛК - Требования по заполнению архитектуры (проверка корректности вносимых данных)',
+                                  'error_group_code': 'endPoint',
+                                  'attr_id': 'kadzo.v2023.integrations',
+                                  'attr_name': 'Интеграции',
+                                  'error_text': 'Значение поля Consumer интеграционного потока не найдено в массиве значений поля owners точки взаимодействия ' & $ep_id & ' : "' & $ep_obj.title & '"',
+                                  'link': '/entities/kadzo.v2023.integrations/card?id=' & $id
+                              }
+                          );
+                  )
+              );
+              $append($result1, $result2)
+            )})
+         )

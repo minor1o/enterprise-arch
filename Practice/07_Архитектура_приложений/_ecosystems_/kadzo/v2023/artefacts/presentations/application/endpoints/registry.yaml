@@ -1,0 +1,72 @@
+entities:
+  kadzo.v2023.endpoints:
+    presentations:
+      domain_registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+          - value: uri
+            text: URI
+            align: left
+          - value: status
+            text: Статус
+          - value: owners
+            text: АС, обеспечивающие функционирование точки взаимодействия
+          - value: gates
+            text: АС / тех сервисы, обеспечивающие транспорт точки взаимодействия
+          - value: technology
+            text: Технология интеграции
+          - value: technical-use
+            text: Механизм использования
+          - value: protected
+            text: Средства защиты точки взаимодействия
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              $systems := $."kadzo.v2023.systems";
+              $tech_services := $."kadzo.v2023.tech_services";
+              [$."kadzo.v2023.endpoints".$spread()[$.$keys() ~> $matcher].{
+                      "id": $keys()[0],
+                      "link": "/entities/kadzo.v2023.endpoints/card?id=" & $keys()[0],
+                      "title": *.title,
+                      "uri": *.uri,
+                      "status": *.status,
+                      "owners": $join([
+                                  *.owners.(
+                                      $var := $lookup($systems, $);
+                                      $exists($var) ? $var.title : $)
+                                  ], "\n"),
+                      "gates": $join([
+                              *.gates.(
+                                      $var := $lookup($systems, $);
+                                      $exists($var) ? $var.title : 
+                                          (
+                                              $tech_var := $lookup($tech_services, $);
+                                              $exists($tech_var) ? $tech_var.title : $; 
+                                          )
+                                      )
+                                  ], "\n"),
+                      "technology": *.technology,
+                      "technical-use": *."technical-use",
+                      "protected": $join([*.protected], "\n"),
+                      "comments": $join([*.comments], "\n")
+                  }
+              ];
+          )

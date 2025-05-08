@@ -1,0 +1,18 @@
+entities:
+  kadzo.v2023.goals:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/goals_errors.md
+        origin: kadzo.v2023.validators.goals
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="goals"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "iserrors" : $boolean($errors)
+              }
+          )

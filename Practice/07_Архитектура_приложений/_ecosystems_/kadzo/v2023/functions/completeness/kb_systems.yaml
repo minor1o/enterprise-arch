@@ -1,0 +1,54 @@
+kadzo:
+  kb_systems.completeness:
+    kb_systems_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $kb_systems := $all."kadzo.v2023.kb_systems".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "kb_systems"];
+          $validators := $validators[domain = $domain];
+          $rules := rules.exceptions.$keys();
+          $matcher := $eval('/^' & "kb_systems" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_status := 1;
+          $weight_desc := 1;
+          $weight_class := 1;
+          $weight_location := 1;
+          $weight_title := 1;
+          $weight_kb_systems:= $weight_title + $weight_status + $weight_desc + $weight_class + $weight_location;
+            $valid_title := [$validators[($.attr_id="title")].id];
+            $valid_status := [$validators[($.attr_id="status")].id];
+            $valid_desc := [$validators[($.attr_id="description")].id];
+            $valid_class := [$validators[($.attr_id="class")].id];
+            $valid_location := [$validators[($.attr_id="location")].id];
+            $test_title:=$kb_systems.(($keys() in $valid_title)? 0 : $weight_title);
+            $test_status:=$kb_systems.(($keys() in $valid_status) ? 0 : $weight_status);
+            $test_desc:=$kb_systems.(($keys() in $valid_desc) ? 0 : $weight_desc);
+            $test_class:=$kb_systems.(($keys() in $valid_class) ? 0 : $weight_class);
+            $test_location:=$kb_systems.(($keys() in $valid_location) ? 0 : $weight_location);
+      
+      
+          $total := $zip($test_desc, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_class) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_location) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_title) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_kb_systems});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_kb_systems;
+          $sum_except := $sum_except / $count($kb_systems);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($kb_systems));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )
+      
+      

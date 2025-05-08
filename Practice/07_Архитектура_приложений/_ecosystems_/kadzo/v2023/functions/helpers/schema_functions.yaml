@@ -1,0 +1,138 @@
+kadzo:
+  helpers.functions:
+    schema_data: >
+      (
+          $ctx := ctx;
+          $v_systems := var.systems;
+          $v_functions := var.functions;
+          $v_subsystems := var.subsystems;
+          $v_groups := var.groups;
+          $v_integrations := var.integrations;
+          $v_channels := var.channels;
+          $v_clients := var.clients;
+          $v_tech_services := var.tech_services;
+          
+          $asis := var."meta-inf"."schema-type" = "as-is";
+      
+          /*$log($v_functions, "[schema_data]: functions");*/
+      
+          /* Вычисляем родительские группы */
+          $groups_tree := $each($v_groups, function($v, $k){(
+            $sg := $eval($ctx.kadzo."helpers.functions".extract_parent_groups, {"var": {"group_id": $k, "groups": $v_groups}});
+            $sg := $reverse([$sg.(
+                      $g := $lookup($v_groups, $);
+                      $exists($g) ?
+                      {
+                        "id": $,
+                        "title": $g.title
+                      }
+                    )]);
+            {$k : $sg};
+          )}) ~> $merge();
+          /*$log($groups_tree, "[schema_data]: groups_tree");*/
+      
+          /* todo: костыль. вычисление цветовой нотации в данных */
+          $getFunctionColor := function($functionStatus) {(
+            $asis ? 'black' : ($functionStatus = "Используется" ? 'black' : "red");
+          )};
+      
+          $function_notation := $each($v_functions, function($v, $k){(
+              $icon := $not($asis) ? [$lookup({
+                  "Удаляется": "❌",
+                  "Планируется": "➕"
+                  }, $v.status), ""][0];
+              { $k : {"title": $icon & $v.title, "color": $getFunctionColor($v.status)} };
+          )}) ~> $merge();
+      
+          /* Делаем обратный маппинг система -> список функций */
+          $system_functions := $eval($ctx.kadzo."helpers.functions".system_functions, {"ctx": $ctx, "var": $v_functions});
+          $systems_subsystems := $v_subsystems.$spread() {$.*.parent: {"subsystems": [$.$keys()] }};
+          /* Атачим к подсистемам функции */
+          $subsystems := $each($v_subsystems, function($v, $k){(
+            $fnames := $map($lookup($system_functions, $k)."function", function($obj) {(
+                        $lookup($function_notation, $obj); 
+                       )});
+            {
+              $k :
+              { 
+                "id": $k,
+                "title": $v.titleIcon & $v.title,
+                "notation": $v.notation,
+                "has_functions": $count($fnames) ? 1 : 0,
+                "functions": $fnames
+              }
+            }
+          )}) ~> $merge();
+          /* Атачим к системам подсистемы (с функциями) и сами функции */
+          $systems := [$each($v_systems, function ($v, $k){(
+            $fnames := $map($lookup($system_functions, $k)."function", function($obj) {(
+                          $lookup($function_notation, $obj);
+                         )});
+            $ss := [$lookup($systems_subsystems, $k).subsystems.($lookup($subsystems, $))];
+            {
+              $k :
+              { 
+                "id": $k,
+                "title": $v.titleIcon & $v.title,
+                "notation": $v.notation,
+                "has_functions": $count($fnames) ? 1 : 0,
+                "functions": $fnames,
+                "groups": $v.group ? $lookup($groups_tree, $v.group),
+                "is_sber": $split($k, ".")[0] = "sber" or 
+                              $count($sg[$split($.id, ".")[0] = "sber"]) > 0
+                              ? 1 : 0,
+                "is_external": *.location = "Внешняя" ? 1 : 0,
+                "has_subsystems": $count($ss) ? 1 : 0,
+                "subsystems": $ss
+              }
+            }
+          )})];
+          /*$log($systems, "schema data func: systems");*/
+
+          $res_channels := [$each($v_channels, function ($v, $k){(
+                  $icon := $not($asis) ? [$lookup({
+                      "Выводится": "❌    ",
+                      "Создается": "➕    "
+                      }, $v.status), ""][0];
+                  {"id": $k, "title": $icon & $v.title, "type": $v.location, "description": $v.description}
+              )})];
+      
+          /* Собираем результат */
+          {
+            "systems": $systems.($.*),
+            "has_external": $count($systems[$.is_external = 1]) > 0 ? 1 : 0,
+            "has_sber": $count($systems[$.is_sber = 1]) > 0 ? 1 : 0,
+            "integrations": [$each($v_integrations, function ($v, $k){({
+                                  "id": $k,
+                                  "link_id": $v.extends ? $v.extends : $k,
+                                  "direction": $v.'technical-use' = 'По запросу' ? '<-up-' : $v.'technical-use' = 'По событию' ? '-down->' : '--',
+                                  "from": $v.source,
+                                  "to": $v.consumer,
+                                  "is_new": $asis ? 0 : ($v.status = "Создается" ? 1 : 0),
+                                  "is_deleted": $asis ? 0 : ($v.status = "Удаляется" ? 1 : 0),
+                                  "code_icon": $not($asis) ? [$lookup({
+                                            "Удаляется": "<U+002B>",
+                                            "Создается": "<U+002B>"
+                                            }, $v.status)][0],
+                                  "code": $v.code,
+                                  "color": [$lookup({
+                                      "Создается": "red",
+                                      "Удаляется": "red",
+                                      "Дорабатывается": "red"
+                                  }, $not($asis) ? $v.status), "black"][0]
+                            })})],
+            "tech_services": [$each($v_tech_services, function ($v, $k){({"id": $k, "title": $v.title})})],
+            "channels": $res_channels,
+            "channels_links": [$each($v_channels, function ($v, $k){(
+                                  $v.systems.(
+                                      $exists($lookup($systems, $)) ? {"channel": $k, "system": $} 
+                                          : $exists($lookup($subsystems, $)) ? {"channel": $k, "system": $}  
+                                  )
+                              )})],
+            "has_channels": $count($res_channels) > 0 ? 1 : 0,
+            "clients": [ $each($v_clients, function ($v, $k){({"id": $k, "title": $v.title})}) ],
+            "clients_links": [ $each($v_channels, function ($v, $k){(
+                                $v.clients.{"client": $, "channel": $k};
+                              )})]
+          };
+      )

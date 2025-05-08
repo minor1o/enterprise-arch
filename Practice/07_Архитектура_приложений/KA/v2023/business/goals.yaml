@@ -1,0 +1,28 @@
+kadzo.v2023.goals:
+  ecogroup.bike_rent.goals.id1:
+    goal: В течение 1 года привлечь 60% крупных арендодателей территории на нашу платформу
+    horizont: q2 2026
+
+  ecogroup.bike_rent.goals.id2:
+    goal: Через 1 год работы колиество сделок, заключенных через платформу > 500
+    horizont: q2 2026
+
+  ecogroup.bike_rent.goals.id3:
+    goal: Через 1 год работы количество уникальных пользователей платформы > 5000
+    horizont: q2 2026
+
+  ecogroup.bike_rent.goals.id4:
+    goal: Количество обращений в службу поддержки не более 2% от количества сделок
+    horizont: q2 2026
+
+  ecogroup.bike_rent.goals.id5:
+    goal: По окончании года CSI не менее 85%
+    horizont: q2 2026
+
+  ecogroup.bike_rent.goals.id6:
+    goal: "Обеспечить 3 альтернативных способа финансовых расчётов за аренду: 1. Перед на криптокошелек; 2. Наличные арендодателю; 3. Перевод на рублевый счет платформы"
+    horizont: q2 2026
+
+  ecogroup.bike_rent.goals.id7:
+    goal: Наше решение должно быть легко переносимым на другие территории
+    horizont: q2 2026

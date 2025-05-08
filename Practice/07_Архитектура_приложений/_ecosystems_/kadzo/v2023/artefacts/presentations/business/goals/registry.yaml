@@ -1,0 +1,41 @@
+entities:
+  kadzo.v2023.goals:
+    presentations:
+      registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: goal
+            text: Бизнес-цель
+            align: left
+            link: link
+          - value: horizont
+            text: Горизонт
+            sortable: true
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.goals
+
+        source: > 
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              ["kadzo.v2023.goals".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.goals/card?id=" & $keys()[0],
+                  "goal": *.goal,
+                  "horizont": *.horizont,
+                  "comments": *.comments
+                  }]
+          )

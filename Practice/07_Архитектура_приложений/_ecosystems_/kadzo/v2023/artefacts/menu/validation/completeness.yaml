@@ -1,0 +1,16 @@
+entities:
+  kadzo.validation.full:
+    menu: >
+      (
+          $not($exists(sber.kadzo.enterprise_mode)) and (sber.kadzo.menu.completeness.enabled = true or $not($exists(sber.kadzo.menu.completeness.enabled))) ? (
+              $domain := sber.domain;
+              $menu_root := ($exists(sber.kadzo.menu.completeness.roots) and $count(sber.kadzo.menu.completeness.roots) > 0 and $not(sber.kadzo.menu.completeness.roots = null))  ? sber.kadzo.menu.completeness.roots :
+                  $exists(sber.kadzo.menu_root) ? sber.kadzo.menu_root : "Документы/Архитектура/КА ДЗО/2023";
+              [$menu_root.(
+                  {
+                      'location': $ & '/Проверки КА ДЗО',
+                      'link': 'entities/kadzo.v2023.full/completeness.full_md?domain=' & $domain
+                  }
+              )]
+          )   
+      )

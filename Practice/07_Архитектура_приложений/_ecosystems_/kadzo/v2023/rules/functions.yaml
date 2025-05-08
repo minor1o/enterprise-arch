@@ -1,0 +1,101 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.functions.general:
+      uid: functions-error-general
+      description: >
+        В атрибутах заполнены поля "Наименование", "Описание".
+      title: Общие параметры
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.functions
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="functions" and error_group_code="general"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.functions.target:
+      uid: functions-error-target
+      description: >
+        Заполнен атрибут "Целевое размещение функциональности". Значение атрибута соответствует справочнику.
+      title: Целевое размещение функциональности
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.functions
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="functions" and error_group_code="target"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.functions.systems:
+      uid: functions-error-systems
+      description: >
+        Для каждой функциональности должны быть указаны АС, в которых она реализована или планируется к реализации со ссылкой на связанный реестр (Р11_АС)
+      title: АС
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.functions
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="functions" and error_group_code="systems"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )
+
+    kadzo.metamodel.v2023.functions.status:
+      uid: functions-error-status
+      description: >
+        Заполнен атрибут "Статус". Значение атрибута соответствует справочнику.
+      title: Статус
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.functions
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="functions" and error_group_code="status"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

@@ -1,0 +1,42 @@
+kadzo.v2023.data_objects:
+  ecogroup.bike_rent.data_objects.leaser:
+    title: Карточка арендатора
+    category: Перс данные
+    business_object: ecogroup.bike_rent.business_objects.leaser
+    master_system: ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется
+  
+  ecogroup.bike_rent.data_objects.lessor:
+    title: Карточка арендодателя
+    category: Перс данные
+    business_object: ecogroup.bike_rent.business_objects.lessor
+    master_system: ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется
+
+  ecogroup.bike_rent.data_objects.order:
+    title: Данные заказа
+    category: Прочее
+    business_object: ecogroup.bike_rent.business_objects.order
+    master_system: ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется
+
+  ecogroup.bike_rent.data_objects.contract:
+    title: Данные договора
+    category: Прочее
+    business_object: ecogroup.bike_rent.business_objects.contract
+    master_system: ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется
+
+  ecogroup.bike_rent.data_objects.bill:
+    title: Данные счёта
+    category: Прочее
+    business_object: ecogroup.bike_rent.business_objects.bill
+    master_system: ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется
+
+  ecogroup.bike_rent.data_objects.slip:
+    title: Данные чека
+    category: Прочее
+    business_object: ecogroup.bike_rent.business_objects.slip
+    master_system: ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется

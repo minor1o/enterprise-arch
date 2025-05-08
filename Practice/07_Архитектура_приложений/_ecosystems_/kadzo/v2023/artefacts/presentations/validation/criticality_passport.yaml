@@ -1,0 +1,39 @@
+entities:
+  kadzo.v2023.criticality_passport:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/criticality_passport_errors.md
+        origin: kadzo.v2023.validators.criticality_passports
+        source: >
+          (          
+              $domain_errors := $[domain=$params.domain and validator_type="criticality_passport"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.criticality_calculation:
+        type: table
+        headers:
+          - value: id
+            text: Id
+            link: link
+          - value: name
+            text: Название объекта данных
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.criticality_passports
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="criticality_passport" and error_group_code="general"] ];
+          )

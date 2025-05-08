@@ -1,0 +1,36 @@
+entities:
+  kadzo.v2023.channels:
+    presentations:
+      summary:
+        title: Сводка по каналу
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор канала
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $channel_id := $params.id;
+            $ctx:= base;
+            $append(
+              [
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $channel_id}]
+                }
+              ],
+              $props_to_summary($channel_id,
+                            $ctx."kadzo.v2023.channels",
+                            schema."kadzo.v2023.channels".schema.patternProperties.*.properties,
+                            $ctx, refs)
+            );
+          )

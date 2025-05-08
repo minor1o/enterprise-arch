@@ -1,0 +1,62 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      app_landscape:
+        title: Характеристики системы в IT-ландшафте
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        type: mkr-grid
+        widgets:
+          summary_ownership:
+            title: Модель владения
+            entity: kadzo.v2023.systems
+            presentation: summary_ownership
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          summary_livestage:
+            title: Жизненный цикл
+            entity: kadzo.v2023.systems
+            presentation: summary_livestage
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          system_context:
+            title: Контекст системы
+            presentation: contexts
+            entity: kadzo.v2023.systems
+            order: 20
+            style:
+              border: true
+              margin: 4px
+          integrations:
+            title: Интеграционные потоки
+            entity: kadzo.v2023.systems
+            presentation: integrations
+            order: 30
+            style:
+              margin: 4px
+              border: true
+          system_data_objects:
+            title: Объекты данных в системе
+            entity: kadzo.v2023.data_objects
+            presentation: system_data_objects
+            order: 40
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+              $lookup( $lookup($, "__widgets__.kadzo.v2023.systems.app_landscape"), $params.system_id);
+          )

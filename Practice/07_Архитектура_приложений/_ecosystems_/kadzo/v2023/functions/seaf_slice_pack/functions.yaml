@@ -1,0 +1,84 @@
+kadzo:
+  seaf_slice_pack:
+    functions: >
+      (
+          $domain := sber.domain;
+          $matcher := $eval('/^' & $domain & '/i');
+      
+          $propsMap := { 
+              "state" : "status"
+          };
+      
+          $statusMap := {
+              "Планируется" : "Планируется",
+              "Разрабатывается": "Разрабатывается или модифицируется", 
+              "Используется": "Используется",
+              "Изменяется": "Разрабатывается или модифицируется",
+              "Выводится (Удаляется)": "Удаляется"
+          };
+      
+          $propsMapper := function ($map, $x) { (
+            $var := $lookup($map, $x); 
+            $exists($var) ? $var : $x
+          )};
+            
+          $functions := $sift($.aspects, function ($v, $k) {$v.type="functionality" and $exists($v.sber)}) ;
+          $functions := [$each( $functions, function($v, $k){ 
+            (
+
+              $props := $map($v.sber.$spread(), function($v) {(
+                  $v.$keys() = "state" ?
+                      { $propsMapper($propsMap, $v.$keys()) : $propsMapper($statusMap, $v.*) }
+                      : { $propsMapper($propsMap, $v.$keys()) : $v.* }
+              )});
+              {$k: $merge([$v, $props])};
+            )}
+            )];
+            
+          $systems := $sift( $."components", function($v, $k){ $exists($v.sber) and ($v.sber.service_type = "Система" or $v.sber.service_type = "Функциональная подсистема")});
+      
+          /* Вытаскиваем внутренние системы (на основе матчинга доменного имени с разметкой sber) */
+          $internal_systems := $sift( $."components", function($v, $k){$k ~> $matcher and $exists($v.sber) and ($v.sber.service_type = "Система" or $v.sber.service_type = "Функциональная подсистема")});
+
+          /* 1. Получаем интеграции для определения "связанных" систем. */
+          /* Интеграции могут идти как от систем, так и от их компонент */
+          /* Интеграции от компонент поднимаем до уровня систем */
+          $systems_components := $sift($."components", function($v, $k){ $k ~> $matcher and $v.sber.is_component_of });
+          $integrations := $sift( $."seaf.app.integrations", function($v, $k){$k ~> $matcher and ($v.to in $internal_systems.$keys() or $v.from in $internal_systems.$keys() or $v.to in $systems_components.$keys() or $v.from in $systems_components.$keys())});
+
+          $integrations1 := $each($integrations, function($v, $k){(
+            	                $exists( $lookup($systems_components, $v.to) ) ? 
+                                    {$k : $merge([$v, {"to" : $lookup($systems_components, $v.to).sber.is_component_of}])} 
+                                    : {$k : $v}
+                                )});
+          $integrations2 := $each( $integrations, function($v, $k){(
+                                $exists( $lookup( $systems_components, $v.from) ) ?
+                                    {$k : $merge([$v, {"from" : $lookup($systems_components, $v.from).sber.is_component_of}])} 
+                                    : {$k : $v}
+                                )});
+
+          /* 2. Получаем системы, которые не принадлежат домену компании из интеграций */
+          $external_systems_ids := $append( 
+                                    $integrations1[$not($.*.to in $internal_systems.$keys())].*.to,
+                                    $integrations2[$not($.*.from in $internal_systems.$keys())].*.from
+                                    );
+
+          $external_systems := $sift( $."components", function($v, $k){ $exists($v.sber) and $k in $external_systems_ids});
+
+
+          $systems := $merge([$internal_systems, $external_systems]);
+
+          $tmp := $each( $systems, function($v, $k) {
+                    $map($v.aspects, function($obj) {({$k : $obj})})
+                  }).$map($, $append(?));
+            
+          $systems_in_functions := $tmp { $.* : [$.$keys()]};
+            
+          $functions := [$functions[$keys() ~> $matcher or $exists($lookup($systems_in_functions, $keys()))]];
+          
+          $functions := $functions ~> | $.* |  {"target": "Целевое"} |;
+          
+          $functions := $functions ~> | $ | {$.$keys() : $merge([$.*, {"systems": $seaf_single_array_mapper( $lookup($systems_in_functions, $.$keys()), $domain) }])} |;
+            
+            { "kadzo.v2023.functions": $merge($seaf_key_mapper([$functions], $domain)) };
+      )

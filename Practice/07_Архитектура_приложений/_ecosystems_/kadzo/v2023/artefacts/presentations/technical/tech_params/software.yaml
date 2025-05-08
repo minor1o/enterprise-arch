@@ -1,0 +1,28 @@
+entities:
+  kadzo.v2023.tech_params:
+    presentations:
+      software:
+        title: Прикладное ПО компонента
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор компонента
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+              $params_id := $params.id;
+              $ctx:= base;
+              $props_to_summary($params_id,
+                        $ctx."kadzo.v2023.tech_params",
+                        schema."kadzo.v2023.tech_params".schema."$defs"."kadzo.v2023.tech_params.software".properties,
+                        $ctx, refs);
+          )

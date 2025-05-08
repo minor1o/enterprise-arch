@@ -1,0 +1,60 @@
+entities:
+  menu.kadzo.v2023.enterprise.strategy:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Бизнес-архитектура/Бизнес стратегия",
+                    "link": "entities/kadzo.v2023.strategy/registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.strategy:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Бизнес-архитектура/Бизнес стратегия",
+                             "link": "/entities/kadzo.v2023.strategy/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.strategy:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: strategy
+            text: Задача стратегии
+            align: left
+          - value: horizont
+            text: Горизонт
+            align: left
+
+        origin:
+          strategy: kadzo.v2023.strategy
+          strategy_domains: kadzo.v2023.strategy_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(strategy."kadzo.v2023.strategy", function ($v, $k){({
+                  "domain": $lookup($$.strategy_domains."kadzo.v2023.strategy", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.strategy/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.strategy_domains."kadzo.v2023.strategy", $k).domain).title,
+                  "strategy": $v.strategy,
+                  "horizont": $v.horizont
+              })})]
+          )

@@ -1,0 +1,46 @@
+entities:
+  companies:
+    presentations:
+      company_systems:
+        type: markdown
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен компании
+              type: string
+          required:
+            - domain
+        template: templates/blank.md
+        source: >
+          (          
+              $domain := $params.domain;
+              $matcher := $eval('/^' & $domain & '\\./i');
+              $systems := $."kadzo.v2023.systems".$spread()[$.$keys() ~> $matcher];
+              $c_systems := $systems.$spread().$merge([{"domain": $domains, 'id': $keys()}, $.*]);
+              $company_systems := $c_systems[$not($exists(parent))];
+              $company_systems_internal := $company_systems[location!='Внешняя'];
+              $company_systems_external := $company_systems[location='Внешняя'];          
+              [
+                  {
+                      "title": "Mission Critical",
+                      "data": [{"content": $count($company_systems_internal[criticality='Mission Critical']) & '/' & $count($company_systems_external[criticality='Mission Critical'])}]
+                  },
+                  {
+                      "title": "Business Critical",
+                      "data": [{"content": $count($company_systems_internal[criticality='Business Critical']) & '/' & $count($company_systems_external[criticality = "Business Critical"])}]
+                  },
+                  {
+                      "title": "Business Operational",
+                      "data": [{"content": $count($company_systems_internal[criticality='Business Operational'])& '/' & $count($company_systems_external[criticality = "Business Operational"])}]
+                  },
+                  {
+                      "title": "Office Productivity",
+                      "data": [{"content": $count($company_systems_internal[criticality='Office Productivity'])& '/' & $count($company_systems_external[criticality = "Office Productivity"])}]
+                  },
+                  {
+                      "title": "Класс критичности отсутствует",
+                      "data": [{"content": $count($company_systems_internal[$not($exists(criticality))])& '/' & $count($company_systems_external[$not($exists(criticality))])}]
+                  }          
+              ];
+          )

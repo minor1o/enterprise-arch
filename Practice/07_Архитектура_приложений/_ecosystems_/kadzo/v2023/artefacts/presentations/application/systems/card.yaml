@@ -1,0 +1,31 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      card:
+        title: Карточка системы
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+#        origin: kadzo.v2023
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Описание системы
+            entity: kadzo.v2023.systems
+            presentation: wide_summary
+            order: 10
+          landscape:
+            title: Характеристики системы в IT-ландшафте
+            entity: kadzo.v2023.systems
+            presentation: system_in_landscapes
+            order: 20
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (          
+            $lookup( $lookup($, "__widgets__.kadzo.v2023.systems.card"), $params.id);
+          )

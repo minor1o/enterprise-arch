@@ -1,0 +1,72 @@
+entities:
+  kadzo.v2023.tech_params:
+    presentations:
+      tech_params_by_systems:
+        type: table
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        headers:
+          - value: type
+            text: Тип компонента
+          - value: software
+            text: Прикладное ПО
+          - value: vendor
+            text: Вендор
+          - value: scalability
+            text: Масштабируемость
+          - value: high_availibility
+            text: Отказоустойчивость
+          - value: ha_reservation_type
+            text: Тип резервирования мощностей в пределах одной зоны доступности
+          - value: ha_capacity_management
+            text: Полнота резервирования мощностей в пределах одной зоны доступности
+          - value: disaster_recovery
+            text: Катастрофоустойчивость
+          - value: dr_reservation_type
+            text: Тип резервирования мощностей в резервной зоне доступности
+          - value: dr_reservation_management
+            text: Полнота резервирования мощностей в резервной зоне доступности
+          - value: backup_placement
+            text: Место хранения бекапа
+          - value: backup_backup_placement
+            text: Место хранения дубликата бекапа
+          - value: monitoring
+            text: Мониторинг
+          - value: sec_zone
+            text: Зона безопасности
+        origin: kadzo.v2023.tech_params
+        source: >
+          (
+              [$sift($."kadzo.v2023.tech_params", function($v, $k){(
+                      $v.system = $params.id)
+                  }) ~>
+                    $each(?, function($v, $k){(
+                      {
+                          "id": $k,
+                          "system": $v.system,
+                          "type": $v.type,
+                          "software": $v.software,
+                          "vendor": $v.vendor,
+                          "scalability": $v.scalability,
+                          "high_availibility": $v.high_availability.type,
+                          "ha_reservation_type": $v.high_availability.capacity_reservation_type,
+                          "ha_capacity_management": $v.high_availability.capacity_management,
+                          "disaster_recovery": $v.disaster_recovery.type,
+                          "dr_reservation_type": $v.disaster_recovery.capacity_reservation_type,
+                          "dr_reservation_management": $v.disaster_recovery.capacity_management,
+                          "backup_placement": $v.backup.placement,
+                          "backup_backup_placement": $v.backup.backup_placement,
+                          "monitoring": $v.monitoring,
+                          "sec_zone": $v.sec_zone,
+                          "comments": $v.comments
+                      }
+                    )}
+                  )
+              ];
+          )

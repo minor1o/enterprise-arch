@@ -1,0 +1,16 @@
+entities:
+  kadzo.function_map.menu:
+    menu: >
+      (
+          $not($exists(sber.kadzo.enterprise_mode)) and (sber.kadzo.menu.schemas.enabled = true or $not($exists(sber.kadzo.menu.schemas.enabled))) ? (
+              $domain := sber.domain;
+              $menu_root := ($exists(sber.kadzo.menu.schemas.roots) and $count(sber.kadzo.menu.schemas.roots) > 0 and $not(sber.kadzo.menu.schemas.roots = null))  ? sber.kadzo.menu.schemas.roots :
+                  $exists(sber.kadzo.menu_root) ? sber.kadzo.menu_root : "Документы/Архитектура/КА ДЗО/2023";
+              [$menu_root.(
+                  {
+                      "location": $ & "/Схемы/Общие/Функциональная карта",
+                      "link": "/entities/kadzo.v2023.function_map/function_map_select?domain=" & $domain
+                  }
+              )]
+          )
+      )

@@ -1,0 +1,75 @@
+entities:
+  menu.kadzo.v2023.enterprise.processes:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Бизнес-архитектура/Бизнес-процессы",
+                    "link": "/entities/kadzo.v2023.processes/registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.processes:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Бизнес-архитектура/Бизнес-процессы",
+                             "link": "/entities/kadzo.v2023.processes/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.processes:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название
+            link: link
+          - value: description
+            text: Описание
+          - value: systems
+            text: Системы, обеспечивающие бизнес-процесс
+            align: left
+          - value: products
+            text: Связь с продуктами
+            align: left
+          - value: integrations
+            text: Связь с интеграционными потоками
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+            align: left
+
+        origin:
+          processes: kadzo.v2023.processes
+          processes_domains: kadzo.v2023.processes_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(processes."kadzo.v2023.processes", function ($v, $k){({
+                  "domain": $lookup($$.processes_domains."kadzo.v2023.processes", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.processes/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.processes_domains."kadzo.v2023.processes", $k).domain).title, 
+                  "title": $v.title,
+                  "description": $v.description,
+                  "systems": $v.systems,
+                  "products": $v.products,
+                  "integrations": $v.integrations,
+                  "comments": $v.comments
+              })})]
+          )

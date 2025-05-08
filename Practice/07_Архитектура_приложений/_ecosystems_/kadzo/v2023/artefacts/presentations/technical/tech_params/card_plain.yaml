@@ -1,0 +1,31 @@
+entities:
+  kadzo.v2023.tech_params:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/tech_params.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.tech_params".$spread()[$keys()[0] =$params.id].{
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.tech_params/card?id=" & $keys()[0],
+                "system": *.system,
+                "system_link": "/entities/kadzo.v2023.systems/card?id=" & *.system,
+                "type": *.type,
+                "software": *.software,
+                "vendor": *.vendor,
+                "scalability": *.scalability,
+                "high_availibility": *.high_availability.type,
+                "ha_reservation_type": *.high_availability.capacity_reservation_type,
+                "ha_capacity_management": *.high_availability.capacity_management,
+                "disaster_recovery": *.disaster_recovery.type,
+                "dr_reservation_type": *.disaster_recovery.capacity_reservation_type,
+                "dr_reservation_management": *.disaster_recovery.capacity_management,
+                "backup_placement": *.backup.placement,
+                "backup_backup_placement": *.backup.backup_placement,
+                "sec_zone": *.sec_zone,
+                "monitoring": *.monitoring
+            };          
+          )

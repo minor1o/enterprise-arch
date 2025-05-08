@@ -1,0 +1,31 @@
+entities:
+  kadzo.v2023.integrations:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/integrations.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.integrations".$spread()[$keys()[0] =$params.id].{
+              "id": $keys()[0],
+              "link": "/entities/kadzo.v2023.integrations/card?id=" & $keys()[0],
+              "description": *.description,
+              "source": *.source,
+              "source_link": $exists(*.source) ? "/entities/kadzo.v2023.systems/card?id=" & *.source,
+              "consumer": *.consumer,
+              "consumer_link": $exists(*.consumer) ? "/entities/kadzo.v2023.systems/card?id=" & *.consumer,
+              "data-objects": *."data-objects",
+              "technologies": *.technologies,
+              "technical-use": *."technical-use",
+              "async": *.async,
+              "status": *.status,
+              "protected": *.protected,
+              "load_average": *.load.average,
+              "load_max": *.load.maximum, 
+              "changes": *.changes,
+              "agreement": *.agreement,
+              "comments": *.comments
+            };          
+          )

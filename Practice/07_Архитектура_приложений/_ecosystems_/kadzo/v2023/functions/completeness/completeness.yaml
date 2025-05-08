@@ -1,0 +1,129 @@
+kadzo:
+  completeness:
+    full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $registry_count := 18;
+          $rules := $.rules;
+          $vl := $.validators;
+          $impl := $.impl;
+          $fn := $impl.kadzo."tech_params.completeness"."tech_params_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_tech_params := $number($valid."summary");
+          $result_tech_params_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."tech_services.completeness"."tech_services_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_tech_services := $number($valid."summary");
+          $result_tech_services_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."client.completeness"."clients_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $client_channel := $valid."errors";
+          $result_clients := $number($valid."summary");
+          $result_clients_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."systems.completeness"."systems_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_systems := $number($valid."summary");
+          $result_systems_ex := $number($valid."sum_except");
+          $system_function := $valid."errors";
+          $fn := $impl.kadzo."integrations.completeness"."integrations_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_integrations := $number($valid."summary");
+          $result_integrations_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."processes.completeness"."processes_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_processes := $number($valid."summary");
+          $result_processes_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."channels.completeness"."channels_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_channels := $number($valid."summary");
+          $result_channels_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."products.completeness"."products_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_products := $number($valid."summary");
+          $result_products_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."strategy.completeness"."strategy_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_strategy := $number($valid."summary");
+          $result_strategy_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."goals.completeness"."goals_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_goals := $number($valid."summary");
+          $result_goals_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."business_objects.completeness"."business_objects_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_business_objects := $number($valid."summary");
+          $result_business_objects_ex := $number($valid."sum_except");
+          $bo_do := $valid."errors";
+          $fn := $impl.kadzo."data_objects.completeness"."data_objects_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_data_objects := $number($valid."summary");
+          $result_data_objects_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."kb_systems.completeness"."kb_systems_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_kb_systems := $number($valid."summary");
+          $result_kb_systems_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."functions.completeness"."functions_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_functions := $number($valid."summary");
+          $result_functions_ex := $number($valid."sum_except");
+          $fn := $impl.kadzo."groups.completeness"."groups_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_groups := $number($valid."summary");
+          $result_groups_ex := $number($valid."sum_except");
+      
+          $fn := $impl.kadzo."endpoints.completeness"."endpoints_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_endpoints := $number($valid."summary");
+          $result_endpoints_ex := $number($valid."sum_except");
+      
+          $fn := $impl.kadzo."tasks.completeness"."tasks_full";
+          $valid := $eval($fn, {'domain': $domain, 'dataset' : $ka, 'validators' : $vl, 'rules' : $rules});
+          $result_tasks := $number($valid."summary");
+          $result_tasks_ex := $number($valid."sum_except");
+          $cross_system := $system_function ? 0 : 1;
+          $cross_bo := $bo_do ? 0 : 1;
+          $cross_client := $client_channel ? 0 : 1;
+          $cross:= ($cross_bo + $cross_client + $cross_system) / 3;
+          $cross := $cross ? $cross : 0;
+          $cross := $formatNumber($cross, '0.000000');
+          $cross := $substring($cross, 0, 4);
+          $cross_temp := $number($cross);
+      
+          $result := $sum([$result_tech_services, $result_tech_params, $result_clients, $result_systems,$result_integrations,$cross_temp]);
+          $result := $sum([$result, $result_processes, $result_channels, $result_products, $result_strategy, $result_goals, $result_endpoints]);
+          $result := $sum([$result, $result_business_objects, $result_data_objects, $result_kb_systems, $result_functions, $result_groups, $result_tasks]);
+          $result := $number($result) / $registry_count;
+          $result := $formatNumber($result, '0.000000');
+          $result := $substring($result, 0, 4); 
+      
+          $result_ex := $sum([$result_tech_services_ex, $result_tech_params_ex, $result_clients_ex, $result_systems_ex,$result_integrations_ex,$cross_temp]);
+          $result_ex := $sum([$result_ex, $result_processes_ex, $result_channels_ex, $result_products_ex, $result_strategy_ex, $result_goals_ex, $result_endpoints_ex]);
+          $result_ex := $sum([$result_ex, $result_business_objects_ex, $result_data_objects_ex, $result_kb_systems_ex, $result_functions_ex, $result_groups_ex, $result_tasks_ex]);
+          $result_ex := $number($result_ex) / $registry_count;
+          $result_ex := $formatNumber($result_ex, '0.000000');
+          $result_ex := $substring($result_ex, 0, 4);
+      
+          {"sum_except": $result_ex,
+          "summary" : $result,
+          "cross" : $cross,
+          "tech_params" : $result_tech_params,
+          "tech_services" : $result_tech_services,
+          "clients" : $result_clients,
+          "systems" : $result_systems,
+          "integrations" : $result_integrations,
+          "processes" : $result_processes,
+          "channels" : $result_channels,
+          "products" : $result_products,
+          "startegy" : $result_strategy,
+          "goals" : $result_goals,
+          "business_objects" : $result_business_objects,
+          "data_objects" : $result_data_objects,
+          "kb_systems" : $result_kb_systems,
+          "groups" : $result_groups,
+          "tasks" : $result_tasks,
+          "functions" : $result_functions
+          }
+      )
+      
+      

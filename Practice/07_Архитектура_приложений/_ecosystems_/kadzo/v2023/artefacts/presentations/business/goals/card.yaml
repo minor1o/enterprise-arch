@@ -1,0 +1,29 @@
+entities:
+  kadzo.v2023.goals:
+    presentations:
+      card:
+        title: Карточка бизнес-цели
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор цели
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по бизнес-цели
+            entity: kadzo.v2023.goals
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+                $lookup( $lookup($, "__widgets__.kadzo.v2023.goals.card"), $params.id);
+          )

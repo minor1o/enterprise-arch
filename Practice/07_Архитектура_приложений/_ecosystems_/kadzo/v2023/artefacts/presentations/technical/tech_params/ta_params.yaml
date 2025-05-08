@@ -1,0 +1,47 @@
+entities:
+  kadzo.v2023.tech_params:
+    presentations:
+      ta_params:
+        title: Параметры ТА
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор компонента с параметрами ТА
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          base_ta_params:
+            title: Базовые параметры ТА
+            entity: kadzo.v2023.tech_params
+            presentation: base_ta_params
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          hadr_params:
+            title: Отказоустойчивость и катастрофоустойчивость
+            entity: kadzo.v2023.tech_params
+            presentation: hadr_params
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          backup_ta_params:
+            title: Резервное копирование
+            entity: kadzo.v2023.tech_params
+            presentation: backup_ta_params
+            order: 20
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+              $lookup( $lookup($, "__widgets__.kadzo.v2023.tech_params.ta_params"), $params.id);
+          )

@@ -1,0 +1,297 @@
+'!pragma ratio 0.3
+!pragma horizontalLineBetweenDifferentPackageAllowed
+!pragma layout elk
+'Общее позиционирование
+
+allowmixing
+
+skinparam {
+
+    titleFontSize 40
+	wrapWidth 150
+
+	maxMessageSize 200
+
+	'hide stereotype
+
+	tabSize 5
+
+	defaultfontname Arial
+
+	roundCorner 10
+
+	linetype ortho
+
+	'linetype polyline
+
+	nodesep 20
+
+	ranksep 20
+
+	shadowing true
+	stereotypefontsize 8
+
+	'padding 10
+
+    hyperlinkColor black
+
+    hyperlinkUnderline false
+
+}
+
+'top to bottom direction
+'left to right direction
+
+hide circle
+
+hide empty members
+
+'Стили для (АС)
+
+skinparam class {
+
+    wrapWidth 250
+	fontsize 14
+
+	'attributeFontSize 10
+
+	fontstyle bold
+
+	borderthickness 1
+
+	attributefontsize 11
+	stereotypefontsize 9
+
+	bordercolor #4e4948
+
+    'hide stereotype
+    backgroundcolor #fcfcee
+
+	stereotypefontcolor<<Нецелевая>> darkgray
+	'fontcolor<<Нецелевая>> white
+	headerbackgroundcolor<<Нецелевая>> #006600-%lighten("#006600", 40)
+	bordercolor<<Нецелевая>> gray
+	'attributefontcolor<<Нецелевая>> white
+
+	'fontcolor<<Нецелевая модифицируется>> white
+	headerbackgroundcolor<<Нецелевая модифицируется>> #006600/%lighten("#006600", 40)
+	bordercolor<<Нецелевая модифицируется>> red
+	'attributefontcolor<<Нецелевая модифицируется>> white
+
+	headerbackgroundcolor<<Целевая требуется выбор>> orange/%lighten("#orange", 40)
+	bordercolor<<Целевая требуется выбор>> red
+
+	headerbackgroundcolor<<Целевая разработка>> ffff8a/%lighten("#ffff8a", 40)
+	bordercolor<<Целевая разработка>> red
+
+	headerbackgroundcolor<<Целевая частично внедрена>> #ffff8a/%lighten("#ffff8a", 40)
+
+	headerbackgroundcolor<<Целевая частично внедрена модифицируется>> #ffff8a/%lighten("#ffff8a", 40)
+	bordercolor<<Целевая частично внедрена модифицируется>> red
+
+	headerbackgroundcolor<<Целевая внедрена полностью>> #92d050/%lighten("#92d050", 40)
+
+	headerbackgroundcolor<<Целевая внедрена полностью модифицируется>> #92d050/%lighten("#92d050", 40)
+	bordercolor<<Целевая внедрена полностью модифицируется>> red
+
+	headerbackgroundcolor<<Внешняя>> lightblue/%lighten("#lightblue", 40)
+	bordercolor<<Внешняя>> gray
+
+	headerbackgroundcolor<<Технический сервис>> de924b/%lighten("de924b", 40)
+
+	'backgroundcolor<<Внешний>> lightblue
+	'bordercolor<<Внешний>> gray
+
+	'backgroundcolor<<Банк>> #e9f6dc
+
+}
+
+'Стили регионов
+
+skinparam rectangle {
+
+	borderthickness 2
+	fontstyle bold
+
+	attributefontsize 11
+
+	'sameClassWidth true
+
+	'padding 200
+
+	'ranksep 10
+	'bordercolor transparent
+	backgroundcolor #f0f0f0
+
+	bordercolor<<External-сеть>> transparent
+
+	backgroundcolor<<External-сеть>> #ddd5e4
+
+	bordercolor<<Internal-сеть>> transparent
+
+	backgroundcolor<<Internal-сеть>> #c5d7ef
+
+	borderstyle<<Группа систем>> dashed
+
+	bordercolor<< ДБ/ДЗО >> transparent
+
+	backgroundcolor<< ДБ/ДЗО >> #f0f0f0
+
+	bordercolor<<Каналы>> transparent
+
+	backgroundcolor<<Каналы>> #84b5f5
+
+	bordercolor<<Банк>> transparent
+
+	backgroundcolor<<Банк>> #e9f6dc
+
+	bordercolor<<ОЭ>> transparent
+
+	backgroundcolor<<ОЭ>> #a1f1dc
+
+	bordercolor<<Cloud>> transparent
+
+	backgroundcolor<<Cloud>> #a1f1dc
+
+	backgroundcolor<<Платформа>> #ffcc66
+
+}
+
+'Стили Person
+skinparam component<<Person>> {
+	backgroundColor Transparent
+	borderColor Transparent
+	shadowing false
+	hide stereotype
+	borderthickness 1
+	FontSize 14
+    FontStyle Bold
+}
+
+skinparam frame {
+    borderthickness 2
+	fontstyle bold
+	borderstyle dashed
+
+	'backgroundColor #ffcc66
+
+	attributefontsize 11
+}
+
+skinparam node {
+    borderthickness 1
+	fontstyle bold
+	borderStyle dashed
+
+	attributefontsize 11
+    backgroundcolor #GreenYellow/LightGoldenRodYellow
+}
+
+'hide stereotype
+hide <<>> stereotype
+
+set namespaceSeparator none
+title {{&title}}
+
+@startuml
+
+{{#clients}}
+    component {{id}} <<Person>> [
+        ..<size:42><&person,color=Blue></size>..
+        ..{{&title}}..
+    ]
+{{/clients}}
+
+!if ({{has_channels}})
+node "Каналы взаимодействия с клиентом" as channels_boundary{
+!endif
+    {{#channels}}
+        rectangle "{{&title}}" as {{id}}
+    {{/channels}}
+!if ({{has_channels}})
+}
+!endif
+
+{{#systems}}
+    {{#groups}}
+        rectangle "{{&title}}" as {{id}} {
+    {{/groups}}
+    !if ({{has_subsystems}})
+        frame "{{&title}}" as {{id}}.frame {
+        class "{{&title}}" as {{id}} <<{{notation}}>> [[/entities/kadzo.v2023.systems/card?id={{id}}]]
+        !if ({{has_functions}})
+            {
+            {{#functions}}
+                {field} <size:8><U+25E6> {{.}}</size>
+            {{/functions}}
+            {{#flow_data}}
+                 {method} <color:silver><size:8><U+25E6> {{.}} </size>
+            {{/flow_data}}
+            }
+        !else
+            {
+                {field}<size:8></size>
+            }
+        !endif
+
+        frame "Подсистемы {{&title}}" as {{id}}.sub {
+        {{#subsystems}}
+            class "{{&ss_title}}" as {{ss_id}} <<{{ss_notation}}>> [[/entities/kadzo.v2023.systems/card?id={{id}}]]
+            !if ({{ss_has_functions}})
+                {
+                {{#ss_functions}}
+                    {field} <size:8><U+25E6> {{&.}} </size>
+                {{/ss_functions}}
+                {{#ss_flow_data}}
+                    {method} <color:silver><size:8><U+25E6> {{&.}} </size>
+                {{/ss_flow_data}}
+                }
+            !else
+                {
+                    {field}<size:8></size>
+                }
+            !endif
+        {{/subsystems}}
+        }
+        }
+    !else
+    class "{{&title}}" as {{id}} << {{notation}} >> [[/entities/kadzo.v2023.systems/card?id={{id}}]]
+        !if ({{has_functions}})
+            {
+            {{#functions}}
+                {field} <size:8><U+25E6> {{&.}}</size>
+            {{/functions}}
+            {{#flow_data}}
+                {method} <color:silver><size:8><U+25E6> {{&.}} </size>
+            {{/flow_data}}
+            }
+        !else
+            {
+                {field}<size:8></size>
+            }
+        !endif
+    !endif
+    {{#groups}}
+    }
+    {{/groups}}
+{{/systems}}
+
+{{#tech_services}}
+    rectangle "Технические сервисы" {
+        class "{{&title}}" as {{id}} <<Технический сервис>>
+    }
+{{/tech_services}}
+
+{{#integrations}}
+    "{{from}}" ------> "{{to}}" #{{color}};text:{{color}} : [[/entities/kadzo.v2023.integrations/card?id={{link_id}} {{code}}]]
+{{/integrations}}
+
+{{#channels_links}}
+    {{channel}} -[dotted]down----- {{system}}
+{{/channels_links}}
+
+{{#clients_links}}
+    {{client}} -[dotted]down----- {{channel}}
+{{/clients_links}}
+
+@enduml

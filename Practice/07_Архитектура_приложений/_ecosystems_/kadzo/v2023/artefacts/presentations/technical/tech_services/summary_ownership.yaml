@@ -1,0 +1,28 @@
+entities:
+  kadzo.v2023.tech_services:
+    presentations:
+      summary_ownership:
+        title: Модель владения
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор технического сервиса
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $tech_service_id := $params.id;
+            $ctx:= base;
+            $props_to_summary($tech_service_id,
+                              $ctx."kadzo.v2023.tech_services",
+                              schema."kadzo.v2023.tech_services".schema."$defs"."kadzo.v2023.tech_services.ownership".properties,
+                              $ctx, refs)
+          )

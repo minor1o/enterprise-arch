@@ -1,0 +1,68 @@
+entities:
+  menu.kadzo.v2023.enterprise.business_objects:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Информационная архитектура/Бизнес-объекты",
+                    "link": "/entities/kadzo.v2023.business_objects/registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.business_objects:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Информационная архитектура/Бизнес-объекты",
+                             "link": "/entities/kadzo.v2023.business_objects/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.business_objects:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: status
+            text: Статус
+            align: left
+          - value: processes
+            text: Используется в бизнес-процессах
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin:
+          business_objects: kadzo.v2023.business_objects
+          business_objects_domains: kadzo.v2023.business_objects_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(business_objects."kadzo.v2023.business_objects", function ($v, $k){({
+                  "domain": $lookup($$.business_objects_domains."kadzo.v2023.business_objects", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.business_objects/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.business_objects_domains."kadzo.v2023.business_objects", $k).domain).title,
+                  "title": $v.title,
+                  "status": $v.status,
+                  "processes": $v.processes,
+                  "comments": $v.comments
+              })})]
+          )

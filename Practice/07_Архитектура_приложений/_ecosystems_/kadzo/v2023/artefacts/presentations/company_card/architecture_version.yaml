@@ -1,0 +1,33 @@
+entities:
+  companies:
+    presentations:
+      architecture_version:
+        type: markdown
+        template: templates/blank.md
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен компании
+              type: string
+          required:
+            - domain
+        source: >
+          (     
+                  $domain := $params.domain;
+                  $domain_data := sber.domains.$spread()[$keys()=$domain];
+                  [
+                      {"title": "Квартал актуализации архитектуры",
+                       "data": [
+                                  {"content": $domain_data.*.version.major}
+                               ]
+                      },
+                      {"title": "Номер версии",
+                       "data": [
+                                  {"content": $domain_data.*.version.patch}
+                               ]
+                      }
+          
+                  ];  
+
+          )

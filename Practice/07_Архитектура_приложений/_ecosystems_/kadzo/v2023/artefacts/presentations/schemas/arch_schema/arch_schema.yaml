@@ -1,0 +1,545 @@
+entities:
+  kadzo.v2023.arch_schema:
+    config:
+      sber_frame: false
+      elk: true
+    presentation_data: >
+      (
+        $ctx := $.base;
+        $domain := $params.domain;
+        $matcher := $eval('/^' & $domain & '\\./i');
+        $domain_systems :=$sift($.base."kadzo.v2023.systems", function($v, $k){$k ~> $matcher and $not($exists($v.parent))});
+        $domain_subsystems :=$sift($.base."kadzo.v2023.systems", function($v, $k){$k ~> $matcher and $exists($v.parent)});
+        $domain_functions :=$sift($.base."kadzo.v2023.functions", function($v, $k){$k ~> $matcher});
+        $domain_groups :=$sift($.base."kadzo.v2023.groups", function($v, $k){$k ~> $matcher});
+        $domain_integrations := $sift($.base."kadzo.v2023.integrations", function($v, $k){$k ~> $matcher});
+        $domain_channels := $sift($.base."kadzo.v2023.channels", function($v, $k){$k ~> $matcher});
+        $domain_clients := $sift($.base."kadzo.v2023.clients", function($v, $k){$k ~> $matcher});
+        $domain_tech_services := $sift($.base."kadzo.v2023.tech_services", function($v, $k){$k ~> $matcher});
+            
+        $ss := $sift($.base."kadzo.v2023.systems", function($v, $k){ $k ~> $matcher });
+      
+        $toSystem := function($v){(
+          $res := $v;
+          $parent_src := $lookup($ss, $v.*.source).parent;
+          $res := $exists($parent_src) ? { $res.$keys() : $merge([$res.*, {"source": $parent_src}])} : $res;
+          $parent_consumer := $lookup($ss, $v.*.consumer).parent;
+          $res := $exists($parent_consumer) ? { $res.$keys() : $merge([$res.*, {"consumer": $parent_consumer}])} : $res;
+        )};
+
+        $domain_integrations := $scParams.hide_fp ? $merge($domain_integrations.$spread().($toSystem($))) : $domain_integrations;
+      
+        $isExternal := function($v){(
+          $not($lookup($ss, $v.*.source).location = "Внутренняя" and $lookup($ss, $v.*.consumer).location = "Внутренняя"); 
+        )};
+        $domain_integrations := $scParams.ext_only ? $merge($domain_integrations.$spread()[$isExternal($)]) : $domain_integrations;
+            
+        $external_systems_id := $distinct($each($domain_integrations, function($v, $k){(
+                $tmp := [$not($exists($v.source ~> $matcher)) ? $v.source, $not($exists($v.consumer ~> $matcher)) ? $v.consumer];
+            )})).$map($, $append(?));
+      
+        $external_systems_id_from_channels := $distinct($each($domain_channels, function($v, $k){(
+              [$v.systems[$not($exists($ ~> $matcher))]]
+            )})).$map($, $append(?));
+        $external_systems_all_ids := $append($external_systems_id, $external_systems_id_from_channels);
+      
+        $external_systems := $sift($.base."kadzo.v2023.systems", function($v, $k){ $k in $external_systems_all_ids });
+            
+        $external_functions :=$sift($.base."kadzo.v2023.functions", function($v, $k){ $count($v.systems[$ in $external_systems_all_ids]) > 0 } );
+        $external_groups :=$sift($.base."kadzo.v2023.groups", function($v, $k){$k in $distinct($external_systems.*.group)});
+      
+        $systems := $merge([$domain_systems, $external_systems]);
+        $functions := $merge([$domain_functions, $external_functions]);
+        $groups := $merge([$domain_groups, $external_groups]);
+            
+        $domain_clients := $sift($domain_clients, function($v, $k){ $k in $domain_channels.*.clients });
+        $endpoint_ids := [$domain_integrations.*.endpoint];
+        $ts_used_ep := $endpoint_ids.(
+          $point := $lookup($$.base."kadzo.v2023.endpoints", $);
+          $point.gates.($lookup($$.base."kadzo.v2023.tech_services", $) ? $)
+        );
+      
+        $domain_tech_services := $sift($domain_tech_services, function ($v, $k) { $k in $ts_used_ep} );
+            
+        $r_systems := $each($systems, function($v, $k){(
+             $scParams.hide_fp ? 
+                  ( $var := $lookup($$.schema.systems, $k); $var ~> | $ | {"has_subsystems" : 0 }, "subsystems" | )
+                  : $lookup($$.schema.systems, $k) 
+            )});
+        $r_channels := $each($domain_channels, function($v, $k){(
+               $lookup($$.schema.channels, $k)
+           )});
+         $mergedeep([
+            {
+              "systems": $r_systems,
+              "has_external": $count($r_systems[$.is_external = 1]) > 0 ? 1 : 0,
+              "has_sber": $count($r_systems[$.is_sber = 1]) > 0 ? 1 : 0,
+              "integrations": $each($domain_integrations, function($v, $k){(
+                            $merge([ $lookup($$.schema.integrations, $k), {"from": $v.source, "to": $v.consumer}])
+                      )}),
+              "tech_services": $each($domain_tech_services, function($v, $k){(
+                          $lookup($$.schema.tech_services, $k)
+                      )}),
+              "channels": $r_channels,
+              "channels_links": [$r_channels.$spread().(
+                                    $channel := $.id;
+                                    $lookup($domain_channels, $.id).systems.(
+                                        $exists($lookup($systems, $)) ? {"channel": $channel, "system": $} 
+                                            : $exists($lookup($subsystems, $)) ? {"channel": $channel, "system": $}  
+                                    )
+                                )],
+              "has_channels": $count($r_channels) > 0 ? 1 : 0,
+              "clients": $each($domain_clients, function($v, $k){(
+                               $lookup($$.schema.clients, $k)
+                           )}),
+              "clients_links": [$r_channels.$spread().(
+                                  $channel := $.id;
+                                  $lookup($domain_channels, $.id).clients.({"client": $, "channel": $channel});
+                                )]
+            },   
+            { "title": $scParams.title },
+            { "config": $merge([$.entities."kadzo.v2023.arch_schema".config, $.settings.schemas.arch_schema])}
+         ])
+      )
+
+    presentation_data_sa_config:
+      config:
+        hideBoundaryTitles: false
+        hideLeafTitles: false
+        direction: column
+        height: 2000
+        grid:
+          - row:
+              - col: sber
+              - col: sber
+              - col: eco
+              - col: eco
+          - row:
+              - col: user
+              - col: channel
+              - col: dzo
+              - col: ext
+
+
+
+    presentation_data_sa: >
+      (
+        /* данные и настройки */
+        $data := $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+        $settings := $.settings.sber.kadzo.settings.smartants;
+        $domain := $params.domain;
+        $matcher := $eval('/^' & $domain & '\\./i');
+      
+        /* общие функции */
+        $idToTag := {
+          $domain: {
+            "systems": "dzo",
+            "external_systems": "ext",
+            "ecosystem": "eco"
+          },
+          "sber": {
+            "systems": "sber",
+            "ecosystem": "eco"
+          }
+        };
+      
+        $getTag := function($id, $object) {(
+          $object ? ( $res := (
+            $d :=  $id ~> $matcher 
+              ? {
+                  "domain": $domain,
+                  "subdomains": $object.is_external ? "external_systems" : "systems" 
+                } 
+              : (
+                  $domains := $split($id, ".");
+                  {
+                      "domain": $domains[0],
+                      "subdomains": $domains[1]
+                  }
+                );   
+            $lookup($lookup($idToTag, $d.domain), $d.subdomains);
+          );
+          $res ? $res : ($object.notation = 'Внешняя' ? 'ext');
+          )
+          : 'skip';
+        )};
+      
+        $notationToColor := $lookup($.settings.sber.kadzo.settings.notationToColor, $saParams.notation);
+        $notationToBorderColor := $lookup($.settings.sber.kadzo.settings.notationToBorderColor, $saParams.notation);
+        $notationToTitleColor := $lookup($.settings.sber.kadzo.settings.notationToTitleColor, $saParams.notation);
+
+        $convertSystem := function($system) {(
+          $system.{
+              "title": title,
+              "symbol": id,
+              "sa_id": id,
+              "hideTitle": true,
+              "background": ($color := $lookup($notationToColor, notation); $color ? $color : $settings.defaultColor),
+              "borderColor": $lookup($notationToBorderColor, notation),
+              "titleColor": $lookup($notationToTitleColor, notation),
+              "functions": functions.($.color="white" ? $merge([$, {"color": "black"}]) : $),
+              "tag": $getTag(id, $),
+              "link": "/entities/kadzo.v2023.systems/card?id=" & id
+            };
+        )};
+      
+        $convertTechServices := function($system) {(
+          $system.{
+              "title": title,
+              "symbol": id,
+              "sa_id": id,
+              "hideTitle": true,
+              "background": "#de924b",
+              "borderColor": $lookup($notationToBorderColor, notation),
+              "titleColor": $lookup($notationToTitleColor, notation),
+              "functions": functions.($.color="white" ? $merge([$, {"color": "black"}]) : $),
+              "tag": "dzo",
+              "link": "/entities/kadzo.v2023.tech_services/card?id=" & id
+            };
+        )};
+            
+        $getGroupId := function($groups){(
+            $join($groups.(
+                $join([$replace($.id, ".", ";" )], "groups;")
+            ),".");
+        )};
+        
+        /* рамки */
+        $extractGroups := function($groups){(
+            $result := [ { $getGroupId($groups) : {"id" : $groups[$count($groups)-1].id, "title" : $groups[$count($groups)-1].title}}];
+            $count($groups) > 1 ? $result := $append($result, $extractGroups($groups[[0..$count($groups)-2]]));
+            $result;
+        )};
+
+        $groupsFromSystems := $data.systems.(
+            $result := $extractGroups($.groups);
+        );
+        
+        $boundaries := $groupsFromSystems.{$keys(): {"title": $.*.title, "symbol": $.*.id, "sa_id": $.*.id, "tag": $getTag($.*.id), "hideTitle": true}};
+        $boundaries := $mergedeep([$boundaries, {"sber;groups;sber": {"background":"#e9f6dc", "opacity": 1, "symbol": "sber", "hideTitle": true}}]);
+      
+        $channelBoundary := {";channels;": {"title": "Каналы взаимодействия с клиентом", "symbol": "channels", "sa_id": "channels", "tag": "channel"}};
+      
+        $techServicesBoundary := $count($data.tech_services) ? {";tech_services;": {"title": "Технические сервисы", "tag": "dzo"}};
+      
+        $boundaries := $merge([$boundaries, $channelBoundary, $techServicesBoundary]);
+        $boundaries := $boundaries ~> | * | {"background": ($exists(background) ? background : $settings.defaultBackground) } |;
+      
+        $boundariesSymbols := $eval($.settings.sber.kadzo.settings.groupNode, 
+          {"nodes": $boundaries, "settings": $settings});
+            
+        /* ноды */
+        $users := $data.clients.{$replace(id, ".", ";" ): {"title": title, "symbol": "user", "sa_id": id, "tag": "user"}} ~> $merge();
+
+        $channels := $data.channels.{
+          ";channels;." & $replace(id, ".", ";") : {"sa_id": id, "title": title, "hideTitle": true, "symbol": id, "tag": "channel"}
+        } ~> $merge();
+      
+        $systems := $data.systems.(
+          $has_subsystems := $count(subsystems) > 0;
+          {
+              $getGroupId(groups) & "." & $replace(id, ".", ";" ): ( $convertSystem($) ~> | $ | (  $has_subsystems ? { "opacity": $settings.systemWithSubsOpacity } : {}  )| )
+          };
+        ) ~> $merge();
+      
+        $subsystems := $data.systems[$count(subsystems)>0].(
+          $sid := $getGroupId(groups) & "." & $replace(id, ".", ";" );
+          subsystems.(
+          { 
+              $sid & "." & $replace(id, ".", ";" ): $convertSystem($)
+          })
+        ) ~> $merge();
+      
+        $tech_services := $data.tech_services.{
+          ";tech_services;." & $replace(id, ".", ";") : $convertTechServices($)
+        } ~> $merge();
+      
+        $nodes := $merge([$boundaries, $users, $systems, $subsystems, $channels, $tech_services]);
+        $nodes := $nodes ~> | * | {"tag": ($exists(tag) ? tag : "skip") } |;
+      
+        /* символы */
+        $channelSymbols := $eval($.settings.sber.kadzo.settings.whiteNode, {"nodes": $channels, "settings": $settings});
+        
+        $systemSymbols := $eval($.settings.sber.kadzo.settings.systemNode, 
+          {"nodes": $merge([$systems, $subsystems, $systemsWithSubs]), "settings": $settings});
+      
+        $techServicesSymbols := $eval($.settings.sber.kadzo.settings.systemNode, 
+                  {"nodes": $tech_services, "settings": $settings});
+      
+        $log($systemSymbols, "symbols");
+      
+        $symbols := $merge([$boundariesSymbols, $systemSymbols, $channelSymbols, $techServicesSymbols, {"sber": $."sber.kadzo.v2023.symbols".sber}]);
+
+
+        /* связи */      
+        $nodesArray := $nodes.$spread();
+        
+        $linkStyle := function($int) {(
+          "-[#" & ($exists($int.color) ? $int.color : "black") & "]->";
+        )};  
+        
+        $linkTitle := function($int) {(
+          ($int.is_new ? "➕ " : $int.is_deleted ? "❌ ") & $int.code;
+        )};
+      
+        $systemLinks := ($data.integrations)@$int.{
+          "from": $nodesArray.*[sa_id = $int.from].%.$keys(), 
+          "to": $nodesArray.*[sa_id = $int.to].%.$keys(), 
+          "style": $linkStyle($int), 
+          "title": $linkTitle($int),
+          "link": "/entities/kadzo.v2023.integrations/card?id=" & $int.link_id
+        };
+      
+        $channelLinks := ($data.channels_links)@$int.{
+          "from": $nodesArray.*[sa_id = $int.channel].%.$keys(), 
+          "to": $nodesArray.*[sa_id = $int.system].%.$keys(), 
+          "style": $linkStyle($int), 
+          "title": $linkTitle($int)
+        };
+        $clientLinks := ($data.clients_links)@$int.{
+          "from": $replace($int.client, ".", ";"), 
+          "to": $nodesArray.*[sa_id = $int.channel].%.$keys(), 
+          "style": $linkStyle($int), 
+          "title": $linkTitle($int)
+        };
+        $links := $append($append($systemLinks, $channelLinks), $clientLinks);
+
+        
+        /* результат */
+        $mergedeep([$.settings.sber.kadzo.settings.smartants.global,
+          $.entities."kadzo.v2023.arch_schema".presentation_data_sa_config,
+          {
+            "header": {
+              "title": $saParams.title
+            },
+            "nodes": $nodes,
+            "links": $links,
+            "symbols": $symbols
+          }]);
+      )
+
+    presentations:
+      arch_schemas:
+        title: Архитектурная схема
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен
+              type: string
+          required:
+            - domain
+        type: mkr-select
+        source: >
+          (
+              $domain := $params.domain;
+              [
+                  {
+                      "title": "Текущая схема",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_as_is?domain=" & $domain
+                  },
+                  {
+                      "title": "Текущая схема (только внешний периметр)",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_as_is_ligth?domain=" & $domain
+                  },
+                  {
+                      "title": "Текущая схема (без ФП)",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_as_is_exclude_fp?domain=" & $domain
+                  },
+                  {
+                      "title": "Текущая схема (без ФП, внешний периметр)",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_as_is_exclude_fp_light?domain=" & $domain
+                  },
+                  {
+                      "title": "Целевая схема",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_to_be?domain=" & $domain
+                  },
+                  {
+                      "title": "Целевая схема (только внешний периметр)",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_to_be_light?domain=" & $domain
+                  },
+                  {
+                      "title": "Целевая схема (без ФП)",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_to_be_exclude_fp?domain=" & $domain
+                  },
+                  {
+                      "title": "Целевая схема (без ФП, внешний периметр)",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_to_be_exclude_fp_light?domain=" & $domain
+                  }
+              ]
+          )
+
+      smartants_arch_schemas:
+        title: Архитектурная схема (smart-ants)
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен
+              type: string
+          required:
+            - domain
+        type: mkr-select
+        source: >
+          (
+              $domain := $params.domain;
+              [
+                  {
+                      "title": "Текущая схема",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_as_is_sa?domain=" & $domain
+                  },
+                  {
+                      "title": "Целевая схема",
+                      "src": "@entity/kadzo.v2023.arch_schema/schema_to_be_sa?domain=" & $domain
+                  }
+              ]
+          )
+
+      schema_as_is:
+        type: plantuml
+        title: Текущая схема
+        template: ../templates/arch_schema.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source : >
+          (
+              $scParams := {"title": "Архитектурная схема as-is"};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_as_is_ligth:
+        type: plantuml
+        title: Текущая схема (только внешний периметр)
+        template: ../templates/arch_schema.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $scParams := {"title": "Архитектурная схема as-is (внешний периметр)", "ext_only": true};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_as_is_exclude_fp:
+        type: plantuml
+        title: Текущая схема (без ФП)
+        template: ../templates/arch_schema.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $scParams := {"title": "Архитектурная схема as-is (без ФП)", "hide_fp": true};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_as_is_exclude_fp_light:
+        type: plantuml
+        title: Текущая схема (без ФП, внешний периметр)
+        template: ../templates/arch_schema.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+              $scParams := {"title": "Архитектурная схема as-is (без ФП, внешний периметр)", "ext_only": true, "hide_fp": true};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_to_be:
+        type: plantuml
+        title: Целевая схема
+        template: ../templates/arch_schema_to_be.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title": "Архитектурная схема to-be"};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_to_be_light:
+        type: plantuml
+        title: Целевая схема (только внешний периметр)
+        template: ../templates/arch_schema_to_be.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title": "Архитектурная схема to-be (внешний периметр)", "ext_only": true};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_to_be_exclude_fp:
+        type: plantuml
+        title: Целевая схема (без ФП)
+        template: ../templates/arch_schema_to_be.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title": "Архитектурная схема to-be (без ФП)", "hide_fp": true};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_to_be_exclude_fp_light:
+        type: plantuml
+        title: Целевая схема (без ФП, внешний периметр)
+        template: ../templates/arch_schema_to_be.puml
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+              $scParams := {"title": "Архитектурная схема to-be (без ФП, внешний периметр)", "ext_only": true, "hide_fp": true};
+              $eval(entities."kadzo.v2023.arch_schema".presentation_data);
+          )
+
+      schema_as_is_sa:
+        type: smartants
+        title: Текущая схема SmartAnts
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.asis
+          schema: kadzo.v2023.arch_schema.asis
+        source: >
+          (
+            $saParams := {"title": "Архитектурная схема (as-is)", "notation": "as-is"}; 
+            $eval(entities."kadzo.v2023.arch_schema".presentation_data_sa);
+          )
+
+
+      schema_to_be_sa:
+        type: smartants
+        title: Целевая схема SmartAnts
+        origin:
+          entities: kadzo.v2023.entities
+          settings: kadzo.__sber_settings__
+          base: kadzo.v2023.tobe
+          schema: kadzo.v2023.arch_schema.tobe
+        source: >
+          (
+            $saParams := {"title": "Архитектурная схема (to-be)", "notation": "to-be"}; 
+            $eval(entities."kadzo.v2023.arch_schema".presentation_data_sa);
+          )

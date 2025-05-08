@@ -1,0 +1,53 @@
+entities:
+  companies:
+    presentations:
+      about_company:
+        type: markdown
+        template: templates/blank.md
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен компании
+              type: string
+          required:
+            - domain
+        origin:
+          base: "($)"
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+              $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+                  $domain := $params.domain;
+                  [
+                      {"title": "Идентификатор",
+                       "data": [
+                                  {"content": $domain}
+                               ]
+                      },
+                      {"title": "Название компании",
+                       "data": [
+                                  {"content": $.sber.domains.*.title}
+                               ]
+                      }
+                    
+                  ]        
+                  ):
+              (
+                $ctx:= base;                      
+                $domain := $params.domain;
+                $append(
+                          [
+                            {
+                                "title": "Идентификатор",
+                                "data": [{"content": $domain}]
+                            }
+                          ],
+                          $props_to_summary($domain,
+                                            $ctx."companies",
+                                            $ctx.entities."companies".schema.patternProperties.*.properties,
+                                            $ctx, refs)
+                      );
+              )
+
+          )

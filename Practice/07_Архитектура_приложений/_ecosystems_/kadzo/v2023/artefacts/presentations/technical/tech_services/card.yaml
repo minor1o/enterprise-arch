@@ -1,0 +1,47 @@
+entities:
+  kadzo.v2023.tech_services:
+    presentations:
+      card:
+        title: Сводка по техническому сервису
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор технического сервиса
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по техническому сервису
+            entity: kadzo.v2023.tech_services
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          livestage:
+            title: Жизненный цикл
+            entity: kadzo.v2023.tech_services
+            presentation: summary_livestage
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          ownership:
+            title: Модель владения
+            entity: kadzo.v2023.tech_services
+            presentation: summary_ownership
+            order: 20
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+            $lookup( $lookup($, "__widgets__.kadzo.v2023.tech_services.card"), $params.id);
+          )

@@ -1,0 +1,20 @@
+entities:
+  kadzo.v2023.endpoints:
+    presentations:
+      card:
+        title: Карточка точки взаимодействия
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор точки взаимодействия
+              type: string
+          required:
+            - id
+        type: mkr-grid
+
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+              $lookup( $lookup($, "__widgets__.kadzo.v2023.endpoints.card"), $params.id);
+          )

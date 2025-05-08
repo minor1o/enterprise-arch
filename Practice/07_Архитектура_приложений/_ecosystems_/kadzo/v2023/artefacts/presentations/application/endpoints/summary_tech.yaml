@@ -1,0 +1,28 @@
+entities:
+  kadzo.v2023.endpoints:
+    presentations:
+      summary_tech:
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор точки взаимодействия
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+              $endpoint_id := $params."id";
+              $ctx := base;
+                    
+                $props_to_summary($endpoint_id,
+                                  $ctx."kadzo.v2023.endpoints",
+                                  schema."kadzo.v2023.endpoints".schema."$defs"."kadzo.v2023.endpoints.tech".properties,
+                                  $ctx, refs);
+          )

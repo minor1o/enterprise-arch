@@ -1,0 +1,16 @@
+sber:
+  kadzo:
+    settings:
+      smartants:
+        global:
+          header:
+            style:
+              color: green
+              font-size: 22px
+              font-weight: 800
+          config:
+            distance: 50
+            trackWidth: 10
+            lineWidthLimit: 5
+            lineThin: true
+            lineOpacity: 0.5

@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      card_plain:
+        type: markdown
+        template: templates/systems.md
+        origin: kadzo.v2023
+        source: >
+          (
+              $ctx := $;
+              $ctx."kadzo.v2023.systems".$spread()[$keys()[0] =$params.id].{
+                 "id": $keys()[0],
+                 "link": "/entities/kadzo.v2023.systems/card?id=" & $keys()[0],
+                 "title": *.title,
+                 "description": *.description,
+                 "parent": *.parent,
+                 "parent_link": $exists(*.parent) ? "/entities/kadzo.v2023.systems/card?id=" & *.parent,
+                 "class": *.class,
+                 "location": *.location,
+                 "group": *.group,
+                 "ownership": *.ownership,
+                 "live-stage": *."live-stage",
+                 "live-stage-target": *."live-stage-target",
+                 "status": *."target-status",
+                 "change-type": *."change-type",
+                 "criticality": *.criticality,
+                 "performance": *.performance,
+                 "rto": *.rto,
+                 "rpo": *.rpo,
+                 "sla": *.sla,
+                 "monitoring": *.monitoring,
+                 "changes": *.changes,
+                 "comments": *.comments
+             };
+          )

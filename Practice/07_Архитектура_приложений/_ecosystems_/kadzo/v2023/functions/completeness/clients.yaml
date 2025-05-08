@@ -1,0 +1,46 @@
+kadzo:
+  client.completeness:
+    clients_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $clients := $all."kadzo.v2023.clients".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "clients"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "clients" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_type := 1;
+          $weight_count := 1;
+          $weight_title :=1;
+          $weight_client:=$weight_count + $weight_type + $weight_title;
+          $valid_title := [$validators[($.attr_id="title")].id];
+          $valid_count := [$validators[($.attr_id="count")].id];
+          $valid_type := [$validators[($.attr_id="type")].id];
+          $test_title:=$clients.(($keys() in $valid_title)? 0 : $weight_title);
+          $test_count:=$clients.(($keys() in $valid_count) ? 0 : $weight_count);
+          $test_type:=$clients.(($keys() in $valid_type) ? 0 : $weight_type);
+          $errors := ($count($validators[$.error_text = "Клиент не укзан ни в одном канале"]) != 0) ? '*';
+          $sum:=function($i, $j) {$i + $j};
+          $total := $zip($test_count, $test_type) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_title) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total:=$zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_client});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_client;
+          $sum_except := $sum_except / $count($clients);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($clients));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary,
+          "errors" : $errors
+          }
+      )
+      
+      

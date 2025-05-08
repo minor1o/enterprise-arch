@@ -1,0 +1,15 @@
+entities:
+  companies:
+    menu: >
+      (
+        sber.kadzo.enterprise_mode ?
+          sber.domains.$spread().( 
+              $domain := $keys();
+              $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+              { 
+                  "domain": $domain,
+                  "location": "ДЗО/" & $title,
+                  "link": "/entities/companies/blank?id=" & $domain
+              }
+          );
+      )

@@ -1,0 +1,68 @@
+entities:
+  menu.kadzo.v2023.enterprise.products:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Бизнес-архитектура/Продукты",
+                    "link": "entities/kadzo.v2023.products/registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.products:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Бизнес-архитектура/Продукты",
+                             "link": "/entities/kadzo.v2023.products/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.products:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название продукта
+            align: left
+            link: link
+          - value: description
+            text: Описание продукта
+            align: left
+          - value: status
+            text: Статус
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin:
+          products: kadzo.v2023.products
+          products_domains: kadzo.v2023.products_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(products."kadzo.v2023.products", function ($v, $k){({
+                  "domain": $lookup($$.products_domains."kadzo.v2023.products", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.products/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.products_domains."kadzo.v2023.products", $k).domain).title,
+                  "title": $v.title,
+                  "description": $v.description,
+                  "status": $v.status,
+                  "comments": $v.comments
+              })})]
+          )

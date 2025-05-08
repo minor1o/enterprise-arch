@@ -1,0 +1,47 @@
+entities:
+  kadzo.v2023.channels:
+    presentations:
+      card:
+        title: Карточка канала
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор канала
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по каналу
+            entity: kadzo.v2023.channels
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          summary_livestage:
+            title: Жизненный цикл
+            entity: kadzo.v2023.channels
+            presentation: summary_livestage
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          summary_ownership:
+            title: Модель владения
+            entity: kadzo.v2023.channels
+            presentation: summary_ownership
+            order: 20
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+              $lookup( $lookup($, "__widgets__.kadzo.v2023.channels.card"), $params.id);
+          )

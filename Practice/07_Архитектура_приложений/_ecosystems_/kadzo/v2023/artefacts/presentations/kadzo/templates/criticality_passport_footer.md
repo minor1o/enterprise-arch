@@ -1,0 +1,1 @@
+![Criticality passport info](criticality_passport_footer.png)

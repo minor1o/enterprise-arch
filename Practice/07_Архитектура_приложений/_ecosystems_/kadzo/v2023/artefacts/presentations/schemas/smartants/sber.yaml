@@ -1,0 +1,188 @@
+sber:
+  kadzo:
+    settings:
+      smartants:
+        minWidth: 50
+        minHeight: 40
+        rowHeight: 10
+        fontHeight: 8
+        fontWidth: 8
+        maxWidth: 250
+        padding: 3
+        titleFontHeight: 11
+        titleFontWidth: 11
+        titleHeight: 17
+        titlePadding: 4
+        adjustFontCoef: 0.618
+        systemWithSubsOpacity: 0.8
+        defaultBackground: "#ededed"
+        defaultColor: "#fafaf2"
+        defaultBorderColor: "#4e4948"
+        defaultTitleColor: black
+        #      Сейчас не используется
+        defaultFunctionsColor: black
+      notationToColor:
+        as-is:
+          "Нецелевая": "#006600"
+          "Нецелевая модифицируется": "#006600"
+          "Целевая требуется выбор": orange
+          "Целевая разработка": "#ffff8a"
+          "Целевая частично внедрена": "#ffff8a"
+          "Целевая частично внедрена модифицируется": "#ffff8a"
+          "Целевая внедрена полностью": "#92d050"
+          "Целевая внедрена полностью модифицируется": "#92d050"
+          "Внешняя": lightblue
+        to-be:
+          "Нецелевая": "#006600"
+          "Нецелевая модифицируется": "#006600"
+          "Целевая требуется выбор": orange
+          "Целевая разработка": "#ffff8a"
+          "Целевая частично внедрена": "#ffff8a"
+          "Целевая частично внедрена модифицируется": "#ffff8a"
+          "Целевая внедрена полностью": "#92d050"
+          "Целевая внедрена полностью модифицируется": "#92d050"
+          "Внешняя": lightblue
+      notationToBorderColor:
+        as-is:
+          "Нецелевая": gray
+          "Нецелевая модифицируется": red
+          "Целевая требуется выбор": red
+          "Целевая разработка": red
+          "Целевая частично внедрена модифицируется": red
+          "Целевая внедрена полностью модифицируется": red
+          "Внешняя": gray
+        to-be:
+          "Нецелевая": gray
+          "Нецелевая модифицируется": red
+          "Целевая требуется выбор": red
+          "Целевая разработка": red
+          "Целевая частично внедрена модифицируется": red
+          "Целевая внедрена полностью модифицируется": red
+          "Внешняя": gray
+      notationToTitleColor:
+        as-is:
+          "Нецелевая": white
+          "Нецелевая модифицируется": white
+        to-be:
+          "Нецелевая": white
+          "Нецелевая модифицируется": white
+      #   сейчас не используется
+      notationToFunctionsColor:
+        as-is:
+          "Нецелевая": white
+          "Нецелевая модифицируется": white
+        to-be:
+          "Нецелевая": white
+          "Нецелевая модифицируется": white
+      whiteNode: >
+        (
+          $settings := settings;
+          nodes.$spread().*.(
+            $width := $length(title) * $settings.titleFontWidth * $settings.adjustFontCoef + 2 * $settings.titlePadding;
+            $width := $width < $settings.minWidth ? $settings.minWidth : $width; 
+            $height := $settings.titleHeight;
+            $height := $height < $settings.minHeight ? $settings.minHeight : $height;
+            {
+              sa_id : 
+                "<g>"
+                    & "<rect width=" & $width & " height=" & $height & " fill=\"white\" stroke=\"" & $settings.defaultBorderColor & "\" rx=8 stroke-width=2 />"
+                    & "<text x=" & ( $width / 2 ) & " y=" & ($height / 2) & " dominant-baseline=\"middle\" text-anchor=\"middle\" style=\"font-weight:bold; font-size:" & $settings.titleFontHeight & "\" fill=\"black\">" & title & "</text>"
+                & "</g>"          
+            }
+          ) ~> $merge();
+        )
+
+      groupNode: >
+        (
+            $settings := settings;
+            
+            nodes.$spread().*.(
+                $width := $length(title) * $settings.titleFontWidth * $settings.adjustFontCoef + 2 * $settings.titlePadding;
+                $width := $width < $settings.minWidth ? $settings.minWidth : $width;
+                $height := $settings.titleHeight;
+                {
+                    sa_id:
+                        "<g>"
+                            & "<rect width=" & $width & " height=" & ($settings.titleFontHeight + 2 * $settings.titlePadding) & " fill=\"white\" stroke=\"" & $settings.defaultBorderColor & "\" rx=2 stroke-width=1 />"
+                            & '<text x=' & ( $width / 2 ) & ' y=' & ($height / 2) & ' dominant-baseline="middle" text-anchor="middle" style="font-size:' & $settings.titleFontHeight & '"><tspan fill="black">' & title & '</tspan></text>'
+                        & "</g>"
+                }
+            ) ~> $merge();
+        )
+
+      systemNode: >
+        (
+          $settings := settings;
+          nodes.$spread().*.(
+            $borderColor := borderColor ? borderColor : $settings.defaultBorderColor;
+            $titleColor := titleColor ? titleColor : $settings.defaultTitleColor;
+        
+            /* Ограничиваем строки по ширине */
+        
+            $titleLines := $limitTextByPxLength(title, $settings.maxWidth, $ceil($settings.titleFontWidth * $settings.adjustFontCoef));
+        
+            $functionsLines := $map(functions[], function($f, $i) {
+                { $string( $i ): $limitTextByPxLength($f.title, $settings.maxWidth, $ceil($settings.fontWidth * $settings.adjustFontCoef)).{"title": $, "color": $f.color} }
+            });
+        
+            $functionsLines := $functionsLines.$spread() ~> | $ | 
+                {$.$keys() : 
+                    $append( $merge([{"symbol": "&#x25E6 "}, $.*[0]]),
+                        $.*[[1..$count($.*)]])
+                }
+            |;
+        
+            /* Расчитываем размеры для svg-подложки */
+            /* Считаем высоту заголовка */
+            $titleHeight := $max([$settings.titleHeight, $settings.titleFontHeight + 2 * $settings.titlePadding]);
+            $titleHeight :=  $count($titleLines) * $settings.titleFontHeight + 2 * $settings.titlePadding;
+            $height := $titleHeight;
+  
+            /* Добавляем высоту под содержимое */
+            $functionsCount := $count($functionsLines.*[]);
+            $functionsHeight := ($functionsCount) * $settings.fontHeight + $settings.padding * 2;
+            $height := $functionsCount = 0 ? $height : $height + $functionsHeight;
+            $adjustedHeight := $height < $settings.minHeight ? $settings.minHeight - $height : 0;
+            $height := $height < $settings.minHeight ? $settings.minHeight : $height;
+        
+            /* Считаем ширину заголовка */
+            $maxTitleLength := $titleLines[].$length() ~> $max();
+            $titleWidth := $maxTitleLength * $settings.titleFontWidth * $settings.adjustFontCoef + 2 * $settings.titlePadding; 
+            $width := $titleWidth;
+            /* Вычисляем ширину под содержимое */
+            $maxFunctionLength := $functionsLines.*[].$length(title) ~> $max();
+            $functionsWidth := $maxFunctionLength * $settings.fontWidth * $settings.adjustFontCoef + $settings.padding * 2;
+            $width := $functionsCount = 0 ? $width : $max([$width, $functionsWidth]);  
+            $width := $width < $settings.minWidth ? $settings.minWidth : $width;
+  
+        
+            $debug_info := {"width": $width, "height": $height, "ratio": ( $width / $height ), "title_lines": $titleLines, "functions_lines": $functionsLines};
+            /* $log($debug_info, "system node " & title); */
+  
+            {
+              sa_id : 
+                "<g>"
+                    & "<rect x=0 y=0 width=" & $width & " height=" & $height & " fill=\"" & "#ededed" &"\"stroke=\"" & $borderColor & "\" rx=3 stroke-width=1 />"
+                    & "<rect x=0 y=0 width=" & $width & " height=" & $titleHeight & " fill=\"" & background & "\" stroke=\"" & $borderColor & "\" rx=3 stroke-width=1 />"
+                    & ($exists(link) ? "<a href=\"" & link & "\" >" : "")
+                    & (
+                        $join($map($titleLines[], function($t, $i) {
+                            "<text x=" & ($width  / 2) & " y=" &  ( $settings.titlePadding + $i * $settings.titleFontHeight  + $settings.titleFontHeight / 2 )  & " dominant-baseline=\"middle\" text-anchor=\"middle\" style=\"font-weight:bold; font-family:Arial; font-size:" & $settings.titleFontWidth & "\" fill=\"" & $titleColor & "\"><tspan fill=" & $titleColor & ">" & $t & "</tspan></text>"
+                        }))     
+                      )
+                    & "<rect x=0 y=" & $titleHeight & " width=" & $width & " height=" & ( $height - $titleHeight ) & " fill=\"" & "#fcfcee" & "\" stroke=\"" & $borderColor & "\" rx=3 stroke-width=1 />"
+                    & ($exists(link) ? "</a>" : "")
+                    & ($functionsCount = 0 ? "" :
+                        $join($map($functionsLines.*[], function($f, $i) {(
+                                "<text x=" & $settings.padding 
+                                    & " y=" & ($titleHeight + $adjustedHeight / 2 + $settings.padding + $i * $settings.fontHeight + $settings.fontHeight / 2) 
+                                    & " dominant-baseline=\"middle\" style=\"font-family:Arial; font-size:" & $settings.fontWidth 
+                                    & "\" fill=\"" & $f.color & "\">"
+                                    & "<tspan fill=\"" & $f.color & "\">" & $f.symbol & $f.title & "</tspan>"  
+                                & "</text>"
+                        )}))
+                    )
+                & "</g>"          
+            };
+          ) ~> $merge();
+        )

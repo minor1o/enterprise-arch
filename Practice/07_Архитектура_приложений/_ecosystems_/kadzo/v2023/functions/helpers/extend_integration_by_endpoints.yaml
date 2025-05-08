@@ -1,0 +1,73 @@
+functions:
+  kadzo_extend_integrations_by_endpoints:
+    title: Функция расширяет сущности интеграции, добавляя неизвестные свойства из указанной точки взаимодействия
+    params:
+      - alias: integrations
+        type: object
+        title: Интеграционные потоки
+        required: true
+      - alias: endpoints
+        type: object
+        title: Точки взаимодействия
+        required: true
+    code: >
+      (
+          $pintegrations := integrations;
+          $pendpoints := endpoints;
+          $integrations_with_endpoints := $pintegrations.$spread()[*.endpoint];
+          $init_integrations := $pintegrations ~> | $ | {}, $integrations_with_endpoints.$keys() |;
+          $updated_integrations := $integrations_with_endpoints#$i.(
+              $integration := $;
+              $endpoint := $lookup($pendpoints, *.endpoint);
+              $exists($endpoint.gates) ? (
+                    $tu := $exists($endpoint."technical-use") ? $endpoint."technical-use" : 
+                        ($integration.*."technical-use" = "По запросу" ? "Pull" : $integration.*."technical-use" = "Push");
+                    $tu = "Pull" ?
+                      $append(
+                        $map($endpoint.gates, function ($v, $j, $a){(
+                          $j ? { $integration.$keys()[0] & $i & $j :
+                                  $merge([$integration.*, {"source": $a[$j], "consumer": $a[$j-1], "extends": $integration.$keys()[0] } ]) }
+                             : { $integration.$keys()[0] & $i & $j : $merge([$integration.*, {"source": $a[$j], "consumer": $integration.consumer, "extends": $integration.$keys()[0]}]) }
+                        )}),
+                        $endpoint.owners#$j.(
+                            {
+                              $integration.$keys()[0] & $i & $count($endpoint.gates)  & $j : 
+                                  $merge([$integration.*,
+                                       {"source": $, "consumer": $endpoint.gates[-1], "extends": $integration.$keys()[0]}
+                                  ])
+                            }
+                        )
+                      ) :
+                      (
+                        $append(
+                          $map($endpoint.gates, function ($v, $j, $a){(
+                            $j ? { $integration.$keys()[0] & $i & $j :
+                                    $merge([$integration.*, {"source": $a[$j-1], "consumer": $a[$j], "extends": $integration.$keys()[0] } ]) }
+                               : { $integration.$keys()[0] & $i & $j : $merge([$integration.*, {"source": $integration.source, "consumer": $a[$j], "extends": $integration.$keys()[0]}]) }
+                          )}),
+                          $endpoint.owners#$j.(
+                              {
+                                $integration.$keys()[0] & $i & $count($endpoint.gates)  & $j : 
+                                    $merge([$integration.*,
+                                         {"source": $endpoint.gates[-1], "consumer": $, "extends": $integration.$keys()[0]}
+                                    ])
+                              }
+                          )
+                        )
+                      ) 
+                ) :
+                (
+                    $tu := $exists($endpoint."technical-use") ? $endpoint."technical-use" : 
+                        ($integration.*."technical-use" = "По запросу" ? "Pull" : $integration.*."technical-use" = "Push");
+                    $tu = "Pull" ?
+                            $endpoint.owners#$j.(
+                               {$integration.$keys()[0] & $i & $j : $merge([$integration.*, {"source": $, "extends": $integration.$keys()[0]}])};
+                            )
+                    :  $endpoint.owners#$j.(
+                               {$integration.$keys()[0] & $i & $j : $merge([$integration.*, {"consumer": $, "extends": $integration.$keys()[0]}])};
+                            );
+                );
+          );
+      
+          $merge([$updated_integrations]);
+      )

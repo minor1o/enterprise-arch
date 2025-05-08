@@ -1,0 +1,8 @@
+imports:
+  - registry.yaml
+  - card.yaml
+#  - card_plain.yaml
+  - summary.yaml
+  - summary_livestage.yaml
+#  - by_process.yaml
+#  - by_channel.yaml

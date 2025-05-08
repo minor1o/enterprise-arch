@@ -1,0 +1,20 @@
+kadzo:
+  v2022_migration_pack:
+    functions: >
+      (
+        $domain := sber.domain;
+        $key := $.aspects;
+        $subject := $key.$spread()[$not($split($keys()[0],".")[0] = "sber")];
+        $functions := $map($subject, function($v, $i){
+              {$domain & "." & $v.$keys()[0] : $v.*.{
+                      "title" : title,
+                      "location" : location,
+                      "status" : sber.status,
+                      "systems"[] : $$.components.$spread()[$v.$keys()[0] in *.aspects].($domain & "." & $keys()[0]) ~> $distinct()
+                  }
+              }
+          }
+        )[$exists(*.systems)];
+        { "kadzo.v2023.functions" : $merge($functions) };
+      /*$.components.*["FuelUp.B2B" in aspects].sber.fullname*/
+      )

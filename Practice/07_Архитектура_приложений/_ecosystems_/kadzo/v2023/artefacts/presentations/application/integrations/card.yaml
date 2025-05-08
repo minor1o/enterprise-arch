@@ -1,0 +1,72 @@
+entities:
+  kadzo.v2023.integrations:
+    presentations:
+      card:
+        title: Карточка интеграционного потока
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор интеграционного потока
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по интеграционному потоку
+            entity: kadzo.v2023.integrations
+            presentation: summary
+            align: "<"
+            order: 10
+            style:
+              margin: 4px
+              border: true
+          summary_technologies:
+            title: Технологии интеграций
+            entity: kadzo.v2023.integrations
+            presentation: summary_technologies
+            align: ">"
+            order: 10
+            style:
+              margin: 4px
+              border: true
+          summary_performance:
+            title: Нагрузочные характеристики интеграций
+            entity: kadzo.v2023.integrations
+            presentation: summary_performance
+            align: ">"
+            order: 20
+            style:
+              margin: 4px
+              border: true
+          summary_livestages:
+            title: Жизненный цикл потока
+            entity: kadzo.v2023.integrations
+            presentation: summary_livestages
+            align: "<"
+            order: 20
+            style:
+              margin: 4px
+              border: true
+          processes:
+            title: Бизнес-процессы, использующие интеграционный поток
+            entity: kadzo.v2023.processes
+            presentation: processes_by_integration
+            order: 30
+            style:
+              margin: 4px
+              border: true
+          data_objects:
+            title: Объекты данных
+            entity: kadzo.v2023.data_objects
+            presentation: data_objects_by_integration
+            order: 30
+            style:
+              margin: 4xp
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (          
+              $lookup( $lookup($, "__widgets__.kadzo.v2023.integrations.card"), $params.id);
+          )

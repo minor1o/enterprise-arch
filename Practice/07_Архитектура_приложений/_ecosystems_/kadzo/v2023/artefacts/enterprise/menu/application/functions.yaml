@@ -1,0 +1,71 @@
+entities:
+  menu.kadzo.v2023.enterprise.functions:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Функциональность",
+                    "link": "/entities/kadzo.v2023.functions/domain_registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.functions:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Прикладная архитектура/Функциональность",
+                             "link": "/entities/kadzo.v2023.functions/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.functions:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название
+            align: left
+          - value: description
+            text: Описание
+            align: left
+          - value: systems
+            text: Системы, в которых реализована
+            align: left
+          - value: target
+            text: Целевое размещение функциональности
+            align: left
+          - value: status
+            text: Статус
+
+        origin:
+          functions: kadzo.v2023.functions
+          functions_domains: kadzo.v2023.functions_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(functions."kadzo.v2023.functions", function ($v, $k){({
+                  "domain": $lookup($$.functions_domains."kadzo.v2023.functions", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.functions/card?id=" & $k,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.functions_domains."kadzo.v2023.functions", $k).domain).title,
+                  "title": $v.title,
+                  "description": $v.description,
+                  "systems": $v.systems,
+                  "target": $v.target,
+                  "status": $v.status
+              })})]
+          )

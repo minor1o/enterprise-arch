@@ -1,0 +1,13 @@
+kadzo:
+  goals.completeness:
+    goals_full: >
+      (
+          $domain := $.domain;
+          $all:=$.dataset;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $items := $all."kadzo.v2023.goals".$spread()[$.$keys() ~> $matcher];
+          $result := ($not($exists($items)) ? '0.00' : "1.00");
+          {"sum_except": $result,
+          "summary" : $result
+          }
+      )

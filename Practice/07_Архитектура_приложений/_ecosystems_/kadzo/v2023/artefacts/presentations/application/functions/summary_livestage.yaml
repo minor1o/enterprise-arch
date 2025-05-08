@@ -1,0 +1,29 @@
+entities:
+  kadzo.v2023.functions:
+    presentations:
+      summary_livestage:
+        title: Жизненный цикл
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор функциональности
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $function_id := $params.id;
+          
+            $props_to_summary($function_id, 
+                base."kadzo.v2023.functions",
+                schema."kadzo.v2023.functions".schema."$defs"."kadzo.v2023.functions.lifestage".properties,
+                base,
+                refs);
+          )

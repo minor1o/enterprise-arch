@@ -1,0 +1,43 @@
+entities:
+  kadzo.v2023.functions:
+    presentations:
+      card:
+        title: Карточка функциональности
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор функциональности
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Описание функциональности
+            entity: kadzo.v2023.functions
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          summary_livestage:
+            title: Жизненный цикл функциональности
+            entity: kadzo.v2023.functions
+            presentation: summary_livestage
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          in_systems:
+            title: Системы, в которых реализована функциональность
+            entity: kadzo.v2023.systems
+            presentation: systems_by_functions
+            order: 20
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+                $lookup( $lookup($, "__widgets__.kadzo.v2023.functions.card"), $params.id);
+          )

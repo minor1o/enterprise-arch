@@ -1,0 +1,3 @@
+imports:
+  - widgets_src.yaml
+  - props_to_summary.yaml

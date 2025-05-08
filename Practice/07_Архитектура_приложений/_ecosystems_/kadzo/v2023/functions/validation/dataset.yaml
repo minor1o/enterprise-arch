@@ -1,0 +1,28 @@
+datasets:
+  kadzo.validation.impl:
+    origin:
+      goals: "goals.yaml"
+      strategy: "strategy.yaml"
+      channels: "channels.yaml"
+      clients: "clients.yaml"
+      processes: "processes.yaml"
+      products: "products.yaml"
+      functions: "functions.yaml"
+      groups: "groups.yaml"
+      systems: "systems.yaml"
+      integrations: "integrations.yaml"
+      tasks: "tasks.yaml"
+      endpoints: "endpoints.yaml"
+      kb_systems: "kb_systems.yaml"
+      business_objects: "business_objects.yaml"
+      data_objects: "data_objects.yaml"
+      tech_services: "tech_services.yaml"
+      tech_params: "tech_params.yaml"
+      unifying_elements: "unifying_elements.yaml"
+      criticality_passport: "criticality_passport.yaml"
+      domain: "domain.yaml"
+      domain_enterprise: "domain_enterprise.yaml"
+    source: >
+      (
+          $mergedeep( [ $.* ])
+      )

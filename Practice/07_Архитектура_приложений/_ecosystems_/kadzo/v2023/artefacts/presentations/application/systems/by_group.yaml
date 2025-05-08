@@ -1,0 +1,97 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      systems_by_group:
+        type: table
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор группы
+              type: string
+          required:
+            - id
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: parent
+            text: Родительская АС
+            link: parent_link
+            align: left
+          - value: class
+            text: Класс
+            align: left
+          - value: location
+            text: Размещение
+            align: left
+          - value: ownership
+            text: Степень владения
+            align: left
+          - value: live-stage
+            text: Этап жизненного цикла
+            align: left
+          - value: live-stage-target
+            text: Этап жизненного цикла на горизонт планирования
+            align: left
+          - value: status
+            text: Целевой статус (решение принято)
+            align: left
+          - value: change-type
+            text: Тип изменений
+            align: left
+          - value: criticality
+            text: Уровень критичности
+            align: left
+          - value: performance
+            text: Производительность
+          - value: rto
+            text: RTO (час)
+          - value: rpo
+            text: RPO (час)
+          - value: sla
+            text: SLA
+          - value: monitoring
+            text: Средства мониторинга
+          - value: changes
+            text: Описание изменений
+
+        origin: kadzo.v2023.systems.united
+
+        source: >
+          (
+              [ $sift($."kadzo.v2023.systems", function ($v, $k){ $v.group=$params.id })
+                  ~> $each(?, function($v, $k){(
+                    {
+                        "id": $k,
+                        "link": "/entities/kadzo.v2023.systems/card?id=" & $k,
+                        "title": $v.title,
+                        "description": $v.description,
+                        "parent": $v.parent,
+                        "parent_link": $exists($v.parent) ? "/entities/kadzo.v2023.systems/card?id=" & $v.parent,
+                        "class": $v.class,
+                        "location": $v.location,
+                        "group": $v.group,
+                        "ownership": $v.ownership,
+                        "live-stage": $v."live-stage",
+                        "live-stage-target": $v."live-stage-target",
+                        "status": $v."target-status",
+                        "change-type": $v."change-type",
+                        "criticality": $v.criticality,
+                        "performance": $v.performance,
+                        "rto": $v.rto,
+                        "rpo": $v.rpo,
+                        "sla": $v.sla,
+                        "monitoring": $v.monitoring,
+                        "changes": $v.changes
+                    }
+                  )})
+              ]
+          )

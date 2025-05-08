@@ -1,0 +1,84 @@
+kadzo:
+  endpoints.completeness:
+    endpoints_full: >
+      (
+                $all:=$.dataset;
+                $domain := $.domain;
+                $matcher := $eval('/^' & $domain & '\\./i');
+                $sum:=function($i, $j) {$i + $j};
+                $endpoints := $all."kadzo.v2023.endpoints".$spread()[$.$keys() ~> $matcher];
+                $validators := $.validators[validator_type = "endpoints"];
+                $validators := $validators[domain = $domain];
+                $rules := $.rules;
+                $matcher := $eval('/^' & "endpoints" & '.*$/');
+                $rules := $rules[$matcher($)];
+                $weight_title := 1;
+                $weight_status := 1;
+                $weight_protected := 1;
+                $weight_technical_use := 1;
+                $weight_technology := 1;
+                $weight_uri := 1;
+                $weight_owners := 1;
+                $weight_gates := 1;
+                $weight_endpoints:= $weight_title + $weight_status  + $weight_protected + $weight_technical_use + $weight_technology + $weight_uri + $weight_owners + $weight_gates;
+                  $valid_title := [$validators[($.attr_id="title")].id];
+                  $valid_status := [$validators[($.attr_id="status")].id];
+                  $valid_protected := [$validators[($.attr_id="protected")].id];
+                  $valid_technical_use := [$validators[($.attr_id="technical-use")].id];
+                  $valid_technology := [$validators[($.attr_id="technology")].id];
+                  $valid_uri := [$validators[($.attr_id="uri")].id];
+                  $test_title:=$endpoints.(($keys() in $valid_title)? 0 : $weight_title);
+                  $test_status:=$endpoints.(($keys() in $valid_status) ? 0 : $weight_status);
+                  $test_protected:=$endpoints.(($keys() in $valid_protected) ? 0 : $weight_protected);
+                  $test_technical_use:=$endpoints.(($keys() in $valid_technical_use) ? 0 : $weight_technical_use);
+                  $test_technology:=$endpoints.(($keys() in $valid_technology) ? 0 : $weight_technology);
+                  $test_uri:=$endpoints.(($keys() in $valid_uri) ? 0 : $weight_uri);
+                  $valid_owners := [$validators[($.attr_id="owners")].id];
+                  $test_owners:=$endpoints.(($keys() in $valid_owners)? 0 : $weight_owners);
+                  $valid_gates := [$validators[($.attr_id="gates")].id];
+                  $test_gates:=$endpoints.(($keys() in $valid_gates)? 0 : $weight_gates);
+
+                $total := $zip($test_title, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+                $total := $zip($total, $test_protected) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+                $total := $zip($total, $test_technical_use) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+                $total := $zip($total, $test_technology) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+                $total := $zip($total, $test_uri) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+      
+                $total := $zip($total, $test_owners) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+                $total := $zip($total, $test_gates) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+                $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_endpoints});
+                $sum_except := $reduce($total, $sum);
+                $matcher := $eval('/^.*' & "title" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_endpoints;
+                $matcher := $eval('/^.*' & "status" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_status / $weight_endpoints;
+                $matcher := $eval('/^.*' & "protected" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_protected / $weight_endpoints;
+                $matcher := $eval('/^.*' & "technical_use" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_technical_use / $weight_endpoints;
+                $matcher := $eval('/^.*' & "technology" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_technology / $weight_endpoints;
+                $matcher := $eval('/^.*' & "uri" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_uri / $weight_endpoints;
+                $matcher := $eval('/^.*' & "owners" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_owners / $weight_endpoints;
+                $matcher := $eval('/^.*' & "gates" & '.*$/');
+                $rules_temp := $rules[$matcher($)];
+                $sum_except := $sum_except + $count($rules_temp) * $weight_gates / $weight_endpoints;
+                $sum_except := $sum_except / $count($endpoints);
+                $sum_except := $formatNumber($sum_except, "0.00000");
+                $sum_except := $substring($sum_except, 0, 4);
+                $summary := ($reduce ($total, $sum) / $count($endpoints));
+                $summary := $formatNumber($summary, "0.00000");
+                $summary := $substring($summary, 0, 4);
+                {"sum_except": $sum_except,
+                "summary" : $summary
+                }
+            )

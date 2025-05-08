@@ -1,0 +1,39 @@
+entities:
+  kadzo.v2023.groups:
+    presentations:
+      card:
+        title: Карточка группы
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор группы
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Описание группы
+            entity: kadzo.v2023.groups
+            presentation: summary
+            align: "<"
+            order: 10
+            style:
+              margin: 4px
+              border: true
+          systems_in_group:
+            title: Системы в группе
+            entity: kadzo.v2023.systems
+            presentation: systems_by_group
+            order: 20
+          group_contexts:
+            title: Контекст группы
+            entity: kadzo.v2023.groups
+            presentation: group_contexts
+            order: 30
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+            $lookup( $lookup($, "__widgets__.kadzo.v2023.groups.card"), $params.id);
+          )

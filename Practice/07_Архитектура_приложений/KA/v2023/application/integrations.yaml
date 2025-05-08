@@ -1,0 +1,38 @@
+kadzo.v2023.integrations:
+  ecogroup.bike_rent.integrations.telegram-backend:
+    description: Передача параметров заказа клиента
+    #source: ecosystem.systems.sberid
+    source: ecogroup.bike_rent.external_systems.telegram
+    consumer: ecogroup.bike_rent.systems.bike_rent_back.telegram_adapter
+    data-objects:
+      - ecogroup.bike_rent.data_objects.order
+    async: Ложно
+    status: Используется
+
+  ecogroup.bike_rent.integrations.new_integration:
+    description: Новая тестовая интеграция
+    source: ecogroup.bike_rent.systems.bike_rent_back
+    consumer: ecogroup.bike_rent.systems.new_system
+    data-objects:
+      - ecogroup.bike_rent.data_objects.order
+    async: Ложно
+    status: Создается
+
+  ecogroup.bike_rent.integrations.backend_crm:
+    description: Вкидывать данные из телеграма в CRM 
+    source: ecogroup.bike_rent.systems.bike_rent_back
+    consumer: ecogroup.bike_rent.systems.new_system
+    data-objects:
+      - ecogroup.bike_rent.data_objects.order
+    async: Ложно
+    status: Создается
+
+  ecogroup.bike_rent.integrations.crm_to_call_center:
+    description: Передача данных из CRM в систему колл-центра
+    source: ecogroup.bike_rent.systems.new_system
+    consumer: ecogroup.bike_rent.systems.new_system
+    data-objects:
+      - ecogroup.bike_rent.data_objects.order
+      # - ecogroup.bike_rent.data_objects.customer
+    async: Ложно
+    status: Создается

@@ -1,0 +1,29 @@
+entities:
+  sber.kadzo.v2023.report.enterprise.menu:
+    menu: >
+      (
+        sber.kadzo.enterprise_mode ?
+          sber.domains.$spread().( 
+              $domain := $keys();
+              $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+              { 
+                  "domain": $domain,
+                  "location": "ДЗО/" & $title & "/Сводный КА ДЗО",
+                  "link": "/entities/sber.kadzo.v2023.report/report?domain=" & $domain
+              }
+          );
+      )
+  sber.kadzo.v2023.criticality_passport.enterprise.menu:
+    menu: >
+      (
+        sber.kadzo.enterprise_mode ?
+          sber.domains.$spread().( 
+              $domain := $keys();
+              $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+              { 
+                  "domain": $domain,
+                  "location": "ДЗО/" & $title & "/Данные архитектуры/Сводный - Паспорта критичности",
+                  "link": "/entities/sber.kadzo.v2023.criticality_passport/report?domain=" & $domain
+              }
+          );
+      )

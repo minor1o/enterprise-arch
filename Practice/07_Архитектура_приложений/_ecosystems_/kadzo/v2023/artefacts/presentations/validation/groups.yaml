@@ -1,0 +1,38 @@
+entities:
+  kadzo.v2023.groups:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/groups_errors.md
+        origin: kadzo.v2023.validators.groups
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="groups"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "base" : $errors."general",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Группы
+            link: link
+          - value: name
+            text: Название группы
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.groups
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="groups" and error_group_code="general"] ];
+          )

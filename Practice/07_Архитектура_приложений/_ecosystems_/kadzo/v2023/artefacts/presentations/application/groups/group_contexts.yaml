@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.groups:
+    presentations:
+      group_contexts:
+        title: Контекст группы
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор группы
+              type: string
+          required:
+            - id
+        type: mkr-select
+        source: >
+          (
+              [
+                  {
+                      "title": "Текущий контекст группы",
+                      "src": "@entity/kadzo.v2023.group_context/group_context_asis?group=" & $params.id
+                  },
+                  {
+                      "title": "Текущий контекст группы (без ФП)",
+                      "src": "@entity/kadzo.v2023.group_context/group_context_asis_exclude_details?group=" & $params.id
+                  },
+                  {
+                      "title": "Целевой контекст группы",
+                      "src": "@entity/kadzo.v2023.group_context/group_context_tobe?group=" & $params.id
+                  },
+                  {
+                      "title": "Целевой контекст группы (без ФП)",
+                      "src": "@entity/kadzo.v2023.group_context/group_context_tobe_exclude_details?group=" & $params.id
+                  }
+              ]
+          )

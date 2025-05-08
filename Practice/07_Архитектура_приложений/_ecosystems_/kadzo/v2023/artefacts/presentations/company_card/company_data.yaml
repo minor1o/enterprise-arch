@@ -1,0 +1,26 @@
+entities:
+  companies:
+    presentations:
+      company_data:
+        type: markdown
+        params:
+          type: object
+          properties:
+            domain:
+              title: Домен компании
+              type: string
+          required:
+            - domain
+        template: templates/blank.md
+        source: >
+          (          
+              $domain := $params.domain;
+              $matcher := $eval('/^' & $domain & '\\./i');
+              $data_objects := $."kadzo.v2023.data_objects".$spread()[$.$keys() ~> $matcher];
+              $all_data_objects := $data_objects.$spread().$merge([{"domain": $domains, 'id': $keys()}, $.*]);
+                    [{
+                        "title": "Категории данных",
+                        "data": [{"content": $join($distinct($all_data_objects.category),', ')}]
+                    }];
+          
+          )

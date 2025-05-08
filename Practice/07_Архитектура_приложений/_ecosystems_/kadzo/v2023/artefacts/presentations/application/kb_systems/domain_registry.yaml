@@ -1,0 +1,47 @@
+entities:
+  kadzo.v2023.kb_systems:
+    presentations:
+      domain_registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            link: link
+          - value: description
+            text: Описание
+          - value: class
+            text: Класс
+          - value: location
+            text: Размещение
+          - value: status
+            text: Статус
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.kb_systems
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              ["kadzo.v2023.kb_systems".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.kb_systems/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "class": *.class,
+                  "location": *.location,
+                  "status": *.status,
+                  "comments": *.comments
+              }]
+          )

@@ -1,0 +1,79 @@
+entities:
+  kadzo.v2023.business_objects:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/business_objects_errors.md
+        origin: kadzo.v2023.validators.business_objects
+        source: >
+          (          
+              $domain_errors := $[domain=$params.domain and validator_type="business_objects"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "processes" : $errors."processes",
+                  "data_objects" : $errors."less_data_object",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Бизнес объекта
+            link: link
+          - value: name
+            text: Название бизнес объекта
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.business_objects
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="business_objects" and error_group_code="general"] ];
+          )
+
+      validation.process_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Бизнес объекта
+            link: link
+          - value: name
+            text: Название бизнес объекта
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.business_objects
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="business_objects" and error_group_code="processes"] ];
+          )
+
+      validation.data_objects:
+        type: table
+        headers:
+          - value: id
+            text: Id Бизнес объекта
+            link: link
+          - value: name
+            text: Название бизнес объекта
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.business_objects
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="business_objects" and error_group_code="less_data_object"] ];
+          )

@@ -1,0 +1,53 @@
+entities:
+  kadzo.v2023.functions:
+    presentations:
+      domain_registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: systems
+            text: Системы, в которых реализована
+            align: left
+          - value: target
+            text: Целевое размещение функциональности
+            align: left
+          - value: status
+            text: Статус
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: 
+          functions: kadzo.v2023.functions
+          systems: kadzo.v2023.systems
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              [$.functions."kadzo.v2023.functions".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.functions/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "systems": (*.systems ? ($title := $map(*.systems, function($v){$lookup($$.systems."kadzo.v2023.systems", $v).title}); $title ? $title : "АС не найдены: " & *.systems) : ""),
+                  "target": *.target,
+                  "status": *.status,
+                  "comments": *.comments
+              }]
+          )

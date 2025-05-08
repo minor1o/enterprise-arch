@@ -1,0 +1,13 @@
+datasets:
+  kadzo.v2023.__helpers__:
+    origin:
+      schema: "schema_functions.yaml"
+      groups: "groups_functions.yaml"
+      system: "system_functions.yaml"
+      data_schema: "data_schema_functions.yaml"
+      data: "data_functions.yaml"
+      notation: "notation.yaml"
+    source: >
+      (
+          $mergedeep( [ $.* ])
+      )

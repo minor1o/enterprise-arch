@@ -1,0 +1,83 @@
+entities:
+  kadzo.v2023.system_context:
+    data_view_data: >
+      (
+        $ctx := ctx;
+        $current_id := params.system;
+        $current := $ctx."kadzo.v2023.systems".$current_id;
+        /* Находим систему, для которой строим контекст */
+        $current := { $current_id: $lookup($ctx."kadzo.v2023.systems", $current_id) };
+        /* Находим интеграции с системой */
+        $current_integrations :=$sift($ctx."kadzo.v2023.integrations", function($v, $k) { $v.source=$current_id or $v.consumer=$current_id});
+        $extend_integrations := $sift($ctx."kadzo.v2023.integrations", function($v, $k){$v.extends in $current_integrations.*.extends});
+        $current_integrations := $merge([$current_integrations, $extend_integrations]);
+        $domain_integrations := $current_integrations;
+
+        /* Получаем все системы, которые встречаются в интеграциях */
+        $bound_systems := $sift($ctx."kadzo.v2023.systems", function($v, $k) {$k in [$current_integrations.*.source, $current_integrations.*.consumer]});
+            
+        $context_systems := $merge([$bound_systems, $current]);
+      
+        $subsystems := $sift($context_systems, function($v, $k){ $exists($v.parent)});
+        $parents_systems := $sift($ctx."kadzo.v2023.systems", function($v, $k){ $k in $subsystems.*.parent });
+
+        $systems := $merge([$sift($context_systems, function($v, $k){$not($exists($v.parent))}), $parents_systems]);
+      
+        $domain_data_objects := $sift($ctx."kadzo.v2023.data_objects", function ($v, $k){ $v.master_system in $context_systems.$keys() or $k in $current_integrations.*."data-objects" });
+        /*$log($domain_data_objects, "[data_view_data]: domain_data_objects");*/
+      
+        $endpoint_ids := [$domain_integrations.*.endpoint];
+        $ts_used_ep := $endpoint_ids.(
+          $point := $lookup($ctx."kadzo.v2023.endpoints", $);
+          $point.gates.($lookup($ctx."kadzo.v2023.tech_services", $) ? $)
+        );
+
+        $domain_tech_services := $ctx."kadzo.v2023.tech_services".$spread()[$.$keys()[0] in $ts_used_ep];
+      
+        $channels := $sift($ctx."kadzo.v2023.channels", function($v, $k){ ($v.systems)@$a1.($current.$keys())@$a2[$a1=$a2].$k  } );
+      
+        $context_clients := $sift($ctx."kadzo.v2023.clients", function($v, $k){ $k in $channels.*.clients });
+
+        $merge([$eval(helpers.kadzo."helpers.functions".data_schema_data, 
+                {
+                    "ctx": $ctx,
+                    "helpers": helpers,
+                    "var": {
+                        "systems" : $systems,
+                        "subsystems": $subsystems,
+                        "data_objects": $domain_data_objects,
+                        "groups": $ctx."kadzo.v2023.groups",
+                        "integrations": $domain_integrations,
+                        "tech_services": $domain_tech_services,
+                        "channels": $channels,
+                        "clients": $context_clients
+                    }
+                }
+          ), {"title": "Контекст системы " & $current.*.title & " (view данные)"}]);
+      )
+    presentations:
+      system_context_data_view_asis:
+        template: ../templates/data_schema.puml
+        title: Контекст системы текущий (view данные)
+        type: plantuml
+        origin:
+          entities: kadzo.v2023.entities
+          helpers: kadzo.v2023.__helpers__
+          base: kadzo.v2023.asis
+        source: >
+          (
+              $eval(entities."kadzo.v2023.system_context".data_view_data, {"ctx": base, "helpers": helpers, "params": $merge([$params, {"extended": 1}])});
+          )
+
+      system_context_data_view_tobe:
+        template: ../templates/data_schema_to_be.puml
+        title: Контекст системы целевой (view данные)
+        type: plantuml
+        origin:
+          entities: kadzo.v2023.entities
+          helpers: kadzo.v2023.__helpers__
+          base: kadzo.v2023.tobe
+        source: >
+          (
+              $eval(entities."kadzo.v2023.system_context".data_view_data, {"ctx": base, "helpers": helpers, "params": $merge([$params, {"extended": 1}])});
+          )

@@ -1,0 +1,67 @@
+kadzo:
+  processes.completeness:
+    processes_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $processes := $all."kadzo.v2023.processes".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "processes"];
+          $validators := $validators[domain = $domain];
+          $sum:=function($i, $j) {$i + $j};
+          $rules := $.rules;
+          $matcher := $eval('/^' & "processes" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_desc := 1;
+          $weight_products := 1;
+          $weight_systems := 1;
+          $weight_integrations := 1;
+          $weight_title := 1;
+          $weight_processes := $weight_title + $weight_desc + $weight_products + $weight_systems + $weight_integrations;
+          $valid_title := [$validators[($.attr_id="title")].id];
+          $valid_desc := [$validators[($.attr_id="description")].id];
+          $test_title := $processes.(($keys() in $valid_title)? 0 : $weight_title);
+          $test_desc := $processes.(($keys() in $valid_desc) ? 0 : $weight_desc);
+          $valid_products := [$validators[($.attr_id="products")].id];
+          $test_products := $processes.(($keys() in $valid_products)? 0 : $weight_products);
+          $valid_systems := [$validators[($.attr_id="systems")].id];
+          $test_systems := $processes.(($keys() in $valid_systems)? 0 : $weight_systems);
+          $valid_integrations := [$validators[($.attr_id="integrations")].id];
+          $test_integrations := $processes.(($keys() in $valid_integrations)? 0 : $weight_integrations);
+          $valid_integrations := [$validators[($.attr_id="integrations")].id];
+          $valid_systems := [$validators[($.attr_id="systems")].id];
+          $test_systems2 := $processes.(($keys() in $valid_systems)? 0 : 1);
+          $test_integrations2 := $processes.(($keys() in $valid_integrations)? 0 : 1);
+          $test_systems := $zip($test_systems, $test_systems2) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_integrations := $zip($test_integrations, $test_integrations2) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total := $zip($test_desc, $test_products) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_systems) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_integrations) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_title) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_title) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_processes});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_processes;
+          $matcher := $eval('/^.*' & "products" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_products / $weight_processes;
+          $matcher := $eval('/^.*' & "systems" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_systems / $weight_processes;
+          $matcher := $eval('/^.*' & "integrations" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_integrations / $weight_processes;
+          $sum_except := $sum_except / $count($processes);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($processes));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )
+      
+      

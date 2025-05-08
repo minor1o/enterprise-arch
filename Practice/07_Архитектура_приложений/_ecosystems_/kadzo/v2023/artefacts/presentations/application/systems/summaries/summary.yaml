@@ -1,0 +1,36 @@
+entities:
+  kadzo.v2023.systems:
+    presentations:
+      summary:
+        title: Сводка по системе
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $system_id := $params.id;
+            $ctx:= base;
+            $append(
+              [
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $system_id}]
+                }
+              ],
+              $props_to_summary($system_id,
+                              $ctx."kadzo.v2023.systems",
+                              schema."kadzo.v2023.systems".schema.patternProperties.*.properties,
+                              $ctx, refs)
+            );
+          )

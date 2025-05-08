@@ -1,0 +1,36 @@
+kadzo.v2023.business_objects:
+  ecogroup.bike_rent.business_objects.leaser:
+    title: Арендатор
+    status: Используется
+    processes:
+      - ecogroup.bike_rent.processes.bike_rent
+
+  ecogroup.bike_rent.business_objects.lessor:
+    title: Арендодатель
+    status: Используется
+    processes:
+      - ecogroup.bike_rent.processes.bike_rent
+
+  ecogroup.bike_rent.business_objects.order:
+    title: Заявка на аренду байка
+    status: Используется
+    processes:
+      - ecogroup.bike_rent.processes.bike_rent
+
+  ecogroup.bike_rent.business_objects.contract:
+    title: Договор
+    status: Используется
+    processes:
+      - ecogroup.bike_rent.processes.bike_rent
+      
+  ecogroup.bike_rent.business_objects.bill:
+    title: Счет
+    status: Используется
+    processes:
+      - ecogroup.bike_rent.processes.bike_rent
+
+  ecogroup.bike_rent.business_objects.slip:
+    title: Чек
+    status: Используется
+    processes:
+      - ecogroup.bike_rent.processes.bike_rent

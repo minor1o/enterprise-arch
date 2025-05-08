@@ -1,0 +1,54 @@
+kadzo:
+  tech_services.completeness:
+    tech_services_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $tech_services := $all."kadzo.v2023.tech_services".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "tech_services"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "tech_services" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_desc := 1;
+          $weight_class := 1;
+          $weight_location := 1;
+          $weight_status := 1;
+          $weight_title := 1;
+          $weight_tech_services:= $weight_title + $weight_desc + $weight_class + $weight_location + $weight_status;
+            $valid_title := [$validators[($.attr_id="title")].id];
+            $valid_desc := [$validators[($.attr_id="description")].id];
+            $valid_status := [$validators[($.attr_id="status")].id];
+            $test_title:=$tech_services.(($keys() in $valid_title)? 0 : $weight_title);
+            $test_desc:=$tech_services.(($keys() in $valid_desc) ? 0 : $weight_desc);
+            $test_status:=$tech_services.(($keys() in $valid_status) ? 0 : $weight_status);
+            $valid_class := [$validators[($.attr_id="class")].id];
+            $valid_location := [$validators[($.attr_id="location")].id];
+            $test_class:=$tech_services.(($keys() in $valid_class) ? 0 : $weight_class);
+            $test_location:=$tech_services.(($keys() in $valid_location) ? 0 : $weight_location);
+      
+      
+          $total := $zip($test_desc, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_class) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_location) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_tech_services});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "tech_services-error" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_class / $weight_tech_services;
+          $sum_except := $sum_except / $count($tech_services);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($tech_services));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )
+      
+      

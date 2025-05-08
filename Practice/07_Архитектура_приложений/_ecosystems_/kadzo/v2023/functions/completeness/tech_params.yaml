@@ -1,0 +1,121 @@
+kadzo:
+  tech_params.completeness:
+    tech_params_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $tech_params := $all."kadzo.v2023.tech_params".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "tech_params"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "tech_params" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_type := 1;
+          $weight_software := 1;
+          $weight_scalability := 1;
+          $weight_ha_type := 1;
+          $weight_ha_res_type := 1;
+          $weight_ha_cap_managment := 1;
+          $weight_dr_type := 1;
+          $weight_dr_res_type := 1;
+          $weight_dr_cap_managment := 1;
+          $weight_system := 1;
+          $weight_monitoring := 1;
+          $weight_backup := 1;
+          $weight_tech_params:=$weight_type + $weight_software + $weight_scalability + $weight_ha_type;
+          $weight_tech_params := $weight_tech_params + $weight_ha_res_type + $weight_ha_cap_managment;
+          $weight_tech_params := $weight_tech_params + $weight_dr_type + $weight_dr_res_type + $weight_dr_cap_managment;
+          $weight_tech_params := $weight_tech_params + $weight_system + $weight_monitoring + $weight_backup;
+            $valid_type := [$validators[($.attr_id="type")].id];
+            $valid_software := [$validators[($.attr_id="software")].id];
+            $valid_scalability := [$validators[($.attr_id="scalability")].id];
+            $test_type:=$tech_params.(($keys() in $valid_type)? 0 : $weight_type);
+            $test_software:=$tech_params.(($keys() in $valid_software) ? 0 : $weight_software);
+            $test_scalability:=$tech_params.(($keys() in $valid_scalability) ? 0 : $weight_scalability);
+            $valid_ha_type := [$validators[($.attr_id="high_availability.type")].id];
+            $valid_ha_res_type := [$validators[($.attr_id="high_availability.capacity_reservation_type")].id];
+            $valid_ha_cap_managment := [$validators[($.attr_id="high_availability.capacity_management")].id];
+            $test_ha_type := $tech_params.(($keys() in $valid_ha_type)? 0 : $weight_ha_type);
+            $test_ha_res_type := $tech_params.(($keys() in $valid_ha_res_type) ? 0 : $weight_ha_res_type);
+            $test_ha_cap_managment := $tech_params.(($keys() in $valid_ha_cap_managment) ? 0 : $weight_ha_cap_managment);
+            $valid_ha_res_type := [$validators[($.attr_id="capacity_reservation_type")].id];
+            $valid_ha_cap_managment := [$validators[($.attr_id="capacity_management")].id];
+            $test_ha_res_type2 :=$tech_params.(($keys() in $valid_ha_res_type)? 0 : 1);
+            $test_ha_cap_managment2:=$tech_params.(($keys() in $valid_ha_cap_managment) ? 0 : 1);
+            $valid_dr_type := [$validators[($.attr_id="disaster_recovery.type")].id];
+            $valid_dr_res_type := [$validators[($.attr_id="disaster_recovery.capacity_reservation_type")].id];
+            $valid_dr_cap_managment := [$validators[($.attr_id="disaster_recovery.capacity_management")].id];
+            $test_dr_type :=$tech_params.(($keys() in $valid_dr_type)? 0 : $weight_dr_type);
+            $test_dr_res_type :=$tech_params.(($keys() in $valid_dr_res_type)? 0 : $weight_dr_res_type);
+            $test_dr_cap_managment:=$tech_params.(($keys() in $valid_dr_cap_managment) ? 0 : $weight_dr_cap_managment);
+            $valid_dr_res_type := [$validators[($.attr_id="capacity_reservation_type")].id];
+            $valid_dr_cap_managment := [$validators[($.attr_id="capacity_management")].id];
+            $test_dr_res_type2 :=$tech_params.(($keys() in $valid_dr_res_type)? 0 : 1);
+            $test_dr_cap_managment2:=$tech_params.(($keys() in $valid_dr_cap_managment) ? 0 : 1);
+            $valid_system := [$validators[($.attr_id="system")].id];
+            $test_system :=$tech_params.(($keys() in $valid_system)? 0 : $weight_system);
+            $valid_monitoring := [$validators[($.attr_id="monitoring")].id];
+            $test_monitoring :=$tech_params.(($keys() in $valid_monitoring)? 0 : $weight_monitoring);
+            $valid_backup := [$validators[($.attr_id="backup_placement")].id];
+            $test_backup :=$tech_params.(($keys() in $valid_backup)? 0 : $weight_backup);
+            $valid_ha_dr := [$validators[($.attr_id='"high_availability", "disaster_recovery"')].id];
+            $test_ha_dr :=$tech_params.(($keys() in $valid_ha_dr)? 0 : 1);
+          $test_ha_type := $zip($test_ha_type, $test_ha_dr) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_ha_res_type := $zip($test_ha_res_type, $test_ha_dr) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_ha_res_type := $zip($test_ha_res_type, $test_ha_res_type2) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_ha_cap_managment := $zip($test_ha_cap_managment, $test_ha_dr) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_ha_cap_managment := $zip($test_ha_cap_managment, $test_ha_cap_managment2) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_dr_type := $zip($test_dr_type, $test_ha_dr) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_dr_res_type := $zip($test_dr_res_type, $test_ha_dr) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_dr_res_type := $zip($test_dr_res_type, $test_dr_res_type2) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_dr_cap_managment := $zip($test_dr_cap_managment, $test_ha_dr) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $test_dr_cap_managment := $zip($test_dr_cap_managment, $test_dr_cap_managment2) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+      
+          $total := $zip($test_type, $test_software) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_scalability) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_ha_type) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_ha_res_type) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_ha_cap_managment) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_dr_type) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_dr_res_type) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_dr_cap_managment) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_system) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_monitoring) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_backup) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_tech_params});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_type / $weight_tech_params;
+          $matcher := $eval('/^.*' & "ha" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_ha_type / $weight_tech_params;
+          $matcher := $eval('/^.*' & "dr" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_dr_type / $weight_tech_params;
+          $matcher := $eval('/^.*' & "system" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_system / $weight_tech_params;
+          $matcher := $eval('/^.*' & "backup" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_backup / $weight_tech_params;
+          $matcher := $eval('/^.*' & "monitoring" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_monitoring / $weight_tech_params;
+          $matcher := $eval('/^.*' & "crreq" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) / $weight_tech_params;
+          $sum_except := $sum_except / $count($tech_params);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($tech_params));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )
+      
+      

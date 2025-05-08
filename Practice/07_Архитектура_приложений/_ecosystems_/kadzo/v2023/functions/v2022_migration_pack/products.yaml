@@ -1,0 +1,12 @@
+kadzo:
+  v2022_migration_pack:
+    products: >
+      (
+          $domain := sber.domain;
+          $key := sber.domain & "." & "v2022.r1_1";
+          $subject := $lookup(kadzo, $key);      
+          $products := $map($subject.products, function($v, $i){
+                                { $domain &".products.id" & $i : {"title": $v }}
+                              });
+          { "kadzo.v2023.products" : $merge($products) };
+      )

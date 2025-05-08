@@ -1,0 +1,313 @@
+entities:
+  kadzo.v2023.criticality_passport:
+    presentations:
+      smart:
+        type: markdown
+        template: ../templates/criticality_passport_footer.md
+        source: >
+          (
+              $txt := 'Criticality Passport footer';
+          )
+      outage_scenarios_list:
+        type: table
+        headers:
+          - value: id
+            text: ID
+            align: left
+          - value: impact
+            text: Влияние
+            align: left
+          - value: description
+            text: Описание
+            align: left
+        origin: kadzo.v2023
+        source: >
+          (
+              $system := $params.system_id;
+              $out := [$."kadzo.v2023.criticality_passport".$spread()[$keys()[0] = $system ].*.object_outage_scenarios.{
+                          "id": id, "impact": impact,"description":description}]
+          )
+      outage_clients_list:
+        type: table
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+            scenario_id:
+              title: Идентификатор fgfg
+              type: string
+          required:
+            - system_id
+            - scenario_id
+        headers:
+          - value: clients_affected
+            text: Клиенты
+            align: left
+            width: 10%
+          - value: clients_num_affected
+            text: Количество
+            align: left
+          - value: clients_outage_impact
+            text: Последствия
+            align: left
+            width: 10%
+        origin: kadzo.v2023
+        source: >
+          (
+               
+              $system := $params.scenario_id;
+              $scenario := $params.system_id;
+              
+          /*
+             $system := "bike_rent.criticality_passport.1c";
+             $scenario := "scenario1";
+          */
+              /* $scenarios := $."kadzo.v2023.criticality_passport".$spread()[$keys()[0] = $system].*.object_outage_scenarios; */
+              $scenarios := $."kadzo.v2023.criticality_passport".$spread()[$keys()[0] = $system].*.object_outage_scenarios[id = $scenario];
+              /*$out := */
+          /*
+              [$scenarios.{
+                          "clients_affected": clients_impact.clients_affected, 
+                          "clients_num_affected": clients_impact.clients_num_affected, 
+                          "clients_outage_impact": clients_impact.clients_outage_impact}]
+          */
+          $out :=[$scenarios."clients_impact".{ "clients_affected": clients_affected, 
+                        "clients_num_affected": clients_num_affected, 
+                        "clients_outage_impact": clients_outage_impact}];
+          $check := $type($out) != "array" ? ($out :=[$scenarios."clients_impact".{ "clients_affected": clients_affected, 
+                                                            "clients_num_affected": clients_num_affected, 
+                                                            "clients_outage_impact": clients_outage_impact}];):($out :=[$scenarios."clients_impact".{ "clients_affected": clients_affected, 
+                                                            "clients_num_affected": clients_num_affected, 
+                                                            "clients_outage_impact": clients_outage_impact}];)
+          )
+      outage_scenarios:
+        title: outage_scenarios
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        type: mkr-select
+        source: >
+          (
+              $system := $params.system_id;
+              [$out := $."kadzo.v2023.criticality_passport".$spread()[$keys()[0] = $system].*.object_outage_scenarios.{
+                      "title": "Детали сценария: " &  id & " " & description ,
+                      "src": "@entity/kadzo.v2023.criticality_passport/outage_card?system_id=" & id  & "&scenario_id=" & $system
+          }]
+
+          )
+      summary:
+        title: Сводка по Паспорту Критичности
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        type: markdown
+        template: ../templates/cp_summary.md
+        origin:
+          base: kadzo.v2023
+          entities: kadzo.v2023.entities
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $system_id := $params.system_id;
+            $ctx:= base;
+          
+            $part1 := $append(
+              [
+          $ctx."kadzo.v2023.criticality_passport".$spread()[$keys()[0] =$system_id ].
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $system_id}]
+                }
+              ],
+              $props_to_summary($system_id,
+                              $ctx."kadzo.v2023.criticality_passport",
+                              $merge(entities."kadzo.v2023.criticality_passport".schema.patternProperties.*.properties.$spread()[$keys()[0] != "object_outage_scenarios"]),
+                              $ctx, refs)
+            );
+          $dataset := $."kadzo.v2023.ccalc";
+          $clientRatio := $dataset."dasreda.client_ratio".$spread()[*.client_type = "Сотрудники Банка и компаний Группы"].*.ratio;
+          $csystem := $."kadzo.v2023.systems".$spread()[$keys() = $system_id];
+          $res := $cc_calc($csystem,$dataset);
+          $append($part1,
+          [
+                       {
+                           "title": "*Расчетный класс критичности простоя",
+                           "data": [{"content": $res}]
+                       }
+                     ]
+          );
+          )
+      clients_impact:
+        title: Клиенткие потери (детали)
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        type: markdown
+        template: ../templates/cp_summary.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $system_id := $params.system_id;
+          
+            $res := $."kadzo.v2023.criticality_passport".$spread().*.*[id = $system_id ];       
+            $part1 := $append(
+               [$res.{
+                    "title": "Тип клиентов у кого возможен ущерб",
+                    "data": [{"content": *.clients_affected}]
+              }
+              ],
+            [$res.{
+                  "title": "Насколько крупный ущерб",
+                  "data": [{"content": *.clients_outage_impact}]
+              }
+            ]); 
+          $part1 := $append($part1,
+          [$res.{
+                            "title": "Кол-во клиентов пострадавших за час",
+                            "data": [{"content": *.clients_num_affected}]
+                        }
+                      ]);
+          )
+      financial_impact:
+        title: Финансовые потери (детали)
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        type: markdown
+        template: ../templates/cp_summary.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $system_id := $params.system_id;
+          
+            $res := $."kadzo.v2023.criticality_passport".$spread().*.*[id = $system_id ];       
+            $part1 := $append(
+               [$res.{
+                    "title": "Масштаб потерь до 1 млн. руб.",
+                    "data": [{"content": financial_impact.low}]
+                }
+              ],
+            [$res.{
+                  "title": "Масштаб потерь до 10 млн. руб.",
+                  "data": [{"content": financial_impact.medium}]
+              }
+            ]); 
+          $part1 := $append($part1,
+          [$res.{
+                            "title": "Масштаб потерь до 50 млн. руб.",
+                            "data": [{"content": financial_impact.high}]
+                        }
+                      ]);     
+          $part1 := $append($part1,
+          [$res.{
+                            "title": "Масштаб потерь более 50 млн. руб.",
+                            "data": [{"content": financial_impact.critical}]
+                        }
+                      ]); 
+          )
+      reputational_impact:
+        title: Репутационные потери (детали)
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        type: markdown
+        template: ../templates/cp_summary.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $system_id := $params.system_id;
+          
+            $res := $."kadzo.v2023.criticality_passport".$spread().*.*[id = $system_id ];       
+            $part1 := $append(
+               [$res.{
+                    "title": "Маловероятные публикации",
+                    "data": [{"content": reputational_impact.low}]
+                }
+              ],
+            [$res.{
+                  "title": "Единичные публикации в соц.сетях",
+                  "data": [{"content": reputational_impact.medium}]
+              }
+            ]); 
+          $part1 := $append($part1,
+          [$res.{
+                            "title": "Появления публикаций в СМИ",
+                            "data": [{"content": reputational_impact.high}]
+                        }
+                      ]);     
+          $part1 := $append($part1,
+          [$res.{
+                            "title": "Начало информационного кризиса",
+                            "data": [{"content": reputational_impact.critical}]
+                        }
+                      ]); 
+          )
+      legal_impact:
+        title: Юридические последствия (детали)
+        params:
+          type: object
+          properties:
+            system_id:
+              title: Идентификатор системы
+              type: string
+          required:
+            - system_id
+        type: markdown
+        template: ../templates/cp_summary.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $system_id := $params.system_id;
+          
+            $res := $."kadzo.v2023.criticality_passport".$spread().*.*[id = $system_id ];       
+            $part1 := $append(
+               [$res.{
+                    "title": "Масштаб потерь до 1 млн. руб.",
+                    "data": [{"content": reputational_impact.low}]
+                }
+              ],
+            [$res.{
+                  "title": "Масштаб потерь до 10 млн. руб.",
+                  "data": [{"content": reputational_impact.medium}]
+              }
+            ]); 
+          $part1 := $append($part1,
+          [$res.{
+                            "title": "Масштаб потерь до 50 млн. руб.",
+                            "data": [{"content": reputational_impact.high}]
+                        }
+                      ]);     
+          $part1 := $append($part1,
+          [$res.{
+                            "title": "Масштаб потерь более 50 млн. руб.",
+                            "data": [{"content": reputational_impact.critical}]
+                        }
+                      ]); 
+          )

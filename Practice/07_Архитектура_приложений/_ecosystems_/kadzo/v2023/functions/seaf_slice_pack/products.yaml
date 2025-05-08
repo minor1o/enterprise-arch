@@ -1,0 +1,59 @@
+kadzo:
+  seaf_slice_pack:
+    products: >
+      (
+          $extractParent := function($v, $objects){(
+            $checked = [];
+            $extractParentGroups := function($v, $objects, $checked){(
+              $not($v in $checked) ? (
+                $g := $lookup($objects, $v);
+                $result := $append($checked, [$v]);
+                $parent_result := $exists($g.is_part_of) ?
+                $extractParentGroups($g.is_part_of, $objects, $result)
+                : [ ];
+                $append($v, [$parent_result]);
+              ): [ ];
+            )};
+
+            $extractParentGroups($v, $objects, $checked);
+          )};
+      
+          $ecosystem := "sber";
+          $domain := sber.domain;
+      
+          $prefix := $domain;
+          $matcher := $eval('/^' & $prefix & '/i');
+      
+          $clients := $."seaf.ba.parties".$spread();
+          $clients := $clients[$not($domain in $extractParent($.$keys(), $$."seaf.ba.parties"))][*.sber];
+      
+          /* Берем продукты компании */
+          /* TODO Заменить проверки принадлежности продукта компании (не использовать домен) */
+          $products := $."seaf.ba.products".$spread()[$.$keys() ~> $matcher][*.sber.type='Продукт' or $not($exists(*.sber.type))][*.sber];
+      
+          /* 1. Находим продукты, которые используются в каналах или потребляемых пользователями явно*/  
+          /* 1.1 Берем каналы, которые потребляет клиент */
+          $channels := $."seaf.ba.products".$spread()[$.$keys() in $clients.*.has_interest[type='Потребляет'].id][*.sber.type='Канал'][*.sber];
+          $log($channels, "channels");
+      
+          $usedInChannels := function($v, $channels) {(
+            $result := $v.*.used_in[$ in $channels.$keys()];
+            $count($result) > 0 ? true : false;
+          )};
+      
+          /* 1.2 Находим продукты, которые используются в каналах, потребляемых клиентами */  
+          $used_in_channels := $products[$usedInChannels($, $channels)];
+          
+          /* 2. Находим продукты, для которых явно указано, что их потребляем пользователь */
+          $consume_products := $products[$.$keys() in $clients.*.has_interest[type='Потребляет'].id];
+      
+          $products := $append($used_in_channels, $consume_products);
+      
+          $products := $map($products, function($v){ (
+              {$v.$keys(): $merge([$v.*, $v.*.sber])};
+            )}
+          );          
+          
+          /*{ "kadzo.v2023.products" : $products[$.$keys() ~> $matcher].{$replace($.$keys()[0], $prefix, $domain) : $.*}};*/
+          { "kadzo.v2023.products" : $merge($seaf_key_mapper([$products], $domain))};
+      )

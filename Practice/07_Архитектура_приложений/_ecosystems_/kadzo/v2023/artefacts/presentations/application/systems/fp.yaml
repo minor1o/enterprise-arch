@@ -1,0 +1,92 @@
+entities:
+  kadzo.v2023.systems.fp:
+    presentations:
+      domain_registry:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: parent
+            text: Родительская АС
+            link: parent_link
+            align: left
+          - value: class
+            text: Класс
+            align: left
+          - value: location
+            text: Размещение
+            align: left
+          - value: group
+            text: Группа систем
+            align: left
+          - value: ownership
+            text: Степень владения
+            align: left
+          - value: live-stage
+            text: Этап жизненного цикла
+            align: left
+          - value: live-stage-target
+            text: Этап жизненного цикла на горизонт планирования
+            align: left
+          - value: status
+            text: Целевой статус (решение принято)
+            align: left
+          - value: change-type
+            text: Тип изменений
+            align: left
+          - value: criticality
+            text: Уровень критичности
+            align: left
+          - value: performance
+            text: Производительность
+          - value: rto
+            text: RTO (час)
+          - value: rpo
+            text: RPO (час)
+          - value: sla
+            text: SLA
+          - value: monitoring
+            text: Средства мониторинга
+          - value: changes
+            text: Описание изменений
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.systems.fp
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              ["kadzo.v2023.systems.fp".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.systems/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "parent": *.parent,
+                  "parent_link": $exists(*.parent) ? "/entities/kadzo.v2023.systems/card?id=" & *.parent,
+                  "class": *.class,
+                  "location": *.location,
+                  "group": *.group,
+                  "ownership": *.ownership,
+                  "live-stage": *."live-stage",
+                  "live-stage-target": *."live-stage-target",
+                  "status": *."target-status",
+                  "change-type": *."change-type",
+                  "criticality": *.criticality,
+                  "performance": *.performance,
+                  "rto": *.rto,
+                  "rpo": *.rpo,
+                  "sla": *.sla,
+                  "monitoring": *.monitoring,
+                  "changes": *.changes,
+                  "comments": *.comments
+              }]
+          )

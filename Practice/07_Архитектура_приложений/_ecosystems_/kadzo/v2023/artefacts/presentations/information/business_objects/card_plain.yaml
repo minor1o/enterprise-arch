@@ -1,0 +1,17 @@
+entities:
+  kadzo.v2023.business_objects:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/business_objects.md
+        origin: kadzo.v2023
+        source: >
+          (
+              $ctx := $;
+              $ctx."kadzo.v2023.business_objects".$spread()[$keys()[0]=$params.id].{
+                  "id": $keys()[0],
+                  "title": *.title,
+                  "status": *.status,
+                  "comments": *.comments
+              };
+          )

@@ -1,0 +1,133 @@
+kadzo:
+  endpoints.validation:
+    base_attributes: >
+      (
+          $objects := $.endpoints."kadzo.v2023.endpoints";
+          $obj_full := $.schema;
+          $check_list := ['status','protected','technical-use','technology','uri','title'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          [$check_list.(
+            $attr_id := $.$keys() ;
+            $attr := $.*;
+      
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $uidpref := "endpoints-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+      
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.endpoints/card?id=' & $id
+                      }
+                  );
+              $enumcheck := $attr.enum ? (
+                  $not($value in $attr.enum) and $exist = true ? (
+                      {
+                            'uid': $uidpref & $id & "-notinlist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                            'link': '/entities/kadzo.v2023.endpoints/card?id=' & $id
+                      }
+                  )
+              );
+              $append($nullcheck, $enumcheck)
+            )})
+          )]
+      )
+    owners_attributes: >
+      (
+          $objects := $.endpoints."kadzo.v2023.endpoints";
+          $csystems := $.systems."kadzo.v2023.systems";
+          $obj_full := $.schema;
+          $check_list := ['owners'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "endpoints-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+      
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+      
+              $nullcheck := $value.(
+                    $rid := $;
+                    $not($exists($lookup($csystems, $rid))) ?
+                          {
+                              'uid': $uidpref & $id & "-notinlist",
+                              'id': $id,
+                              'name': $object.title,
+                              'error_type': 'Атрибут "АС, обеспечивающие функционирование точки взаимодействия"',
+                              'error_group_code': 'owners',
+                              'attr_id': $attr_id,
+                              'attr_name': $attr.title,
+                              'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов систем "kadzo.v2023.systems"',
+                              'link': '/entities/kadzo.v2023.endpoints/card?id=' & $id
+                          }
+                  )
+              )});
+          );
+      )
+    gates_attributes: >
+      (
+      $objects := $.endpoints."kadzo.v2023.endpoints";
+      $csystems := $.systems."kadzo.v2023.systems";
+      $ctech_services := $.tech_services."kadzo.v2023.tech_services";
+      $obj_full := $.schema;
+      $check_list := ['gates'];
+      $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+     
+      (
+        $errors := $check_list.(
+          $attr_id := $.$keys();
+          $attr := $.*;
+          $uidpref := "endpoints-" & $attr_id & "-v1-"; /* Префикс уникального идентификатора ошибки */
+      
+          $each($objects, function($object, $id){(
+            $value := $lookup($object, $attr_id);
+            $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+      
+            $value.(
+              $rid := $;
+     
+              /* Проверяем, есть ли $rid в csystems и ctech_services */
+              $exists_in_csystems := $exists($lookup($csystems, $rid));
+              $exists_in_ctech_services := $exists($lookup($ctech_services, $rid));
+      
+              /* Если $rid отсутствует в обоих, то создаем ошибку */
+              $not($exists_in_csystems) and $not($exists_in_ctech_services) ? (
+                {
+                  'uid': $uidpref & $id & "-notinlist",
+                  'id': $id,
+                  'name': $object.title,
+                  'error_type': 'Атрибут "АС / тех сервисы, обеспечивающие транспорт точки взаимодействия"',
+                  'error_group_code': 'gates',
+                  'attr_id': $attr_id,
+                  'attr_name': $attr.title,
+                  'error_text': 'Значение "' & $rid & '" не найдено среди идентификаторов систем "kadzo.v2023.systems" и "kadzo.v2023.tech_services"',
+                  'link': '/entities/kadzo.v2023.endpoints/card?id=' & $id
+                }
+              ) : null
+            )
+          )})
+        );
+      
+        /* Фильтруем null значения и возвращаем массив ошибок (или пустой массив) */
+        $filter($errors, function($e) { $e != null })
+      )
+      )

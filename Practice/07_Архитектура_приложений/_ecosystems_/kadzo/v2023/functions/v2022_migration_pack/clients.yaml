@@ -1,0 +1,12 @@
+kadzo:
+  v2022_migration_pack:
+    clients: >
+      (
+          $domain := sber.domain;
+          $key := sber.domain & "." & "v2022.r1_1";
+          $subject := $lookup(kadzo, $key);      
+          $clients := $map($subject.customers, function($v, $i){
+                                { $domain &".clients.id" & $i : {"title": $v }}
+                              });
+          { "kadzo.v2023.clients" : $merge($clients) };
+      )

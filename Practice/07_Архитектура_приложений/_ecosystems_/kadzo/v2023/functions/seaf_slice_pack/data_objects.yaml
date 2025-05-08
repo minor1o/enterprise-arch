@@ -1,0 +1,54 @@
+kadzo:
+  seaf_slice_pack:
+    data_objects: >
+      (
+          /* Собираем объекты данных */
+          /* 1. Данные явно описанные в домене компании */
+          /* 2. Данные из других доменов, для которых мастер-системой указана система компании */
+          /* 3. Данные, которые передаются в интеграциях */
+      
+          $domain := sber.domain;
+          $matcher := $eval('/^' & $domain & '/i');
+        
+          /* 1. Собираем данные, описанные в домене компании */
+          $domain_data_objects := $sift($."seaf.ia.data_objects", function($v, $k){$k ~> $matcher and $exists($v.sber)});
+
+          /* 2. Данные из других доменов, для которых мастер-системой указана система компании */
+          /* 2.1. Получаем системы и компоненты домена */
+          $internal_systems := $sift( $."components", function($v, $k){$k ~> $matcher and $exists($v.sber) and ($v.sber.service_type = "Система" or $v.sber.service_type = "Функциональная подсистема")});
+          $internal_components := $sift( $."components", function($v, $k){$k ~> $matcher and $v.sber.is_component_of});
+          $internal_apps := $merge([$internal_systems, $internal_components]);
+      
+          /* 2.2. Получаем объекты данных, не принадлежащие домену, но у которых мастер-системой является система компании */
+          $data_objects_in_systems := $sift( $."seaf.ia.data_objects", function($v, $k){ $not( $exists( $k ~> $matcher ) ) and $exists($v.sber) and $exists($lookup($internal_apps, $v.master_system))});
+      
+          /* 3. Получаем объекты данных, участвующие в интеграциях */
+          $integrations := $sift( $."seaf.app.integrations", function($v, $k) { ($v.to in $internal_systems.$keys() or $v.from in $internal_systems.$keys() or  $v.to in $internal_components.$keys() or $v.from in $internal_components.$keys())});
+          $integrations_data_objects_ids := $integrations.*."data-objects";
+          $data_objects_in_integrations := $sift( $."seaf.ia.data_objects", function($v, $k){ $exists($v.sber) and $k in $integrations_data_objects_ids });
+
+          $data_objects := $merge([
+                              $domain_data_objects, $data_objects_in_systems,
+                          $data_objects_in_integrations]);
+      
+          $app_components := $sift($$."components", function($v, $k){$v.sber.is_component_of});
+      
+          /* Подменяем идентификаторы мастер-системы до уровня АС\ФП */
+          $data_objects := $each( $data_objects, function($v, $k){(
+            $exists($lookup($app_components, $v.master_system)) ? 
+                { $k : $merge([$v, {"master_system" : $lookup($app_components, $v.master_system).sber.is_component_of }]) }
+                : {$k : $v}
+            )});
+      
+          /* Подменяем идентификаторы внешний систем в соответствии с доменной политикой именования идентификаторов */
+          $data_objects := $data_objects.(
+                { $.$keys() : $merge([$.*, {"master_system" : $seaf_single_key_mapper($.*.master_system, $domain) }]) }
+            );
+      
+          $data_objects := $map($data_objects, function($v){ (
+              {$v.$keys(): $merge([$v.*, $v.*.sber])};
+            )}
+          );
+            
+          { "kadzo.v2023.data_objects": $merge($seaf_key_mapper([$data_objects], $domain)) };
+      )

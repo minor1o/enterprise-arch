@@ -1,0 +1,26 @@
+entities:
+  kadzo.v2023.processes:
+    presentations:
+      processes_by_business_objects:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор
+          - value: title
+            text: Название
+          - value: description
+            text: Описание
+
+        origin: kadzo.v2023
+        source: >
+          (
+              $bo_processes := [$lookup($."kadzo.v2023.business_objects", $params.business_object).processes];
+              [$."kadzo.v2023.processes".$spread().(
+                  ($keys()[0] in $bo_processes) ?
+                  {
+                      "id": $keys()[0],
+                      "title": *.title,
+                      "description": *.description
+                  }
+              )]
+          )

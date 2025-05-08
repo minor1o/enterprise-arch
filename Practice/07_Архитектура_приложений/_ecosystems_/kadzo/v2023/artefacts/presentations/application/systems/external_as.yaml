@@ -1,0 +1,64 @@
+entities:
+  kadzo.v2023.systems.external_as:
+    presentations:
+      domain_registry:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+            align: left
+            link: link
+          - value: description
+            text: Описание
+            align: left
+          - value: class
+            text: Класс
+            align: left
+          - value: location
+            text: Размещение
+            align: left
+          - value: group
+            text: Группа систем
+            align: left
+          - value: live-stage
+            text: Этап жизненного цикла
+            align: left
+          - value: live-stage-target
+            text: Этап жизненного цикла на горизонт планирования
+            align: left
+          - value: status
+            text: Целевой статус (решение принято)
+            align: left
+          - value: change-type
+            text: Тип изменений
+            align: left
+          - value: changes
+            text: Описание изменений
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.systems.external_as
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');        
+              ["kadzo.v2023.systems.external_as".$spread()[$.$keys() ~> $matcher].{
+                  "domain": $split($keys()[0], ".")[0],
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.systems/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "class": *.class,
+                  "location": *.location,
+                  "group": *.group,
+                  "live-stage": *."live-stage",
+                  "live-stage-target": *."live-stage-target",
+                  "status": *."target-status",
+                  "change-type": *."change-type",
+                  "changes": *.changes,
+                  "comments": *.comments
+              }]
+          )

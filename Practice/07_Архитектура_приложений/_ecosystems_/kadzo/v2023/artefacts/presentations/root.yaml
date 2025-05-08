@@ -1,0 +1,12 @@
+imports:
+  - business/root.yaml
+  - information/root.yaml
+  - application/root.yaml
+  - technical/root.yaml
+  - schemas/root.yaml
+  - validation/root.yaml
+  - completeness/_root.yaml
+  - kadzo/kadzo.yaml
+  - kadzo/criticality_passport.yaml
+  - company_card/root.yaml
+  - kadzo/kadzo_summaries.yaml

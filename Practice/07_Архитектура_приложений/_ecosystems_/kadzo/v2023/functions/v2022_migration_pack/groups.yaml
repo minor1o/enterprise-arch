@@ -1,0 +1,30 @@
+kadzo:
+  v2022_migration_pack:
+    groups: >
+      (
+        $domain := sber.domain;
+        $key := sber.domain & "." & "v2022.";
+      
+        $subject := $.components.$spread()[$not($split($keys()[0], ".")[0]="sber")][*.sber];
+        $ctx := $;
+        
+        $getRootGroupIDs := function($id){(
+              $intermediate := $split($id, ".");
+              $getParentID := function($parentID, $i){
+                (
+                  $i = 0 ? $parentID : $getParentID ($intermediate[$i - 1], $i - 1) & "." & $parentID
+                )
+              };
+              $map( $intermediate,  $getParentID)
+            )
+          };
+        $groupIDs := $subject.$keys().$replace($, /(.*)\..*/, "$1") ~> $distinct();
+        $groupIDs := $groupIDs.$getRootGroupIDs($) ~> $distinct();
+        $groups := $groupIDs.{
+              $domain & "." & $ & ".grp" : {
+                "title" : $lookup($ctx.components, $).title,
+                "parent" : $contains($, ".") ? $domain & "." & $replace($, /(.*)\..*/, "$1") & ".grp"
+              }
+          };
+        { "kadzo.v2023.groups" : $merge($groups) };
+      )

@@ -1,0 +1,46 @@
+entities:
+  kadzo.v2023.tech_params:
+    presentations:
+      card:
+        title: Параметры ТА
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор компонента с параметрами ТА
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Базовое описание компонента
+            entity: kadzo.v2023.tech_params
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+          software:
+            title: Прикладное ПО компонента
+            entity: kadzo.v2023.tech_params
+            presentation: software
+            order: 10
+            align: ">"
+            style:
+              margin: 4px
+              border: true
+          tech_params:
+            title: Параметры ТА компонента
+            entity: kadzo.v2023.tech_params
+            presentation: ta_params
+            order: 20
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+                $lookup( $lookup($, "__widgets__.kadzo.v2023.tech_params.card"), $params.id);
+          )

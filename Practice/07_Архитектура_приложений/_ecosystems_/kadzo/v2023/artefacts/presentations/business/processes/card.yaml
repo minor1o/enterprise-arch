@@ -1,0 +1,29 @@
+entities:
+  kadzo.v2023.processes:
+    presentations:
+      card:
+        title: Карточка бизнес-процесса
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор бизнес-процесса
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по бизнес-процессу
+            entity: kadzo.v2023.processes
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+                $lookup( $lookup($, "__widgets__.kadzo.v2023.processes.card"), $params.id);
+          )

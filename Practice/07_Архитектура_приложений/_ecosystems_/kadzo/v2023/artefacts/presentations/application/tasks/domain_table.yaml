@@ -1,0 +1,48 @@
+entities:
+  kadzo.v2023.tasks:
+    presentations:
+      domain_table:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: task
+            text: Задача
+            align: left
+            link: link
+          - value: strategy
+            text: Стратегическая задача
+            align: left
+            link: strategy_link
+          - value: planned
+            text: Плановый срок реализации
+          - value: status
+            text: Текущий статус
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin: kadzo.v2023.tasks
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              ["kadzo.v2023.tasks".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.tasks/card?id=" & $keys()[0],
+                  "task": *.task,
+                  "strategy": *.strategy,
+                  "strategy_link": "/entities/kadzo.v2023.strategy/card?id=" & $keys()[0],
+                  "planned": *.planned,
+                  "status": *.status,
+                  "comments": *.comments
+              }]
+          )

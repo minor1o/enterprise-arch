@@ -1,0 +1,5 @@
+docs:
+  sber.bike_rent.mm_discovery.docs.overciew:
+    location: Метамодель
+    type: markdown
+    source: templates/overview.md

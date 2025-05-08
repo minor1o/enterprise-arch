@@ -1,0 +1,70 @@
+entities:
+  menu.kadzo.v2023.enterprise.tech_services:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Техническая архитектура/Технологические сервисы и системы",
+                    "link": "/entities/kadzo.v2023.tech_services/registry?domain=" & $domain
+                }
+            );
+      )
+      
+  menu.kadzo.v2023.enterprise.portal.tech_services:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Техническая архитектура/Технологические сервисы и системы",
+                             "link": "/entities/kadzo.v2023.tech_services/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.tech_services:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Наименование
+          - value: description
+            text: Описание
+          - value: class
+            text: Класс
+          - value: location
+            text: Размещение
+          - value: status
+            text: Статус
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin:
+          tech_services: kadzo.v2023.tech_services
+          tech_services_domains: kadzo.v2023.tech_services_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(tech_services."kadzo.v2023.tech_services", function ($v, $k){({
+                  "domain": $lookup($$.tech_services_domains."kadzo.v2023.tech_services", $k).domain,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.tech_services_domains."kadzo.v2023.tech_services", $k).domain).title,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.tech_services/card?id=" & $k,
+                  "title": $v.title,
+                  "description": $v.description,
+                  "class": $v.class,
+                  "location": $v.location,
+                  "status": $v.status,
+                  "comments": $v.comments
+              })})]
+          )

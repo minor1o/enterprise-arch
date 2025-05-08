@@ -1,0 +1,14 @@
+entities:
+  kadzo.enterprise.menu.validation.integrations:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                {
+                    "location": "ДЗО/" & $title & '/Проверки/Интеграции',
+                    "link": 'entities/kadzo.v2023.integrations/validation.errors_md?domain=' & $domain
+                }
+            );
+      )

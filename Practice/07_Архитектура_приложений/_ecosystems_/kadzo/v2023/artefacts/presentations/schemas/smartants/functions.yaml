@@ -1,0 +1,57 @@
+functions:
+  limitTextByPxLength:
+    params:
+      - alias: text
+        type: string
+        title: Текстовая строка
+        required: true
+      - alias: max_length
+        type: integer
+        title: Максимальная длина строки
+        required: true
+      - alias: symbol_length
+        type: integer
+        title: Длина символа
+        required: true
+    result:
+      type: array
+    code: >
+      (
+          $words := $split(text, " ");
+          $symbol_length := symbol_length;
+          $max_length := max_length;
+      
+          /* $debug_info := { "words": $words, "symbol_length": $symbol_length, "max_length": $max_length };*/ 
+          /* $log($debug_info, "limit text by px: debug info"); */
+          
+      
+          $appendWord := function($words, $idx, $current_line) {(
+            /* Слово можно присоединить к строке */
+            $csize := $length( $join([$current_line], " ") ) ;
+            ($csize + $length( $words[$idx] )) * $symbol_length < $max_length  and $idx < $count($words)? (
+                /* TODO проверить, что не выскочим за размер массива */
+                $current_line := $append($current_line, $words[$idx]);
+                $appendWord($words, $idx + 1, $current_line);
+              )
+            : $current_line;
+          )};
+          
+          $formLine := function($words, $idx){(
+              $line := $appendWord($words, $idx, []);
+              $count($line) > 0
+              /* Сформировать следующую строку */
+              ? (
+                    $append(
+                      $join($line, " "),
+                      $formLine($words[[$count($line)..$count($words)-1]], 0)
+                    );
+                )
+              /* Больше не получилось набрать строк */
+              : (
+                  $count($words) > 0 ?
+                    $join([$words[[$idx..$count($words)-1]]], " ");
+                )
+          )};
+      
+          $lines := [ $formLine($words, 0) ];
+      )

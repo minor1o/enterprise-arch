@@ -1,0 +1,69 @@
+kadzo:
+  seaf_slice_pack:
+    systems: >
+      (
+          $domain := sber.domain;
+          $matcher := $eval('/^' & $domain & '/i');
+
+          $propsMap := { 
+              "live_stage" : "live-stage",
+              "live_stage_target": "live-stage-target",
+              "target_status": "target-status",
+              "change_type": "change-type"
+          };
+          $propsMapper := function ($map, $x) { (
+            $var := $lookup($map, $x); 
+            $exists($var) ? $var : $x
+          )};
+      
+          /* Вытаскиваем внутренние системы (на основе матчинга доменного имени с разметкой sber) */
+          $internal_systems := $sift( $."components", function($v, $k){$k ~> $matcher and $exists($v.sber) and ($v.sber.service_type = "Система" or $v.sber.service_type = "Функциональная подсистема")});
+      
+          /* 1. Получаем интеграции для определения "связанных" систем. */
+          /* Интеграции могут идти как от систем, так и от их компонент */
+          /* Интеграции от компонент поднимаем до уровня систем */
+      
+          $systems_components := $sift($."components", function($v, $k){ $k ~> $matcher and $v.sber.is_component_of });
+          $integrations := $sift( $."seaf.app.integrations", function($v, $k){$k ~> $matcher and ($v.to in $internal_systems.$keys() or $v.from in $internal_systems.$keys() or $v.to in $systems_components.$keys() or $v.from in $systems_components.$keys())});
+      
+          $integrations1 := $each($integrations, function($v, $k){(
+            	                $exists( $lookup($systems_components, $v.to) ) ? 
+                                    {$k : $merge([$v, {"to" : $lookup($systems_components, $v.to).sber.is_component_of}])} 
+                                    : {$k : $v}
+                                )});
+          $integrations2 := $each( $integrations, function($v, $k){(
+                                $exists( $lookup( $systems_components, $v.from) ) ?
+                                    {$k : $merge([$v, {"from" : $lookup($systems_components, $v.from).sber.is_component_of}])} 
+                                    : {$k : $v}
+                                )});
+      
+          /* 2. Получаем системы, которые не принадлежат домену компании из интеграций */     
+          $external_systems_ids := $append( 
+                                    $integrations1[$not($.*.to in $internal_systems.$keys())].*.to,
+                                    $integrations2[$not($.*.from in $internal_systems.$keys())].*.from
+                                    );
+
+          $external_systems := $sift( $."components", function($v, $k){ $exists($v.sber) and $k in $external_systems_ids and $not($exists($k ~> /^sber.systems/)) and $not($exists($k ~> /^sber.ecosystem.enablers/))});
+      
+          /* 3. Объединяем внутренние и внешние системы */
+          $systems := $merge([$internal_systems, $external_systems]);
+      
+          $systems := $map($systems.$spread(), function($v){ (
+
+              $props := $map($v.*.sber.$spread(), function($v) {(
+                { $propsMapper($propsMap, $v.$keys()) : $v.* }
+              )});
+              {$v.$keys(): $merge([$v.*, $props])};
+            )}
+          );
+      
+          $systems := $systems.(
+              $id := $keys()[0];
+              $id in $external_systems.$keys() ?
+                  { $id : $merge([$.*, {"location": "Внешняя", "ownership": "Система партнера"}])} 
+                : $
+
+          );
+      
+          { "kadzo.v2023.systems": $merge($seaf_key_mapper([$systems], $domain)) };
+      )

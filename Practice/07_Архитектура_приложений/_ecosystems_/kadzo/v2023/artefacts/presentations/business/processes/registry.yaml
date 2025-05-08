@@ -1,0 +1,55 @@
+entities:
+  kadzo.v2023.processes:
+    presentations:
+      registry:
+        type: table
+        params:
+          type: object
+          properties:
+            domain:
+              title: Идентификатор домена
+              type: string
+          required:
+            - domain
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название
+            link: link
+          - value: description
+            text: Описание
+          - value: systems
+            text: Системы, обеспечивающие бизнес-процесс
+            align: left
+          - value: products
+            text: Связь с продуктами
+            align: left
+          - value: integrations
+            text: Связь с интеграционными потоками
+            align: left
+          - value: comments
+            text: Комментарии, риски, проблемы
+            align: left
+
+        origin: 
+          processes: kadzo.v2023.processes
+          systems: kadzo.v2023.systems
+          integrations: kadzo.v2023.integrations
+          products: kadzo.v2023.products
+
+        source: >
+          (
+              $matcher := $eval('/^' & $params.domain & '\\./i');
+              [$.processes."kadzo.v2023.processes".$spread()[$.$keys() ~> $matcher].{
+                  "id": $keys()[0],
+                  "link": "/entities/kadzo.v2023.processes/card?id=" & $keys()[0],
+                  "title": *.title,
+                  "description": *.description,
+                  "systems": (*.systems ? $map(*.systems, function($v){$lookup($$.systems."kadzo.v2023.systems", $v).title}) : ""),
+                  "products": (*.products ? $map(*.products, function($v){$lookup($$.products."kadzo.v2023.products", $v).title}) : ""),
+                  "integrations": (*.integrations ? $map(*.integrations, function($v){$lookup($$.integrations."kadzo.v2023.integrations", $v).description}) : ""),
+                  "comments": *.comments
+              }]
+          )

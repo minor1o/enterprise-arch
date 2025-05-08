@@ -1,0 +1,45 @@
+kadzo:
+  products.completeness:
+    products_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $products := $all."kadzo.v2023.products".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "products"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "products" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_desc := 1;
+          $weight_status := 1;
+          $weight_title := 1;
+          $weight_products:= $weight_title + $weight_desc + $weight_status;
+            $valid_title := [$validators[($.attr_id="title")].id];
+            $valid_desc := [$validators[($.attr_id="description")].id];
+            $valid_status := [$validators[($.attr_id="status")].id];
+            $test_title:=$products.(($keys() in $valid_title)? 0 : $weight_title);
+            $test_desc:=$products.(($keys() in $valid_desc) ? 0 : $weight_desc);
+            $test_status:=$products.(($keys() in $valid_status) ? 0 : $weight_status);
+      
+          $total := $zip($test_desc, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_products});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_products;
+          $sum_except := $sum_except / $count($products);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4);
+          $summary := ($reduce ($total, $sum) / $count($products));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )
+      
+      

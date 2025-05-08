@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.clients:
+    presentations:
+      summary:
+        title: Сводка по клиенту
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор клиента
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $client_id := $params.id;
+            $ctx:= base;
+            $append([
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $client_id}]
+                }
+              ],
+              $props_to_summary($client_id,
+                            $ctx."kadzo.v2023.clients",
+                            schema."kadzo.v2023.clients".schema.patternProperties.*.properties,
+                            $ctx, refs)
+            );
+          )

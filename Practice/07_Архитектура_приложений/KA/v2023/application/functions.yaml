@@ -1,0 +1,58 @@
+kadzo.v2023.functions:
+  ecogroup.bike_rent.functions.leaser_bot:
+    title: Telegram-бот для арендатора
+    description: Бот для оформления заказа арендатором байка
+    systems:
+      - ecogroup.bike_rent.external_systems.telegram
+      - ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется
+    target: Целевое
+
+  ecogroup.bike_rent.functions.lessor_bot:
+    title: Telegram-бот для арендодателя
+    description: Бот для арендодателя байков
+    systems:
+      - ecogroup.bike_rent.external_systems.telegram
+      - ecogroup.bike_rent.systems.bike_rent_back
+    status: Используется
+    target: Целевое
+
+  ecogroup.bike_rent.functions.accountung:
+    title: Бухучет и отчетность
+    description: Бухучет и отчетность
+    systems:
+      - ecogroup.bike_rent.external_systems.cloud_accounting
+    status: Используется
+    target: Целевое
+
+  ecogroup.bike_rent.functions.integrations:
+    title: Интеграционные сервисы
+    description: Интеграционные сервисы
+    systems:
+      - ecogroup.bike_rent.systems.bike_rent_back.telegram_adapter
+    status: Используется
+    target: Целевое
+
+  ecogroup.bike_rent.functions.new_function:
+    title: Новая тестовая функция
+    description: Для примера
+    systems:
+      - ecogroup.bike_rent.systems.new_system
+    status: Разрабатывается или модифицируется
+    target: Целевое
+
+  ecogroup.bike_rent.functions.marketing:
+    title: Маркетинг и рекламные кампании
+    description: Для примера
+    systems:
+      - ecogroup.bike_rent.external_systems.CRM
+    status: Разрабатывается или модифицируется
+    target: Целевое
+
+  ecogroup.bike_rent.functions.communicating:
+    title: Коммуникации
+    description: Для примера
+    systems:
+      - ecogroup.bike_rent.external_systems.CRM
+    # status: Разрабатывается или модифицируется
+    # target: Целевое

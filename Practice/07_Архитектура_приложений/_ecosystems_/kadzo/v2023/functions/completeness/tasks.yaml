@@ -1,0 +1,33 @@
+kadzo:
+  tasks.completeness:
+    tasks_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $tasks := $all."kadzo.v2023.tasks".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "tasks"];
+          $validators := $validators[domain = $domain];
+          $weight_status := 1;
+          $weight_planned := 1;
+          $weight_task := 1;
+          $weight_tasks:=$weight_status + $weight_planned + $weight_task;
+            $valid_task := [$validators[($.attr_id="task")].id];
+            $valid_status := [$validators[($.attr_id="status")].id];
+            $valid_planned := [$validators[($.attr_id="planned")].id];
+            $test_task:=$tasks.(($keys() in $valid_task)? 0 : $weight_task);
+            $test_status:=$tasks.(($keys() in $valid_status) ? 0 : $weight_status);
+            $test_planned:=$tasks.(($keys() in $valid_planned) ? 0 : $weight_planned);
+      
+          $total := $zip($test_planned, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_task) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_task, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_tasks});
+          $summary := ($reduce ($total, $sum) / $count($tasks));
+          $summary := $formatNumber($summary, "0.00");
+          $result := ($not($exists($tasks)) ? "0.00" : $summary);
+          {"sum_except": $result,
+          "summary" : $result
+          }
+      )

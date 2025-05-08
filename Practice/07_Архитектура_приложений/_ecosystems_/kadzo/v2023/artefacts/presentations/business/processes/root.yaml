@@ -1,0 +1,9 @@
+imports:
+  - registry.yaml
+  - card.yaml
+#  - card_plain.yaml
+  - summary.yaml
+  - by_system.yaml
+  - by_integration.yaml
+  - by_product.yaml
+#  - by_business_object.yaml

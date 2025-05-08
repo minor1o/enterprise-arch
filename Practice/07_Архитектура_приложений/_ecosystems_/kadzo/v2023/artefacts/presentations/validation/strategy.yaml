@@ -1,0 +1,18 @@
+entities:
+  kadzo.v2023.strategy:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/strategy_errors.md
+        origin: kadzo.v2023.validators.strategy
+        source: >
+          (
+              $domain_errors := $[domain=$params.domain and validator_type="strategy"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "iserrors" : $boolean($errors)
+              }
+          )

@@ -1,0 +1,100 @@
+entities:
+  menu.kadzo.v2023.enterprise.tech_params:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys();
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Техническая архитектура/Параметры ТА",
+                    "link": "/entities/kadzo.v2023.tech_params/registry?domain=" & $domain
+                }
+            );
+      )
+
+  menu.kadzo.v2023.enterprise.portal.tech_params:
+    menu: >
+      (
+         sber.kadzo.enterprise_mode ?
+                         { 
+                             "location": "Единый свод/Техническая архитектура/Параметры ТА",
+                             "link": "/entities/kadzo.v2023.tech_params/domain_enterprise"
+                         }
+      )
+
+  kadzo.v2023.tech_params:
+    presentations:
+      domain_enterprise:
+        type: table
+        headers:
+          - value: dzo
+            text: ДЗО
+            align: left
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: system
+            text: Система
+            align: left
+            link: system_link
+          - value: type
+            text: Тип компонента
+          - value: software
+            text: Прикладное ПО
+          - value: vendor
+            text: Вендор
+          - value: scalability
+            text: Масштабируемость
+          - value: high_availibility
+            text: Отказоустойчивость
+          - value: ha_reservation_type
+            text: Тип резервирования мощностей в пределах одной зоны доступности
+          - value: ha_capacity_management
+            text: Полнота резервирования мощностей в пределах одной зоны доступности
+          - value: disaster_recovery
+            text: Катастрофоустойчивость
+          - value: dr_reservation_type
+            text: Тип резервирования мощностей в резервной зоне доступности
+          - value: dr_reservation_management
+            text: Полнота резервирования мощностей в резервной зоне доступности
+          - value: backup_placement
+            text: Место хранения бекапа
+          - value: backup_backup_placement
+            text: Место хранения дубликата бекапа
+          - value: monitoring
+            text: Мониторинг
+          - value: comments
+            text: Комментарии, риски, проблемы
+
+        origin:
+          tech_params: kadzo.v2023.tech_params
+          tech_params_domains: kadzo.v2023.tech_params_by_domains
+          settings: kadzo.__sber_settings__
+
+        source: >
+          (
+              [$each(tech_params."kadzo.v2023.tech_params", function ($v, $k){({
+                  "domain": $lookup($$.tech_params_domains."kadzo.v2023.tech_params", $k).domain,
+                  "id": $k,
+                  "link": "/entities/kadzo.v2023.tech_params/card?id=" & $k,
+                  "system": $v.system,
+                  "system_link": "/entities/kadzo.v2023.systems/card?id=" & $v.system,
+                  "dzo": $lookup($$.settings.sber.domains, $lookup($$.tech_params_domains."kadzo.v2023.tech_params", $k).domain).title,
+                  "type": $v.type,
+                  "software": $v.software,
+                  "vendor": $v.vendor,
+                  "scalability": $v.scalability,
+                  "high_availibility": $v.high_availability.type,
+                  "ha_reservation_type": $v.high_availability.capacity_reservation_type,
+                  "ha_capacity_management": $v.high_availability.capacity_management,
+                  "disaster_recovery": $v.disaster_recovery.type,
+                  "dr_reservation_type": $v.disaster_recovery.capacity_reservation_type,
+                  "dr_reservation_management": $v.disaster_recovery.capacity_management,
+                  "backup_placement": $v.backup.placement,
+                  "backup_backup_placement": $v.backup.backup_placement,
+                  "monitoring": $v.monitoring,
+                  "comments": $v.comments
+              })})]
+          )

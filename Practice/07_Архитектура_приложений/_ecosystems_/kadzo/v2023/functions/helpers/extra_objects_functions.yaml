@@ -1,0 +1,33 @@
+kadzo:
+  helpers.functions:
+    extra_context_channels: >
+      (
+          $v_channels := params.channels;
+          $v_systems := params.systems;
+      
+          $log($v_channels, "extra context channels: channels");
+          $log($v_systems, "extra context systems: systems");
+      
+          $isChannelLinked := function($v){
+              (
+                  $reduce([$v.*.systems.($exists($lookup($v_systems,$)))], function($i, $j) { $i or $j});
+              )
+          };
+          $channels := $merge($v_channels.$spread()[$isChannelLinked($)]);
+      )
+
+    extra_context_clients: >
+      (
+          $v_clients := params.clients;
+          $v_channels := params.channels;
+          
+          $log($v_clients, "[extra context clients]: clients");
+          $log($v_channels, "[extra context clients]: channels");
+      
+          $isContextClient := function($v){
+            (
+                $v_channels.$spread()[$v in $.*.clients];
+            )
+          };
+          $clients := $merge($v_clients.$spread()[$isContextClient($keys()[0])]);
+      )

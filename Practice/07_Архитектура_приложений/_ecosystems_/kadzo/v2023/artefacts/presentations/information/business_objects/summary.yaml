@@ -1,0 +1,35 @@
+entities:
+  kadzo.v2023.business_objects:
+    presentations:
+      summary:
+        title: Сводка по бизнес объекту
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор бизнес-объекта
+              type: string
+          required:
+            - id
+        type: markdown
+        template: ../templates/summary.md
+        origin:
+          base: kadzo.v2023
+          schema: kadzo.v2023.entities.schema
+          refs: kadzo.v2023.entities.__refs__
+        source: >
+          (
+            $business_object_id := $params.id;
+            $ctx:= base;
+            $append([
+                {
+                    "title": "Идентификатор",
+                    "data": [{"content": $business_object_id}]
+                }
+              ],
+              $props_to_summary($business_object_id,
+                            $ctx."kadzo.v2023.business_objects",
+                            schema."kadzo.v2023.business_objects".schema.patternProperties.*.properties,
+                            $ctx, refs)
+            );
+          )

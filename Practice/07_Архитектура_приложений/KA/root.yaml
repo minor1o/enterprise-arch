@@ -1,0 +1,87 @@
+# Базовая информация для подготовки КА ДЗО
+sber:
+  domain: ecogroup.bike_rent
+  kadzo:
+    menu_root: "Документы/Маркетплейс аренды байков"
+    # Ниже настройки для скрытия или перемещения меню
+    # конфигурационный файл выносится в данные архитектуры и для каждой группы пользователей
+    # используется своя конфигурация меню, вычитываемая из соотвествующего файла. Организация
+    # выбора конфигурации не реализована, но может решаться средствами Git и сабмодулей.
+    menu:
+      architecture:
+        enabled: true
+        #roots:
+        # - Перечислите здесь корневые элементы меню куда требуется переместить раздел
+        #   если значения нет или параметр roots отсуствует, то используется расположение по-умолчанию
+        #   из параметра sber.kadzo.menu_root
+      validators:
+        enabled: true
+        #roots:
+        # - Перечислите здесь корневые элементы меню куда требуется переместить раздел
+        #   если значения нет или параметр roots отсуствует, то используется расположение по-умолчанию
+        #   из параметра sber.kadzo.menu_root
+      company_card:
+        enabled: true
+        #roots:
+        # - Перечислите здесь корневые элементы меню куда требуется переместить раздел
+        #   если значения нет или параметр roots отсуствует, то используется расположение по-умолчанию
+        #   из параметра sber.kadzo.menu_root
+      completeness:
+        enabled: true
+        #roots:
+        # - Перечислите здесь корневые элементы меню куда требуется переместить раздел
+        #   если значения нет или параметр roots отсуствует, то используется расположение по-умолчанию
+        #   из параметра sber.kadzo.menu_root
+      summary:
+        enabled: true
+        #roots:
+        # - Перечислите здесь корневые элементы меню куда требуется переместить раздел
+        #   если значения нет или параметр roots отсуствует, то используется расположение по-умолчанию
+        #   из параметра sber.kadzo.menu_root
+      schemas:
+        enabled: true
+        #roots:
+        # - Перечислите здесь корневые элементы меню куда требуется переместить раздел
+        #   если значения нет или параметр roots отсуствует, то используется расположение по-умолчанию
+        #   из параметра sber.kadzo.menu_root
+    docs:
+      enabled: true
+      #root: # Задайте новое расположение раздела "Документы" если это необходимо
+    # Конец блока управления меню
+
+    settings:
+      schema_config:
+        sber_frame: false
+        elk: true
+
+
+# Настройки для преобразования данных архитектуры ДЗО в данные КА ДЗО (не передаются в КА)
+# Набор функций v2022_migration_pack входит в поставку kadzo
+# При описании в модели КА ДЗО преобразований данных не требуется
+#kadzo:
+#  settings:
+#    kadzo_goals_functions: kadzo.v2022_migration_pack.goals
+#    kadzo_strategy_functions: kadzo.v2022_migration_pack.strategy
+#    kadzo_clients_functions: kadzo.v2022_migration_pack.clients
+#    kadzo_products_functions: kadzo.v2022_migration_pack.products
+#    kadzo_processes_functions: kadzo.v2022_migration_pack.processes
+#    kadzo_systems_functions: kadzo.v2022_migration_pack.systems
+#    kadzo_groups_functions: kadzo.v2022_migration_pack.groups
+#    kadzo_functions_functions: kadzo.v2022_migration_pack.functions
+#    kadzo_integrations_functions: kadzo.v2022_migration_pack.integrations
+#    kadzo_tasks_functions: kadzo.v2022_migration_pack.tasks
+
+# Настройки для получения "среза КА ДЗО" из SEAF v1.2
+#kadzo:
+# settings:
+#   kadzo_goals_functions: kadzo.seaf_slice_pack.goals
+#   kadzo_strategy_functions: kadzo.seaf_slice_pack.strategy
+#   kadzo_products_functions: kadzo.seaf_slice_pack.products
+#   kadzo_channels_functions: kadzo.seaf_slice_pack.channels
+#   kadzo_clients_functions: kadzo.seaf_slice_pack.clients
+#   kadzo_processes_functions: kadzo.seaf_slice_pack.processes
+
+
+# Данные по разделам
+imports:
+  - v2023/root.yaml

@@ -1,0 +1,14 @@
+imports:
+  - arch_schema/arch_schema.yaml
+  - system_map/system_map.yaml
+  - data_map/data_map.yaml
+  - function_map/function_map.yaml
+  - business_schema/business_schema.yaml
+  - system_context/system_context.yaml
+  - system_context_selector/system_context_selector.yaml
+  - group_context/group_context.yaml
+  - data_context/data_context.yaml
+  - system_context_data_view/system_context_data_view.yaml
+  - symbols/root.yaml
+  - smartants/root.yaml
+  - system_map/system_map_crit.yaml

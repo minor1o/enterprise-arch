@@ -1,0 +1,196 @@
+entities:
+  kadzo.v2023.tech_params:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/tech_params_errors.md
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (          
+              $domain_errors := $[domain=$params.domain and validator_type="tech_params"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "ha" : $errors."ha",
+                  "hac" : $errors."hac",
+                  "dr" : $errors."dr",
+                  "drc" : $errors."drc",
+                  "system" : $errors."system",
+                  "monitoring" : $errors."monitoring",
+                  "backup" : $errors."backup",
+                  "crreq" : $errors."crreq",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="general"] ];
+          )
+
+      validation.ha_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название параметра
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="ha"] ];
+          )
+
+      validation.ha_consistency:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название параметра
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="hac"] ];
+          )
+
+      validation.dr_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="dr"] ];
+          )
+
+      validation.dr_consistency:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="drc"] ];
+          )
+
+      validation.system_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="system"] ];
+          )
+
+      validation.monitoring_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="monitoring"] ];
+          )
+
+      validation.backup_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="backup"] ];
+          )
+
+      validation.crreq:
+        type: table
+        headers:
+          - value: id
+            text: Id Тех параметра
+            link: link
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.tech_params
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="tech_params" and error_group_code="crreq"] ];
+          )

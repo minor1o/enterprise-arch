@@ -1,0 +1,105 @@
+entities:
+  kadzo.v2023.functions:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/functions_errors.md
+        origin: kadzo.v2023.validators.functions
+        source: >
+          (   
+              $domain_errors := $[domain=$params.domain and validator_type="functions"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "base" : $errors."general",
+                  "target" : $errors."target",
+                  "systems" : $errors."systems",
+                  "status" : $errors."status",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Функциональности
+            link: link
+          - value: name
+            text: Название Функциональности
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.functions
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="functions" and error_group_code="general"] ];
+          )
+
+      validation.target_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Функциональности
+            link: link
+          - value: name
+            text: Название Функциональности
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.functions
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="functions" and error_group_code="target"] ];
+          )
+
+      validation.systems_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Функциональности
+            link: link
+          - value: name
+            text: Название Функциональности
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.functions
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="functions" and error_group_code="systems"] ];
+          )
+
+      validation.status_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Функциональности
+            link: link
+          - value: name
+            text: Название Функциональности
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.functions
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="functions" and error_group_code="status"] ];
+          )

@@ -1,0 +1,105 @@
+entities:
+  kadzo.v2023.channels:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/channels_errors.md
+        origin: kadzo.v2023.validators.channels
+        source: >
+          (          
+              $domain_errors := $[domain=$params.domain and validator_type="channels"];
+          
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "products" : $errors."products",
+                  "systems" : $errors."systems",
+                  "clients" : $errors."clients",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Канала
+            link: link
+          - value: name
+            text: Название канала
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.channels
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="channels" and error_group_code="general"] ];
+          )
+
+      validation.products_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Канала
+            link: link
+          - value: name
+            text: Название канала
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.channels
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="channels" and error_group_code="products"] ];
+          )
+
+      validation.clients_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Канала
+            link: link
+          - value: name
+            text: Название канала
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.channels
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="channels" and error_group_code="clients"] ];
+          )
+
+      validation.systems_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Канала
+            link: link
+          - value: name
+            text: Название канала
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.channels
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="channels" and error_group_code="systems"] ];
+          )

@@ -1,0 +1,19 @@
+imports:
+  - business/goals.yaml
+  - business/strategy.yaml
+  - business/clients.yaml
+  - business/products.yaml
+  - business/channels.yaml
+  - business/processes.yaml
+  - information/business_objects.yaml
+  - information/data_objects.yaml
+  - application/tasks.yaml
+  - application/functions.yaml
+  - application/systems.yaml
+  - application/groups.yaml
+  - application/integrations.yaml
+  - application/kb_systems.yaml
+  - application/endpoints.yaml
+  - technical/tech_services.yaml
+  - technical/tech_params.yaml
+  - kadzo/criticality_passport.yaml

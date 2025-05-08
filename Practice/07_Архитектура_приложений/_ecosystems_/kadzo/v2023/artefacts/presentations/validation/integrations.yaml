@@ -1,0 +1,149 @@
+entities:
+  kadzo.v2023.integrations:
+    presentations:
+      validation.errors_md:
+        type: markdown
+        template: templates/integrations_errors.md
+        origin: kadzo.v2023.validators.integrations
+        source: >
+          (          
+              $domain_errors := $[domain=$params.domain and validator_type="integrations"];
+
+              $errors := $domain_errors {$.error_group_code : 1};
+              {
+                  "domain": $params.domain,
+                  "general" : $errors."general",
+                  "params" : $errors."params",
+                  "change" : $errors."change",
+                  "src_dst" : $errors."src_dst",
+                  "status" : $errors."status",
+                  "endPoint" : $errors."endPoint",
+                  "iserrors" : $boolean($errors)
+              }
+          )
+
+      validation.base_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Интеграции
+            link: link
+          - value: name
+            text: Описание Интеграции
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.integrations
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="integrations" and error_group_code="general"] ];
+          )
+
+      validation.params_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Интеграции
+            link: link
+          - value: name
+            text: Название Интеграции
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.integrations
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="integrations" and error_group_code="params"] ];
+          )
+
+      validation.change_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Интеграции
+            link: link
+          - value: name
+            text: Название Интеграции
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.integrations
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="integrations" and error_group_code="change"] ];
+          )
+
+      validation.src_dst_attrib:
+        type: table
+        headers:
+          - value: id
+            text: Id Интеграции
+            link: link
+          - value: name
+            text: Название Интеграции
+          - value: attr_id
+            text: Id атрибута
+          - value: attr_name
+            text: Название атрибута
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.integrations
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="integrations" and error_group_code="src_dst"] ];
+          )
+
+      validation.status:
+        type: table
+        headers:
+          - value: id
+            text: Id Интеграции
+            link: link
+          - value: name
+            text: Название Интеграции
+          - value: attr_id
+            text: Id
+          - value: attr_name
+            text: Название
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.integrations
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="integrations" and error_group_code="status"] ];
+          )
+
+      validation.endPoints:
+        type: table
+        headers:
+          - value: id
+            text: Id Интеграции
+            link: link
+          - value: name
+            text: Название Интеграции
+          - value: attr_id
+            text: Id
+          - value: attr_name
+            text: Название
+          - value: error_text
+            text: Текст ошибки
+        origin: kadzo.v2023.validators.integrations
+        source: >
+          (
+              $domain := $params.domain;
+              $domain_errors := [ $[domain=$params.domain and validator_type="integrations" and error_group_code="endPoint"] ];
+          )

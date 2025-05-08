@@ -1,0 +1,26 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.domain.foreign:
+      uid: domain-error-general
+      description: >
+        Идентификатор всех объектов компании должен начинаться с домена компании
+      title: Неправильный домен
+      origin:
+        base: kadzo.__sber_settings__
+        errors: kadzo.v2023.validators.domain
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;        
+              $errors := errors[domain = $domain and validator_type="domain" and error_group_code="foreign"];
+              [$errors#$i.(
+                  {
+                      "uid": $.uid,
+                      "title": $.id & ' - ' & $.attr_id,
+                      "location": $.link,
+                      "correction": $.error_text,
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

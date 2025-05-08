@@ -1,0 +1,6 @@
+imports:
+  - registry.yaml
+  - blank.yaml
+  - blank_widgets.yaml
+  - summary.yaml
+  - summary_tech.yaml

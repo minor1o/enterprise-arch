@@ -1,0 +1,29 @@
+entities:
+  kadzo.v2023.strategy:
+    presentations:
+      card:
+        title: Карточка стратегической задачи
+        params:
+          type: object
+          properties:
+            id:
+              title: Идентификатор стратегической задачи
+              type: string
+          required:
+            - id
+        type: mkr-grid
+        widgets:
+          summary:
+            title: Сводка по стратегической задаче
+            entity: kadzo.v2023.strategy
+            presentation: summary
+            order: 10
+            align: "<"
+            style:
+              margin: 4px
+              border: true
+        origin: kadzo.v2023.__presentations__.widgets
+        source: >
+          (
+                $lookup( $lookup($, "__widgets__.kadzo.v2023.strategy.card"), $params.id);
+          )

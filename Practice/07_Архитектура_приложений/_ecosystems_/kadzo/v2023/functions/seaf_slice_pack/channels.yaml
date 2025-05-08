@@ -1,0 +1,80 @@
+kadzo:
+  seaf_slice_pack:
+    channels: >
+      (
+          $extractParent := function($v, $objects){(
+            $checked = [];
+            $extractParentGroups := function($v, $objects, $checked){(
+              $not($v in $checked) ? (
+                $g := $lookup($objects, $v);
+                $result := $append($checked, [$v]);
+                $parent_result := $exists($g.is_part_of) ?
+                $extractParentGroups($g.is_part_of, $objects, $result)
+                : [ ];
+                $append($v, [$parent_result]);
+              ): [ ];
+            )};
+
+            $extractParentGroups($v, $objects, $checked);
+          )};
+      
+          $ecosystem := "sber";
+          $domain := sber.domain;
+      
+          $propsMap := { 
+              "channel_type" : "type"
+          };
+          $propsMapper := function ($map, $x) { (
+            $var := $lookup($map, $x); 
+            $exists($var) ? $var : $x
+          )};
+      
+          $prefix := $domain;
+          $matcher := $eval('/^' & $prefix & '/i');
+      
+          $clients := $."seaf.ba.parties".$spread();
+          $clients := $clients[$not($domain in $extractParent($.$keys(), $$."seaf.ba.parties"))][*.sber];
+      
+          /* 1. Берем продукты компании */
+          /* TODO Заменить проверки принадлежности продукта компании (не использовать домен) */
+          $products := $."seaf.ba.products".$spread()[$.$keys() ~> $matcher][*.sber.type='Продукт' or $not($exists(*.sber.type))][*.sber];
+
+          /* 2. Берем каналы, которые потребляет клиент */
+          $channels := $."seaf.ba.products".$spread()[$.$keys() in $clients.*.has_interest[type='Потребляет'].id][*.sber.type='Канал'];
+      
+          /* 2.1 Берем каналы из домена компании */ 
+          $domain_channels := $channels[$.$keys() ~> $matcher];
+          /* 2.2 Берем каналы, в которых используются продукты компании */
+          $external_channels :=  $channels[$.$keys() in $products.*.used_in];
+      
+          /* TODO удалять дубликаты (делать distinct) */
+          $channels := $append($domain_channels, $external_channels);
+      
+          /*enrich channels with products references*/
+          $channels:= $map([$channels], function($v) {(
+            $v~>|$.*|{"products": [$products[$v.$keys() in $.*.used_in].$keys()]}|;
+          )});
+      
+          /*enrich channels with clients references*/
+          $channels:= $map([$channels], function($v) {(
+            $v~>|$.*|{
+                      "clients": [$seaf_key_mapper([$clients[$v.$keys() in $.*.has_interest[type='Потребляет'].id]], $domain).$keys()]
+                  }|;
+          )});
+      
+          $channels := $map($channels, function($v){ (
+              {$v.$keys(): $merge([$v.*, $v.*.sber])};
+            )}
+          );
+      
+          $channels := $map($channels, function($v){ (
+
+              $props := $map($v.*.sber.$spread(), function($v) {(
+                { $propsMapper($propsMap, $v.$keys()) : $v.* }
+              )});
+              {$v.$keys(): $merge([$v.*, $props])};
+            )}
+          );
+            
+          { "kadzo.v2023.channels" : $seaf_key_mapper([$channels], $domain) };
+      )

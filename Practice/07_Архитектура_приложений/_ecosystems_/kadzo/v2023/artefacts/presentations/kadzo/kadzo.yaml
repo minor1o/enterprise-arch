@@ -1,0 +1,23 @@
+entities:
+  sber.kadzo.v2023.report:
+    presentations:
+      report:
+        type: markdown
+        template: templates/kadzo.md
+        source: >
+          (
+            {
+              "domain": $params.domain
+            }
+          )
+  sber.kadzo.v2023.criticality_passport:
+    presentations:
+      report:
+        type: markdown
+        template: templates/criticality_passport.md
+        source: >
+          (
+            {
+              "domain": $params.domain
+            }
+          )

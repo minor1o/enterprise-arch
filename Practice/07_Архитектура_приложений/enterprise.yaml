@@ -1,0 +1,9 @@
+sber:
+  #domain:
+  kadzo:
+    enterprise_mode: true
+
+
+imports:
+  - _ecosystems_/root.yaml    # Подключается пакет стандартов
+  - _ecosystems_/kadzo/v2023/artefacts/enterprise/menu/root.yaml

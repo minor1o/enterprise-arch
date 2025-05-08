@@ -1,0 +1,107 @@
+kadzo:
+  notation:
+    systems:
+      Внешняя: >
+        (
+            /* Голубая */
+            $ctx := ctx;
+            $var := var;
+            ($ctx.location = "Внешняя")
+        )
+      Нецелевая: >
+        (
+            /* Болотная */
+            $ctx := ctx;
+            $var := var;
+            ($ctx.location = "Внутренняя")
+                and ($ctx."target-status" = "Не целевая")
+                and (type="asis"
+                    or (type="tobe"
+                    and $not($ctx."change-type" = "Модифицируется" or $ctx."change-type" = "Разрабатывается")))
+        )
+      "Целевая требуется выбор": >
+        (
+            /* Оранжевая */
+            $ctx := ctx;
+            $var := var;
+            type = "tobe"
+                and ($var = "Эскиз" or $var = "В разработке / приобретение" or $var = "Внедрение / Не введена в эксплуатацию")
+                and  ( $ctx.ownership = "Владеем экземпляром" or $not($exists($ctx.ownership)))
+        )
+      "Целевая разработка": >
+        (
+            /* Желтая */
+            $ctx := ctx;
+            $var := var;
+            type = "tobe"
+                and ($var = "Эскиз" or $var = "В разработке / приобретение" or $var = "Внедрение / Не введена в эксплуатацию")
+                and $ctx.ownership = "Владеем исходным кодом"
+        )
+      "Целевая частично внедрена": >
+        (
+            /* Желтая */
+            $ctx := ctx;
+            $var := var;
+            (type = "asis" and $var = "Опытная эксплуатация")
+            or (type = "tobe"
+                    and $var = "Опытная эксплуатация"
+                    and $not($ctx."change-type" = "Модифицируется" or $ctx."change-type" = "Разрабатывается")
+                )
+        )
+      "Целевая частично внедрена модифицируется": >
+        (
+            /* Желтая c красной рамкой*/
+            $ctx := ctx;
+            $var := var;
+            (type = "tobe" 
+                and $var = "Опытная эксплуатация"
+                and ($ctx."change-type" = "Модифицируется" or $ctx."change-type" = "Разрабатывается"))
+        )
+      "Целевая внедрена полностью": >
+        (
+            /* Зеленая */
+            $ctx := ctx;
+            $var := var;
+            ($var = "Промышленная эксплуатация")
+            and (type="asis"
+                or (type="tobe"
+                    and $not($ctx."change-type" = "Модифицируется" or $ctx."change-type" = "Разрабатывается")))
+        )
+      "Нецелевая модифицируется": >
+        (
+            /* Болотная */
+            $ctx := ctx;
+            $var := var;
+            ($ctx.location = "Внутренняя")
+            and ($ctx."target-status" = "Не целевая")
+            and (type="tobe"
+                    and ($ctx."change-type" = "Модифицируется" or $ctx."change-type" = "Разрабатывается"))
+        )
+      "Целевая внедрена полностью модифицируется": >
+        (
+            /* Зеленая */
+            $ctx := ctx;
+            $var := var;
+            ($var = "Промышленная эксплуатация")
+            and (type="tobe"
+                    and ($ctx."change-type" = "Модифицируется" or $ctx."change-type" = "Разрабатывается"))
+        )
+    kb_systems:
+      Внешняя: >
+        (
+            ($.location = "Внешняя")
+        )
+      "Целевая внедрена полностью": >
+        (
+            ($.location = "Внутренняя")
+        )
+
+    tech_services:
+      Внешняя: >
+        (
+            ($.location = "Внешняя")
+        )
+      "Целевая внедрена полностью": >
+        (
+            ($.location = "Внутренняя")
+        )

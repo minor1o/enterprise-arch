@@ -1,0 +1,25 @@
+entities:
+  kadzo.v2023.channels:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/channels.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.channels".$spread()[$keys()[0] =$params.id].{
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.channels/card?id=" & $keys()[0],
+                "title": *.title,
+                "description": *.description,
+                "type": *.type,
+                "location": *.location,
+                "status": *.status,
+                "products": *.products,
+                "clients": *.clients,
+                "systems": *.systems,
+                "security": *.security,
+                "comments": *.comments
+            };          
+          )

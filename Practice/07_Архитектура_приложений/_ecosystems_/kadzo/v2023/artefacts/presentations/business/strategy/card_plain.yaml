@@ -1,0 +1,17 @@
+entities:
+  kadzo.v2023.strategy:
+    presentations:
+      card_plain:
+        type: markdown
+        template: ../templates/strategy.md
+        origin: kadzo.v2023
+        source: >
+          (
+            $ctx := $;
+            $ctx."kadzo.v2023.strategy".$spread()[$keys()[0] =$params.id].{
+                "id": $keys()[0],
+                "link": "/entities/kadzo.v2023.strategy/card?id=" & $keys()[0],
+                "strategy": *.strategy,
+                "horizont": *.horizont
+            };          
+          )

@@ -1,0 +1,36 @@
+entities:
+  kadzo.v2023.products:
+    presentations:
+      products_by_channel:
+        type: table
+        headers:
+          - value: id
+            text: Идентификатор
+            link: link
+          - value: title
+            text: Название продукта
+            align: left
+            link: link
+          - value: description
+            text: Описание продукта
+            align: left
+          - value: status
+            text: Статус
+            align: left
+
+        origin: kadzo.v2023
+
+        source: >
+          (
+              $product_channel := [$lookup($."kadzo.v2023.channels", $params.channel).products];
+              [$."kadzo.v2023.products".$spread().(
+                  ($keys()[0] in $product_channel) ?
+                  {
+                      "id": $keys()[0],
+                      "link": "/entities/kadzo.v2023.products/card?id=" & $keys()[0],
+                      "title": *.title,
+                      "description": *.description,
+                      "status": *.status
+                  }
+              )]
+          )

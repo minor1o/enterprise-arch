@@ -1,0 +1,29 @@
+functions:
+  evaluate_dataset:
+    params:
+      - alias: context
+        type: object
+        title: Контекст функции
+      - alias: ds
+        type: string
+        title: Идентификатор датасета
+    result:
+      type: object
+    code: >
+      (
+        $context := context;
+        $ds := ds;
+        $origins := $lookup($context.datasets, $ds).origin;
+        $params := $exists($origins) ?
+          $type($origins) = "object" ?
+            $map($origins.$spread(), function($var){
+                (
+                    $var.* = "($)" ? 
+                        { $var.$keys()[0] : $eval($var.*, $context)}
+                        : $exists($lookup($context.datasets, $var.*)) ? { $var.$keys()[0] : $evaluate_dataset($context, $var.*)};
+                )
+            })
+            : $evaluate_dataset($context, $origins)
+          : $context;
+        $eval($lookup($context.datasets, $ds).source, $params);
+      )

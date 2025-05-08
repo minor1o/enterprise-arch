@@ -1,0 +1,8 @@
+imports:
+  - functions/root.yaml
+  - groups/root.yaml
+  - integrations/root.yaml
+  - systems/root.yaml
+  - tasks/root.yaml
+  - kb_systems/root.yaml
+  - endpoints/root.yaml

@@ -1,0 +1,60 @@
+kadzo:
+  functions.completeness:
+    functions_full: >
+      (
+          $all:=$.dataset;
+          $domain := $.domain;
+          $matcher := $eval('/^' & $domain & '\\./i');
+          $sum:=function($i, $j) {$i + $j};
+          $functions := $all."kadzo.v2023.functions".$spread()[$.$keys() ~> $matcher];
+          $validators := $.validators[validator_type = "functions"];
+          $validators := $validators[domain = $domain];
+          $rules := $.rules;
+          $matcher := $eval('/^' & "functions" & '.*$/');
+          $rules := $rules[$matcher($)];
+          $weight_desc := 1;
+          $weight_target := 1;
+          $weight_systems := 1;
+          $weight_status := 1;
+          $weight_title := 1;
+          $weight_functions:= $weight_title + $weight_desc + $weight_target + $weight_systems + $weight_status;
+            $valid_title := [$validators[($.attr_id="title")].id];
+            $valid_desc := [$validators[($.attr_id="description")].id];
+            $test_title:=$functions.(($keys() in $valid_title)? 0 : $weight_title);
+            $test_desc:=$functions.(($keys() in $valid_desc) ? 0 : $weight_desc);
+            $valid_target := [$validators[($.attr_id="target")].id];
+            $test_target:=$functions.(($keys() in $valid_target) ? 0 : $weight_target);
+            $valid_systems := [$validators[($.attr_id="systems")].id];
+            $test_systems:=$functions.(($keys() in $valid_systems) ? 0 : $weight_systems);
+            $valid_status := [$validators[($.attr_id="status")].id];
+            $test_status:=$functions.(($keys() in $valid_status) ? 0 : $weight_status);
+      
+          $total := $zip($test_desc, $test_target) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_systems) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_status) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($total, $test_title) ~> $map(function($v, $i, $a) {$v[0] + $v[1]});
+          $total := $zip($test_title, $total) ~> $map(function($v, $i, $a) {$v[0] * $v[1]});
+          $total:= $map($total, function($v, $i, $a) {$v[0] / $weight_functions});
+          $sum_except := $reduce($total, $sum);
+          $matcher := $eval('/^.*' & "general" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_title / $weight_functions;
+          $matcher := $eval('/^.*' & "target" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_target / $weight_functions;
+          $matcher := $eval('/^.*' & "systems" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_systems / $weight_functions;
+          $matcher := $eval('/^.*' & "status" & '.*$/');
+          $rules_temp := $rules[$matcher($)];
+          $sum_except := $sum_except + $count($rules_temp) * $weight_status / $weight_functions;
+          $sum_except := $sum_except / $count($functions);
+          $sum_except := $formatNumber($sum_except, "0.00000");
+          $sum_except := $substring($sum_except, 0, 4); 
+          $summary := ($reduce ($total, $sum) / $count($functions));
+          $summary := $formatNumber($summary, "0.00000");
+          $summary := $substring($summary, 0, 4);
+          {"sum_except": $sum_except,
+          "summary" : $summary
+          }
+      )

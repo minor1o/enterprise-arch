@@ -1,0 +1,27 @@
+rules:
+  validators:
+    kadzo.metamodel.v2023.strategy.existence:
+      uid: strategy-error-existence
+      description: >
+        Должны быть определены и описаны все стратегические задачи компании.
+      title: Наличие стратегических задач
+      origin:
+        base: kadzo.__sber_settings__
+        validation: kadzo.v2023.validators
+      source: >
+        (
+            $not($exists(base.sber.kadzo.enterprise_mode)) ? (
+              $domain := base.sber.domain;
+              $domain_errors := validation[domain=$domain and validator_type="strategy"];  
+              
+              [$boolean($domain_errors) = true ? (
+                  {
+                      "uid": $self.uid & "-" & $domain,
+                      "title": "Отсутствуют стратегические задачи",
+                      "location": "entities/kadzo.v2023.strategy/registry?domain=" & $domain,
+                      "correction": 'Необходимо заполнить сущность "kadzo.v2023.strategy" перечислив все стратегические задачи компании',
+                      "description": $self.description
+                  }
+              )]
+            )
+        )

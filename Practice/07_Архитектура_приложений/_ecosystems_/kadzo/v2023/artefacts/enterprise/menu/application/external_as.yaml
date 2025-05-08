@@ -1,0 +1,15 @@
+entities:
+  menu.kadzo.v2023.enterprise.external_as:
+    menu: >
+      (
+          sber.kadzo.enterprise_mode ?
+            sber.domains.$spread().( 
+                $domain := $keys(); 
+                $title := $lookup($$.companies, $domain) ? $lookup($$.companies, $domain).title : $.*.title;
+                { 
+                    "domain": $domain,
+                    "location": "ДЗО/" & $title & "/Данные архитектуры/Прикладная архитектура/Системы/Внешние АС",
+                    "link": "/entities/kadzo.v2023.systems.external_as/domain_registry?domain=" & $domain
+                }
+            );
+      )

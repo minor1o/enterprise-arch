@@ -1,0 +1,203 @@
+kadzo:
+  channels.validation:
+    base_attributes: >
+      (
+          $objects := $.channels."kadzo.v2023.channels";
+          $obj_full := $.schema;
+          $check_list := ['title', 'description', 'status', 'type', 'location'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+            $uidpref := "channels-" & $attr_id & "-v1-"; /* Задаем префикс уникального идентификатора ошибки */
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': $uidpref & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                      }
+                  );
+              $enumcheck := $attr.enum ? (
+                  $not($value in $attr.enum) and $exist = true ? (
+                      {
+                            'uid': $uidpref & $id & "-notinlist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Базовые атрибуты',
+                            'error_group_code': 'general',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Значение "' & $value &'" не из словаря допустимых значений',
+                            'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                      }
+                  )
+              );
+              $append($nullcheck, $enumcheck)
+            )})
+          );
+      )
+
+    products_attributes: >
+      (
+          $objects := $.channels."kadzo.v2023.channels";
+          $cproducts := $.products."kadzo.v2023.products";
+          $obj_full := $.schema;
+          $check_list := ['products'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := ($value = null or $exists($value) != true) or $value = '' or $value = {} ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': 'channels-products-v1-' & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Атрибут "Продукты, поставляемые в канале"',
+                            'error_group_code': 'products',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                      }
+                  );
+              $linkcheck := $attr.**.'$ref' ? (
+                    /* временная проверка, что тип - массив */
+                    $exist = true and $type($value) = "array" ? $value.(
+                        $rid := $;
+                        $not($exists($lookup($cproducts, $rid))) ? (
+                            {
+                                'uid': 'channels-products-v1-' & $id & "-notinlist",
+                                'id': $id,
+                                'name': $object.title,
+                                'error_type': 'Атрибут "Продукты, поставляемые в канале"',
+                                'error_group_code': 'products',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов продуктов "kadzo.v2023.products"',
+                                'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                            }
+                        )
+                  )
+              );
+              $append($nullcheck, $linkcheck)
+            )})
+          );
+      )
+
+    systems_attributes: >
+      (
+          $objects := $.channels."kadzo.v2023.channels";
+          $csystems := $.systems."kadzo.v2023.systems";
+          $obj_full := $.schema;
+          $check_list := ['systems'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': 'channels-systems-v1-' & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Атрибут "Связи с АС"',
+                            'error_group_code': 'systems',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                      }
+                  );
+              $linkcheck := $attr.**.'$ref' ? (
+                    $exist = true ? $value.(
+                        $rid := $;
+                        $not($exists($lookup($csystems, $rid))) ? (
+                            {
+                                'uid': 'channels-systems-v1-' & $id & "-notinlist",
+                                'id': $id,
+                                'name': $object.title,
+                                'error_type': 'Атрибут "Связи с АС"',
+                                'error_group_code': 'systems',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов систем "kadzo.v2023.systems"',
+                                'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                            }
+                        )
+                  )
+              );
+              $append($nullcheck, $linkcheck)
+            )})
+          );
+      )
+
+    clients_attributes: >
+      (
+          $objects := $.channels."kadzo.v2023.channels";
+          $cclients := $.clients."kadzo.v2023.clients";
+          $obj_full := $.schema;
+          $check_list := ['clients'];
+          $check_list := $check_list.{ $ : $lookup($schema.**.properties, $) };
+      
+          $check_list.(
+            $attr_id := $.$keys();
+            $attr := $.*;
+  
+            $each($objects, function($object, $id){(
+              $value := $lookup($object, $attr_id);
+              $exist := $value = null or $exists($value) != true or $count($value) = 0 ? false : true;
+              $nullcheck := $exist = false ? (
+                      {
+                            'uid': 'channels-clients-v1-' & $id & "-notexist",
+                            'id': $id,
+                            'name': $object.title,
+                            'error_type': 'Атрибут "Клиенты"',
+                            'error_group_code': 'clients',
+                            'attr_id': $attr_id,
+                            'attr_name': $attr.title,
+                            'error_text': 'Атрибут ' & $attr_id & ' не может быть пустым',
+                            'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                      }
+                  );
+              $linkcheck := $attr.**.'$ref' ? (
+                    $exist = true ? $value.(
+                        $rid := $;
+                        $not($exists($lookup($cclients, $rid))) ? (
+                            {
+                                'uid': 'channels-clients-v1-' & $id & "-notinlist",
+                                'id': $id,
+                                'name': $object.title,
+                                'error_type': 'Атрибут "Клиенты"',
+                                'error_group_code': 'clients',
+                                'attr_id': $attr_id,
+                                'attr_name': $attr.title,
+                                'error_text': 'Значение "' & $rid &'" не найдено среди идентификаторов клиентов "kadzo.v2023.clients"',
+                                'link': '/entities/kadzo.v2023.channels/card?id=' & $id
+                            }
+                        )
+                  )
+              );
+              $append($nullcheck, $linkcheck)
+            )})
+          );
+      )
